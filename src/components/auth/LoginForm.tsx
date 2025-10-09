@@ -1,3 +1,5 @@
+import { useNavigate, Link } from "react-router-dom";
+
 import { useAuthStore } from "@/store/useAuthStore";
 import { useFormValidation } from "@/hooks/useFormValidation";
 
@@ -9,6 +11,8 @@ const LoginForm = () => {
   const { login, isLoading, error } = useAuthStore();
   const { validateEmail, validatePassword, clearError } = useFormValidation();
 
+  const navigate = useNavigate();
+
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -18,7 +22,11 @@ const LoginForm = () => {
 
     if (!validateEmail(email) || !validatePassword(password)) return;
 
-    await login({ email, password });
+    const result = await login({ email, password });
+
+    if (result) {
+      navigate("/", { replace: true });
+    }
   };
 
   const handleInputChange = () => clearError();
@@ -50,6 +58,13 @@ const LoginForm = () => {
       <div className={styles.submitBtn}>
         <SubmitBtn text="Login" isLoading={isLoading} form="loginForm" />
       </div>
+
+      <p className={styles.registerLink}>
+        <span>Do not have an account? </span>
+        <Link to="/registration" className={styles.link} onClick={clearError}>
+          Register here!
+        </Link>
+      </p>
     </form>
   );
 };

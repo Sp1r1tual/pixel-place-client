@@ -4,6 +4,7 @@ import App from "./App";
 import { LoginPage } from "./pages/LoginPage";
 import { RegistrationPage } from "./pages/RegistrationPage";
 import { AuthenticatedLayout } from "./layouts/AuthenticatedLayout";
+import { PageLayout } from "./layouts/PageLayout";
 import { MainPage } from "./pages/MainPage";
 
 const Router = createBrowserRouter([
@@ -16,7 +17,16 @@ const Router = createBrowserRouter([
 
       {
         element: <AuthenticatedLayout />,
-        children: [{ index: true, element: <MainPage /> }],
+        children: [
+          {
+            index: true,
+            element: (
+              <PageLayout>
+                <MainPage />
+              </PageLayout>
+            ),
+          },
+        ],
       },
     ],
   },

@@ -8,9 +8,9 @@ interface IAuthState {
   user: IAuthPayload | null;
   isLoading: boolean;
   error: string | null;
-  login: (payload: IAuthPayload) => Promise<void>;
+  login: (payload: IAuthPayload) => Promise<boolean>;
   logout: () => void;
-  registration: (payload: IAuthPayload) => Promise<void>;
+  registration: (payload: IAuthPayload) => Promise<boolean>;
   setError: (message: string | null) => void;
 }
 
@@ -26,11 +26,15 @@ const useAuthStore = create<IAuthState>((set) => ({
 
       localStorage.setItem("token", data.accessToken);
       set({ user: data.user });
+
+      return true;
     } catch (err) {
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
 
       set({ error: error?.message || "Login failed" });
+
+      return false;
     } finally {
       set({ isLoading: false });
     }
@@ -43,11 +47,15 @@ const useAuthStore = create<IAuthState>((set) => ({
 
       localStorage.setItem("token", data.accessToken);
       set({ user: data.user });
+
+      return true;
     } catch (err) {
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
 
       set({ error: error?.message || "Registration failed" });
+
+      return false;
     } finally {
       set({ isLoading: false });
     }
