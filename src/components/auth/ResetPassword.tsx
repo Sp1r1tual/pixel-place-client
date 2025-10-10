@@ -13,7 +13,7 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   const { resetPassword, isLoading, error, setError } = useAuthStore();
-  const { validatePassword, validateConfirmPassword, clearError } =
+  const { validatePassword, validateConfirmPassword, clearError, fieldErrors } =
     useFormValidation();
 
   const { token } = useParams<{ token: string }>();
@@ -59,6 +59,7 @@ const ResetPassword = () => {
           name="password"
           type="password"
           onChange={handleInputChange}
+          className={fieldErrors.password ? styles.errorInput : ""}
         />
       </div>
 
@@ -69,6 +70,7 @@ const ResetPassword = () => {
           name="confirmPassword"
           type="password"
           onChange={handleInputChange}
+          className={fieldErrors.passwordConfirm ? styles.errorInput : ""}
         />
       </div>
 

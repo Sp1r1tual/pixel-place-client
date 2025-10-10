@@ -14,6 +14,7 @@ const RegistrationForm = () => {
     validateEmail,
     validatePassword,
     validateConfirmPassword,
+    fieldErrors,
     clearError,
   } = useFormValidation();
 
@@ -30,12 +31,11 @@ const RegistrationForm = () => {
     const password = formData.get("password")?.toString() || "";
     const passwordConfirm = formData.get("passwordConfirm")?.toString() || "";
 
-    if (
-      !validateEmail(email) ||
-      !validatePassword(password) ||
-      !validateConfirmPassword(password, passwordConfirm)
-    )
-      return;
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    const isConfirmValid = validateConfirmPassword(password, passwordConfirm);
+
+    if (!isEmailValid || !isPasswordValid || !isConfirmValid) return;
 
     const result = await registration({ email, password });
 
@@ -60,6 +60,7 @@ const RegistrationForm = () => {
           name="email"
           type="text"
           onChange={handleInputChange}
+          className={fieldErrors.email ? styles.errorInput : ""}
         />
       </div>
 
@@ -70,6 +71,7 @@ const RegistrationForm = () => {
           name="password"
           type="password"
           onChange={handleInputChange}
+          className={fieldErrors.password ? styles.errorInput : ""}
         />
       </div>
 
@@ -80,6 +82,7 @@ const RegistrationForm = () => {
           name="passwordConfirm"
           type="password"
           onChange={handleInputChange}
+          className={fieldErrors.passwordConfirm ? styles.errorInput : ""}
         />
       </div>
 

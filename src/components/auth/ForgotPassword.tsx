@@ -8,7 +8,7 @@ import { SubmitBtn } from "../ui/SubmitBtn";
 import styles from "./styles/ForgotPassword.module.css";
 
 const ForgotPassword = () => {
-  const { validateEmail, clearError } = useFormValidation();
+  const { validateEmail, clearError, fieldErrors } = useFormValidation();
   const { requestPasswordReset, isLoading, error, setError } = useAuthStore();
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -40,9 +40,8 @@ const ForgotPassword = () => {
         id="email"
         name="email"
         type="text"
-        onChange={() => {
-          handleInputChange();
-        }}
+        onChange={handleInputChange}
+        className={fieldErrors.email ? styles.errorInput : ""}
       />
 
       {error && <p className={styles.error}>{error}</p>}

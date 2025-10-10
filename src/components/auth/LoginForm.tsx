@@ -9,7 +9,8 @@ import styles from "./styles/LoginForm.module.css";
 
 const LoginForm = () => {
   const { login, isLoading, error } = useAuthStore();
-  const { validateEmail, validatePassword, clearError } = useFormValidation();
+  const { validateEmail, validatePassword, fieldErrors, clearError } =
+    useFormValidation();
 
   const navigate = useNavigate();
 
@@ -20,7 +21,10 @@ const LoginForm = () => {
     const email = formData.get("email")?.toString() || "";
     const password = formData.get("password")?.toString() || "";
 
-    if (!validateEmail(email) || !validatePassword(password)) return;
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+
+    if (!isEmailValid || !isPasswordValid) return;
 
     const result = await login({ email, password });
 
@@ -40,6 +44,7 @@ const LoginForm = () => {
           name="email"
           type="text"
           onChange={handleInputChange}
+          className={fieldErrors.email ? styles.errorInput : ""}
         />
       </div>
 
@@ -50,6 +55,7 @@ const LoginForm = () => {
           name="password"
           type="password"
           onChange={handleInputChange}
+          className={fieldErrors.password ? styles.errorInput : ""}
         />
       </div>
 
