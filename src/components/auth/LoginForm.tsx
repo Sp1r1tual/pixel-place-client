@@ -65,6 +65,17 @@ const LoginForm = () => {
           Register here!
         </Link>
       </p>
+
+      <p className={styles.registerLink}>
+        <span>Forgot your password? </span>
+        <Link
+          to="/forgot-password"
+          className={styles.link}
+          onClick={clearError}
+        >
+          Restore access here
+        </Link>
+      </p>
     </form>
   );
 };

@@ -15,7 +15,7 @@ const Navbar = () => {
         trigger={
           <img src={userSvg} alt="User menu" className={styles.userIcon} />
         }
-        menuClassName={styles.menu} // якщо хочеш стилізувати саме меню Dropdown
+        menuClassName={styles.menu}
       >
         <DropdownBtn
           text="Logout"
@@ -24,7 +24,7 @@ const Navbar = () => {
             localStorage.removeItem("token");
             window.location.href = "/login";
           }}
-          className={styles.dropdownBtn} // додаткові стилі для кнопки
+          className={styles.dropdownBtn}
         />
       </Dropdown>
     </nav>

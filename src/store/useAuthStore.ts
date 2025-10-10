@@ -11,6 +11,8 @@ interface IAuthState {
   login: (payload: IAuthPayload) => Promise<boolean>;
   logout: () => void;
   registration: (payload: IAuthPayload) => Promise<boolean>;
+  requestPasswordReset: (email: string) => Promise<boolean>;
+  resetPassword: (token: string, newPassword: string) => Promise<boolean>;
   setError: (message: string | null) => void;
 }
 
@@ -65,6 +67,43 @@ const useAuthStore = create<IAuthState>((set) => ({
     AuthService.logout();
     localStorage.removeItem("token");
     set({ user: null });
+  },
+
+  requestPasswordReset: async (email: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await AuthService.requestPasswordReset(email);
+
+      return true;
+    } catch (err) {
+      const error = (err as { response?: { data?: IApiError } })?.response
+        ?.data;
+
+      set({ error: error?.message || "Failed to send password reset link" });
+
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      await AuthService.resetPassword(token, newPassword);
+
+      return true;
+    } catch (err) {
+      const error = (err as { response?: { data?: IApiError } })?.response
+        ?.data;
+
+      set({ error: error?.message || "Failed to reset password" });
+
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
   },
 
   setError: (message) => set({ error: message }),

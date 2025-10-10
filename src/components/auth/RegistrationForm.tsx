@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import { useFormValidation } from "@/hooks/useFormValidation";
@@ -17,6 +18,7 @@ const RegistrationForm = () => {
   } = useFormValidation();
 
   const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleRegistration = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -38,7 +40,8 @@ const RegistrationForm = () => {
     const result = await registration({ email, password });
 
     if (result) {
-      navigate("/login", { replace: true });
+      setSuccessMessage("Activation link has been sent to your email 💌");
+      setTimeout(() => navigate("/login", { replace: true }), 3000);
     }
   };
 
@@ -81,6 +84,8 @@ const RegistrationForm = () => {
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
+
+      {successMessage && <p className={styles.success}>{successMessage}</p>}
 
       <div className={styles.submitBtn}>
         <SubmitBtn

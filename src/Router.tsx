@@ -6,6 +6,8 @@ import { RegistrationPage } from "./pages/RegistrationPage";
 import { AuthenticatedLayout } from "./layouts/AuthenticatedLayout";
 import { PageLayout } from "./layouts/PageLayout";
 import { MainPage } from "./pages/MainPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 const Router = createBrowserRouter([
   {
@@ -14,6 +16,8 @@ const Router = createBrowserRouter([
     children: [
       { path: "login", element: <LoginPage /> },
       { path: "registration", element: <RegistrationPage /> },
+      { path: "forgot-password", element: <ForgotPasswordPage /> },
+      { path: "reset-password/:token", element: <ResetPasswordPage /> },
 
       {
         element: <AuthenticatedLayout />,
