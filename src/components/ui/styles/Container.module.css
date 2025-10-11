@@ -1,0 +1,16 @@
+.container {
+  width: 100%;
+  text-align: center;
+  border-radius: 0.5rem;
+  border: 1px solid #000000;
+  padding: 0.5rem;
+  height: auto;
+}
+
+.noBorder {
+  border: none;
+}
+
+.noPadding {
+  padding: 0;
+}

@@ -1,0 +1,24 @@
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.btn:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}

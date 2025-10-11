@@ -1,0 +1,87 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
+import { useFormValidation } from "@/hooks/useFormValidation";
+import { useAuthStore } from "@/store/useAuthStore";
+
+import { SubmitBtn } from "../ui/SubmitBtn";
+import { Header } from "../ui/Header";
+
+import styles from "./styles/ForgotPassword.module.css";
+
+const ForgotPassword = () => {
+  const { validateEmail, clearError, fieldErrors } = useFormValidation();
+  const { requestPasswordReset, isLoading, error, setError } = useAuthStore();
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const requestResetPassword = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    setError(null);
+    setSuccessMessage("");
+
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email")?.toString() || "";
+
+    if (!validateEmail(email)) return;
+
+    const success = await requestPasswordReset(email);
+
+    if (success) {
+      setSuccessMessage(
+        "A password reset link has been sent to your email. The link will be valid for 15 minutes.",
+      );
+    }
+  };
+
+  const handleInputChange = () => clearError();
+
+  return (
+    <form
+      id="forgotPassword"
+      className={styles.forgotPasswordForm}
+      autoComplete="off"
+      onSubmit={requestResetPassword}
+    >
+      <Header title="Restore access" color="#2764EB" />
+
+      <div className={styles.formRow}>
+        <label htmlFor="email">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="text"
+          onChange={handleInputChange}
+          className={fieldErrors.email ? styles.errorInput : ""}
+        />
+      </div>
+
+      <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
+        {error && <p className={styles.error}>{error}</p>}
+      </div>
+
+      <div
+        className={`${styles.successWrapper} ${successMessage ? styles.active : ""}`}
+      >
+        {successMessage && <p className={styles.success}>{successMessage}</p>}
+      </div>
+
+      <div className={styles.submitBtn}>
+        <SubmitBtn
+          text="Send reset link"
+          isLoading={isLoading}
+          form="forgotPassword"
+        />
+      </div>
+
+      <p className={styles.registerLink}>
+        <Link to="/login" className={styles.link} onClick={clearError}>
+          Back to login page
+        </Link>
+      </p>
+    </form>
+  );
+};
+
+export { ForgotPassword };

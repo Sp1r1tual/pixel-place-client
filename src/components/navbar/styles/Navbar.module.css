@@ -1,0 +1,19 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #1f2937;
+  color: white;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.userIcon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
