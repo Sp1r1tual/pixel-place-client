@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useFormValidation } from "@/hooks/useFormValidation";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
+import { Header } from "../ui/Header";
 
 import styles from "./styles/LoginForm.module.css";
 
@@ -36,7 +37,14 @@ const LoginForm = () => {
   const handleInputChange = () => clearError();
 
   return (
-    <form id="loginForm" className={styles.loginForm} onSubmit={handleLogin}>
+    <form
+      id="loginForm"
+      className={styles.loginForm}
+      autoComplete="off"
+      onSubmit={handleLogin}
+    >
+      <Header title="Login" color="#2764EB" />
+
       <div className={styles.formRow}>
         <label htmlFor="email">Email</label>
         <input
@@ -59,29 +67,33 @@ const LoginForm = () => {
         />
       </div>
 
-      {error && <p className={styles.error}>{error}</p>}
+      <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
+        {error && <p className={styles.error}>{error}</p>}
+      </div>
 
       <div className={styles.submitBtn}>
         <SubmitBtn text="Login" isLoading={isLoading} form="loginForm" />
       </div>
 
-      <p className={styles.registerLink}>
-        <span>Do not have an account? </span>
-        <Link to="/registration" className={styles.link} onClick={clearError}>
-          Register here!
-        </Link>
-      </p>
+      <div className={styles.linkGroup}>
+        <p className={styles.registerLink}>
+          <span>Do not have an account? </span>
+          <Link to="/registration" className={styles.link} onClick={clearError}>
+            Register here!
+          </Link>
+        </p>
 
-      <p className={styles.registerLink}>
-        <span>Forgot your password? </span>
-        <Link
-          to="/forgot-password"
-          className={styles.link}
-          onClick={clearError}
-        >
-          Restore access here
-        </Link>
-      </p>
+        <p className={styles.registerLink}>
+          <span>Forgot your password? </span>
+          <Link
+            to="/forgot-password"
+            className={styles.link}
+            onClick={clearError}
+          >
+            Restore access here
+          </Link>
+        </p>
+      </div>
     </form>
   );
 };

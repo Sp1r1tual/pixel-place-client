@@ -5,6 +5,7 @@ import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
+import { Header } from "../ui/Header";
 
 import styles from "./styles/RegistrationForm.module.css";
 
@@ -41,7 +42,7 @@ const RegistrationForm = () => {
 
     if (result) {
       setSuccessMessage("Activation link has been sent to your email 💌");
-      setTimeout(() => navigate("/login", { replace: true }), 3000);
+      setTimeout(() => navigate("/login", { replace: true }), 5000);
     }
   };
 
@@ -50,9 +51,12 @@ const RegistrationForm = () => {
   return (
     <form
       id="registrationForm"
-      className={styles.loginForm}
+      className={styles.registrationForm}
+      autoComplete="off"
       onSubmit={handleRegistration}
     >
+      <Header title="Registration" color="#2764EB" />
+
       <div className={styles.formRow}>
         <label htmlFor="email">Email</label>
         <input
@@ -86,9 +90,15 @@ const RegistrationForm = () => {
         />
       </div>
 
-      {error && <p className={styles.error}>{error}</p>}
+      <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
+        {error && <p className={styles.error}>{error}</p>}
+      </div>
 
-      {successMessage && <p className={styles.success}>{successMessage}</p>}
+      <div
+        className={`${styles.successWrapper} ${successMessage ? styles.active : ""}`}
+      >
+        {successMessage && <p className={styles.success}>{successMessage}</p>}
+      </div>
 
       <div className={styles.submitBtn}>
         <SubmitBtn

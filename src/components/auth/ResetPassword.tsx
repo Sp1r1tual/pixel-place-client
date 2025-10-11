@@ -5,11 +5,12 @@ import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
+import { Header } from "../ui/Header";
 
 import styles from "./styles/ResetPassword.module.css";
 
 const ResetPassword = () => {
-  const [successMsg, setSuccessMsg] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   const { resetPassword, isLoading, error, setError } = useAuthStore();
@@ -23,7 +24,7 @@ const ResetPassword = () => {
   ) => {
     event.preventDefault();
     setError(null);
-    setSuccessMsg("");
+    setSuccessMessage("");
 
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password")?.toString() || "";
@@ -43,7 +44,9 @@ const ResetPassword = () => {
     const success = await resetPassword(token, password);
 
     if (success) {
-      setSuccessMsg("Password changed successfully. Redirecting to login...");
+      setSuccessMessage(
+        "Password changed successfully. Redirecting to login...",
+      );
       setTimeout(() => navigate("/login", { replace: true }), 3000);
     }
   };
@@ -51,7 +54,14 @@ const ResetPassword = () => {
   const handleInputChange = () => clearError();
 
   return (
-    <form id="resetPassword" onSubmit={handleResetPassword}>
+    <form
+      id="resetPassword"
+      className={styles.resetPasswordForm}
+      autoComplete="off"
+      onSubmit={handleResetPassword}
+    >
+      <Header title="Change password" color="#2764EB" />
+
       <div className={styles.formRow}>
         <label htmlFor="password">Password</label>
         <input
@@ -74,9 +84,15 @@ const ResetPassword = () => {
         />
       </div>
 
-      {error && <p className={styles.error}>{error}</p>}
+      <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
+        {error && <p className={styles.error}>{error}</p>}
+      </div>
 
-      {successMsg && <p className="text-green-500 text-sm">{successMsg}</p>}
+      <div
+        className={`${styles.successWrapper} ${successMessage ? styles.active : ""}`}
+      >
+        {successMessage && <p className={styles.success}>{successMessage}</p>}
+      </div>
 
       <SubmitBtn
         text="Change password"

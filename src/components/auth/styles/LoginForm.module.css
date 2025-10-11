@@ -1,4 +1,102 @@
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.loginForm label {
+  font-size: 0.9rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.loginForm input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background-color 0.2s;
+}
+
+.loginForm input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background-color: #fff;
+}
+
 .errorInput {
-  border: 1px solid red;
-  background-color: #ffe6e6;
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.errorWrapper {
+  overflow: hidden;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease;
+  max-height: 0;
+  opacity: 0;
+}
+
+.errorWrapper.active {
+  max-height: 100px;
+  opacity: 1;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  text-align: center;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.25rem;
+}
+
+.submitBtn {
+  margin-top: 0.5rem;
+}
+
+.linkGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.registerLink {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.link {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

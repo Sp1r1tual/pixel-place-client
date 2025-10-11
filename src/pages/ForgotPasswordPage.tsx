@@ -1,7 +1,11 @@
 import { ForgotPassword } from "@/components/auth/ForgotPassword";
 
 const ForgotPasswordPage = () => {
-  return <ForgotPassword />;
+  return (
+    <>
+      <ForgotPassword />
+    </>
+  );
 };
 
 export { ForgotPasswordPage };
