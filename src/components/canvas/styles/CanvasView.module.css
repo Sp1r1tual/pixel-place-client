@@ -1,0 +1,24 @@
+.canvasWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.canvasContainer {
+  border: 3px solid #333;
+  border-radius: 8px;
+  overflow: auto;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 1200px) {
+  .canvasContainer {
+    width: 100%;
+    height: 100%;
+  }
+}

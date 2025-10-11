@@ -1,0 +1,15 @@
+.page {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  width: 100%;
+  padding: 20px;
+}

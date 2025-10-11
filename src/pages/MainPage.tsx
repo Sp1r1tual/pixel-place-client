@@ -1,9 +1,7 @@
+import { CanvasView } from "@/components/canvas/CanvasView";
+
 const MainPage = () => {
-  return (
-    <>
-      <p>Hello world</p>
-    </>
-  );
+  return <CanvasView />;
 };
 
 export { MainPage };
