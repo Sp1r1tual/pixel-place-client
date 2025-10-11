@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
 
@@ -11,73 +11,72 @@ const DRAG_THRESHOLD = 5;
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 5;
 
-interface PointerPos {
-  x: number;
-  y: number;
-}
-
 const useCanvas = () => {
   const { pixels, setPixel, initSocket, cleanupSocket } = useCanvasStore();
   const stageRef = useRef<Konva.Stage | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<PointerPos>({ x: 0, y: 0 });
-  const [stagePos, setStagePos] = useState<PointerPos>({ x: 0, y: 0 });
-  const [dragDistance, setDragDistance] = useState(0);
-  const [hasMoved, setHasMoved] = useState(false);
+
+  const dragStateRef = useRef({
+    startX: 0,
+    startY: 0,
+    stageStartX: 0,
+    stageStartY: 0,
+    distance: 0,
+    hasMoved: false,
+  });
 
   useEffect(() => {
     initSocket();
     return () => cleanupSocket();
   }, [initSocket, cleanupSocket]);
 
-  const startDrag = (pointer: PointerPos) => {
-    setIsDragging(true);
-    setHasMoved(false);
-    setDragDistance(0);
-    setDragStart({ x: pointer.x - stagePos.x, y: pointer.y - stagePos.y });
-  };
-
-  const dragMove = (pointer: PointerPos) => {
+  const handleMouseUp = useCallback(() => {
     const stage = stageRef.current;
-    if (!stage) return;
+    if (!stage || !isDragging) return;
 
-    const dx = pointer.x - (dragStart.x + stagePos.x);
-    const dy = pointer.y - (dragStart.y + stagePos.y);
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    setDragDistance(distance);
+    const state = dragStateRef.current;
 
-    if (distance > DRAG_THRESHOLD) {
-      setHasMoved(true);
+    if (state.distance <= DRAG_THRESHOLD && !state.hasMoved) {
+      const pointer = stage.getPointerPosition();
+      if (pointer) {
+        const scale = stage.scaleX();
+        const stageX = stage.x();
+        const stageY = stage.y();
 
-      const newPos = { x: pointer.x - dragStart.x, y: pointer.y - dragStart.y };
-      stage.x(newPos.x);
-      stage.y(newPos.y);
-      setStagePos(newPos);
-    }
-  };
+        const x = Math.floor((pointer.x - stageX) / (PIXEL_SIZE * scale));
+        const y = Math.floor((pointer.y - stageY) / (PIXEL_SIZE * scale));
+        const color = "#000000";
 
-  const endDrag = (pointer?: PointerPos) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    if (isDragging && dragDistance <= DRAG_THRESHOLD && !hasMoved && pointer) {
-      const scale = stage.scaleX();
-      const stageX = stage.x();
-      const stageY = stage.y();
-
-      const x = Math.floor((pointer.x - stageX) / (PIXEL_SIZE * scale));
-      const y = Math.floor((pointer.y - stageY) / (PIXEL_SIZE * scale));
-      const color = "#000000";
-
-      setPixel(x, y, color);
-      getSocket().emit("sendBatch", [{ x, y, color }]);
+        setPixel(x, y, color);
+        getSocket().emit("sendBatch", [{ x, y, color }]);
+      }
     }
 
     setIsDragging(false);
-    setHasMoved(false);
-    setDragDistance(0);
-  };
+  }, [isDragging, setPixel]);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    const handleWindowMouseUp = () => {
+      handleMouseUp();
+    };
+
+    const handleWindowTouchEnd = () => {
+      handleTouchEnd();
+    };
+
+    window.addEventListener("mouseup", handleWindowMouseUp);
+    window.addEventListener("touchend", handleWindowTouchEnd);
+
+    return () => {
+      window.removeEventListener("mouseup", handleWindowMouseUp);
+      window.removeEventListener("touchend", handleWindowTouchEnd);
+    };
+  }, [handleMouseUp, handleTouchEnd]);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     const stage = stageRef.current;
@@ -85,7 +84,17 @@ const useCanvas = () => {
 
     if (e.evt.button === 0 || e.evt.button === 1) {
       const pointer = stage.getPointerPosition();
-      if (pointer) startDrag(pointer);
+      if (pointer) {
+        setIsDragging(true);
+        dragStateRef.current = {
+          startX: pointer.x,
+          startY: pointer.y,
+          stageStartX: stage.x(),
+          stageStartY: stage.y(),
+          distance: 0,
+          hasMoved: false,
+        };
+      }
     }
   };
 
@@ -94,15 +103,20 @@ const useCanvas = () => {
     if (!stage || !isDragging) return;
 
     const pointer = stage.getPointerPosition();
-    if (pointer) dragMove(pointer);
-  };
+    if (!pointer) return;
 
-  const handleMouseUp = () => {
-    const stage = stageRef.current;
-    if (!stage) return;
+    const state = dragStateRef.current;
+    const dx = pointer.x - state.startX;
+    const dy = pointer.y - state.startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    const pointer = stage.getPointerPosition();
-    endDrag(pointer ?? undefined);
+    state.distance = distance;
+
+    if (distance > DRAG_THRESHOLD) {
+      state.hasMoved = true;
+      stage.x(state.stageStartX + dx);
+      stage.y(state.stageStartY + dy);
+    }
   };
 
   const handleTouchStart = (e: KonvaEventObject<TouchEvent>) => {
@@ -111,7 +125,17 @@ const useCanvas = () => {
 
     e.evt.preventDefault();
     const pointer = stage.getPointerPosition();
-    if (pointer) startDrag(pointer);
+    if (pointer) {
+      setIsDragging(true);
+      dragStateRef.current = {
+        startX: pointer.x,
+        startY: pointer.y,
+        stageStartX: stage.x(),
+        stageStartY: stage.y(),
+        distance: 0,
+        hasMoved: false,
+      };
+    }
   };
 
   const handleTouchMove = (e: KonvaEventObject<TouchEvent>) => {
@@ -120,10 +144,21 @@ const useCanvas = () => {
 
     e.evt.preventDefault();
     const pointer = stage.getPointerPosition();
-    if (pointer) dragMove(pointer);
-  };
+    if (!pointer) return;
 
-  const handleTouchEnd = () => setIsDragging(false);
+    const state = dragStateRef.current;
+    const dx = pointer.x - state.startX;
+    const dy = pointer.y - state.startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    state.distance = distance;
+
+    if (distance > DRAG_THRESHOLD) {
+      state.hasMoved = true;
+      stage.x(state.stageStartX + dx);
+      stage.y(state.stageStartY + dy);
+    }
+  };
 
   const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
     const stage = stageRef.current;
@@ -152,7 +187,6 @@ const useCanvas = () => {
     };
 
     stage.position(newPos);
-    setStagePos(newPos);
   };
 
   return {
