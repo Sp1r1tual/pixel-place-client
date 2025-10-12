@@ -45,30 +45,39 @@ const useCanvas = () => {
 
     const state = dragStateRef.current;
 
-    if (state.distance <= CANVAS_DATA.DRAG_THRESHOLD && !state.hasMoved) {
-      const pointer = stage.getPointerPosition();
-
-      if (pointer) {
-        const scale = stage.scaleX();
-        const stageX = stage.x();
-        const stageY = stage.y();
-        const x = Math.floor(
-          (pointer.x - stageX) / (CANVAS_DATA.PIXEL_SIZE * scale),
-        );
-        const y = Math.floor(
-          (pointer.y - stageY) / (CANVAS_DATA.PIXEL_SIZE * scale),
-        );
-        const color = "#000000";
-
-        setPixel(x, y, color);
-
-        getSocket().emit("sendBatch", [{ x, y, color }], (err?: string) => {
-          if (err) console.error("[socket] Pixel error:", err);
-        });
-      }
-    }
-
     setIsDragging(false);
+
+    if (state.distance > CANVAS_DATA.DRAG_THRESHOLD || state.hasMoved) return;
+
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const scale = stage.scaleX();
+    const stageX = stage.x();
+    const stageY = stage.y();
+
+    const x = Math.floor(
+      (pointer.x - stageX) / (CANVAS_DATA.PIXEL_SIZE * scale),
+    );
+    const y = Math.floor(
+      (pointer.y - stageY) / (CANVAS_DATA.PIXEL_SIZE * scale),
+    );
+
+    const isInsideBounds =
+      x >= 0 &&
+      y >= 0 &&
+      x < CANVAS_DATA.CANVAS_WIDTH &&
+      y < CANVAS_DATA.CANVAS_HEIGHT;
+
+    if (!isInsideBounds) return;
+
+    const color = "#000000";
+
+    setPixel(x, y, color);
+
+    getSocket().emit("sendBatch", [{ x, y, color }], (err?: string) => {
+      if (err) console.error("[socket] Pixel error:", err);
+    });
   }, [isDragging, setPixel]);
 
   const handleTouchEnd = useCallback(() => setIsDragging(false), []);

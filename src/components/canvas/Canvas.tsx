@@ -2,6 +2,8 @@ import { Stage, Layer, Rect } from "react-konva";
 
 import { useCanvas } from "@/hooks/useCanvas";
 
+import { CANVAS_DATA } from "@/data/canvas";
+
 import styles from "./styles/Canvas.module.css";
 
 const Canvas = () => {
@@ -21,17 +23,22 @@ const Canvas = () => {
 
   const renderedPixels = Object.entries(pixels).map(([key, color]) => {
     const [xStr, yStr] = key.split(":");
+    const x = Number(xStr);
+    const y = Number(yStr);
     return (
       <Rect
         key={key}
-        x={Number(xStr) * 10}
-        y={Number(yStr) * 10}
-        width={10}
-        height={10}
+        x={x * CANVAS_DATA.PIXEL_SIZE}
+        y={y * CANVAS_DATA.PIXEL_SIZE}
+        width={CANVAS_DATA.PIXEL_SIZE}
+        height={CANVAS_DATA.PIXEL_SIZE}
         fill={color}
       />
     );
   });
+
+  const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
+  const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
   return (
     <div className={styles.canvasWrapper}>
@@ -48,7 +55,31 @@ const Canvas = () => {
         onTouchEnd={handleTouchEnd}
         className={`${styles.canvasStage} ${isDragging ? styles.dragging : ""}`}
       >
-        <Layer>{renderedPixels}</Layer>
+        <Layer
+          x={0}
+          y={0}
+          clipX={0}
+          clipY={0}
+          clipWidth={canvasWidth}
+          clipHeight={canvasHeight}
+        >
+          <Rect x={0} y={0} width={canvasWidth} height={canvasHeight} />
+          {renderedPixels}
+        </Layer>
+
+        <Layer>
+          <Rect
+            x={0}
+            y={0}
+            width={canvasWidth}
+            height={canvasHeight}
+            stroke="#888888"
+            strokeWidth={3}
+            listening={false}
+            shadowColor="#000000"
+            shadowBlur={4}
+          />
+        </Layer>
       </Stage>
     </div>
   );
