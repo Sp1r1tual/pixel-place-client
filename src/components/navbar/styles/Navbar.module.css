@@ -1,19 +1,117 @@
 .navbar {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 0.5rem 1rem;
-  background-color: #1f2937;
-  color: white;
+  background-color: rgba(31, 41, 55, 0.85);
+  border-radius: 12px;
+  z-index: 100;
+  width: 80%;
+}
+
+.logoImg {
+  height: 2.5rem;
+  width: 2.5rem;
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: bold;
+  color: #fff;
+  margin-right: 2rem;
+}
+
+.desktopMenu {
+  display: flex;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.desktopMenu a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.desktopMenu a:hover {
+  text-decoration: underline;
+}
+
+.burgerMenu {
+  display: none;
+  cursor: pointer;
+}
+
+.burgerMenu img {
+  width: 2rem;
+  height: 2rem;
+}
+
+.burgerMenu:hover {
+  transform: scale(1.1);
+}
+
+.mobileMenu {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(31, 41, 55, 0.85);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 101;
+  width: 100%;
+  box-sizing: border-box;
+  animation: dropdownFadeIn 0.3s ease forwards;
 }
 
 .userIcon {
-  width: 24px;
-  height: 24px;
+  width: 2rem;
+  height: 2rem;
   cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  margin-left: auto;
+}
+
+.userIcon:hover {
+  transform: scale(1.1);
+}
+
+.mobileMenu :is(a, [role="link"]) {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.mobileMenu :is(a, [role="link"]):hover {
+  text-decoration: underline;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .desktopMenu {
+    display: none;
+  }
+
+  .burgerMenu {
+    display: block;
+  }
 }

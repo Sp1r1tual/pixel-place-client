@@ -1,19 +1,49 @@
+import { useState } from "react";
+import { NavLink } from "react-router-dom";
+
 import { Dropdown } from "../ui/Dropdown";
 import { DropdownBtn } from "../ui/DropdownBtn";
 
+import pixelPlacePng from "@/assets/pixel-place-logo.png";
 import logoutSvg from "@/assets/logout-svgrepo-com.svg";
 import userSvg from "@/assets/user-circle-svgrepo-com.svg";
+import burgerSvg from "@/assets/burger-menu-svgrepo-com.svg";
 
 import styles from "./styles/Navbar.module.css";
 
 const Navbar = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const toggleMobileMenu = () => setMobileOpen((prev) => !prev);
+  const closeMenu = () => setMobileOpen(false);
+
+  const handleUserMenuClick = () => {
+    closeMenu();
+  };
+
   return (
     <nav className={styles.navbar}>
+      <img className={styles.logoImg} src={pixelPlacePng} alt="logo" />
       <h1 className={styles.title}>Pixel Place</h1>
+
+      <div className={styles.desktopMenu}>
+        <NavLink
+          to="/"
+          className={({ isActive }) => (isActive ? styles.active : "")}
+          onClick={closeMenu}
+        >
+          Shop
+        </NavLink>
+      </div>
 
       <Dropdown
         trigger={
-          <img src={userSvg} alt="User menu" className={styles.userIcon} />
+          <img
+            src={userSvg}
+            alt="User menu"
+            className={styles.userIcon}
+            onClick={handleUserMenuClick}
+          />
         }
         menuClassName={styles.menu}
       >
@@ -27,6 +57,22 @@ const Navbar = () => {
           className={styles.dropdownBtn}
         />
       </Dropdown>
+
+      <div className={styles.burgerMenu} onClick={toggleMobileMenu}>
+        <img src={burgerSvg} alt="Menu" />
+      </div>
+
+      {mobileOpen && (
+        <div className={styles.mobileMenu}>
+          <NavLink
+            to="/"
+            className={({ isActive }) => (isActive ? styles.active : "")}
+            onClick={closeMenu}
+          >
+            Shop
+          </NavLink>
+        </div>
+      )}
     </nav>
   );
 };

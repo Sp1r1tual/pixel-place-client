@@ -4,14 +4,11 @@ import { useCanvas } from "@/hooks/useCanvas";
 
 import styles from "./styles/Canvas.module.css";
 
-const PIXEL_SIZE = 10;
-const CANVAS_WIDTH = 100;
-const CANVAS_HEIGHT = 100;
-
 const Canvas = () => {
   const {
     stageRef,
     pixels,
+    stageSize,
     isDragging,
     handleMouseDown,
     handleMouseMove,
@@ -27,10 +24,10 @@ const Canvas = () => {
     return (
       <Rect
         key={key}
-        x={Number(xStr) * PIXEL_SIZE}
-        y={Number(yStr) * PIXEL_SIZE}
-        width={PIXEL_SIZE}
-        height={PIXEL_SIZE}
+        x={Number(xStr) * 10}
+        y={Number(yStr) * 10}
+        width={10}
+        height={10}
         fill={color}
       />
     );
@@ -38,23 +35,21 @@ const Canvas = () => {
 
   return (
     <div className={styles.canvasWrapper}>
-      <div className={styles.canvasContainer}>
-        <Stage
-          ref={stageRef}
-          width={CANVAS_WIDTH * PIXEL_SIZE}
-          height={CANVAS_HEIGHT * PIXEL_SIZE}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onWheel={handleWheel}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          className={`${styles.canvasStage} ${isDragging ? styles.dragging : ""}`}
-        >
-          <Layer>{renderedPixels}</Layer>
-        </Stage>
-      </div>
+      <Stage
+        ref={stageRef}
+        width={stageSize.width}
+        height={stageSize.height}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className={`${styles.canvasStage} ${isDragging ? styles.dragging : ""}`}
+      >
+        <Layer>{renderedPixels}</Layer>
+      </Stage>
     </div>
   );
 };
