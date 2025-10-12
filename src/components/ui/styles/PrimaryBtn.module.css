@@ -1,0 +1,35 @@
+.primaryBtn {
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 600;
+  background-color: rgba(31, 41, 55, 0.85);
+  color: #fff;
+  border: none;
+  border-radius: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.primaryBtn:hover {
+  background-color: #565f6d;
+  transform: translateY(-2px);
+}
+
+.primaryBtn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.icon {
+  height: 1rem;
+  width: 1rem;
+  pointer-events: none;
+}

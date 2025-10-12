@@ -1,0 +1,48 @@
+.palette {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f0f0f0;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.colorBox {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition:
+    transform 0.1s ease,
+    border 0.2s ease;
+}
+
+.colorBox:hover {
+  transform: scale(1.1);
+}
+
+.selected {
+  border: 2px solid #333333;
+}
+
+@media (max-width: 768px) {
+  .colorBox {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .colorBox {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .palette {
+    gap: 0.35rem;
+    padding: 0.35rem;
+  }
+}

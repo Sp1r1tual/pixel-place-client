@@ -1,0 +1,76 @@
+.bottomContainer {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  gap: 0.5rem;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.bottomContainer.closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.paintPixels {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.topRow > button.closeBtn {
+  position: static;
+  transform: none;
+}
+
+.paletteWrapper {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.btnWrapper {
+  width: 40%;
+  min-width: 100px;
+  display: flex;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.btnWrapper.closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .btnWrapper {
+    width: 60%;
+  }
+}
+
+@media (max-width: 480px) {
+  .btnWrapper {
+    width: 70%;
+  }
+}
