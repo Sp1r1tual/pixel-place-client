@@ -9,7 +9,8 @@ import { getSocket } from "@/sockets/canvasSockets";
 import { CANVAS_DATA } from "@/data/canvas";
 
 const useCanvas = () => {
-  const { pixels, setPixel, initSocket, cleanupSocket } = useCanvasStore();
+  const { pixels, setPixel, selectedColor, initSocket, cleanupSocket } =
+    useCanvasStore();
   const stageRef = useRef<Konva.Stage | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -71,14 +72,14 @@ const useCanvas = () => {
 
     if (!isInsideBounds) return;
 
-    const color = "#000000";
+    const color = selectedColor;
 
     setPixel(x, y, color);
 
     getSocket().emit("sendBatch", [{ x, y, color }], (err?: string) => {
       if (err) console.error("[socket] Pixel error:", err);
     });
-  }, [isDragging, setPixel]);
+  }, [isDragging, setPixel, selectedColor]);
 
   const handleTouchEnd = useCallback(() => setIsDragging(false), []);
 

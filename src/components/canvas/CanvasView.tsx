@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useCanvasStore } from "@/store/useCanvasStore";
+
 import { Canvas } from "./Canvas";
 import { PrimaryBtn } from "../ui/PrimaryBtn";
 import { Palette } from "./Palette";
@@ -17,6 +19,7 @@ const CanvasView = () => {
 
   const handleColorSelect = (color: string) => {
     console.log("Selected color:", color);
+    useCanvasStore.getState().setSelectedColor(color);
   };
 
   const handleClose = () => {

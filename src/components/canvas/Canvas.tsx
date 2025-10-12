@@ -25,14 +25,20 @@ const Canvas = () => {
     const [xStr, yStr] = key.split(":");
     const x = Number(xStr);
     const y = Number(yStr);
+
+    const xPos = Math.round(x * CANVAS_DATA.PIXEL_SIZE);
+    const yPos = Math.round(y * CANVAS_DATA.PIXEL_SIZE);
+    const size = Math.round(CANVAS_DATA.PIXEL_SIZE) + 0.5;
+
     return (
       <Rect
         key={key}
-        x={x * CANVAS_DATA.PIXEL_SIZE}
-        y={y * CANVAS_DATA.PIXEL_SIZE}
-        width={CANVAS_DATA.PIXEL_SIZE}
-        height={CANVAS_DATA.PIXEL_SIZE}
+        x={xPos}
+        y={yPos}
+        width={size}
+        height={size}
         fill={color}
+        strokeWidth={0}
       />
     );
   });
@@ -62,8 +68,15 @@ const Canvas = () => {
           clipY={0}
           clipWidth={canvasWidth}
           clipHeight={canvasHeight}
+          perfectDrawEnabled={true}
         >
-          <Rect x={0} y={0} width={canvasWidth} height={canvasHeight} />
+          <Rect
+            x={0}
+            y={0}
+            width={canvasWidth}
+            height={canvasHeight}
+            fill="#fff"
+          />
           {renderedPixels}
         </Layer>
 
