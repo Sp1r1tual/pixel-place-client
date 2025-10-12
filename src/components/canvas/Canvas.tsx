@@ -24,14 +24,11 @@ const Canvas = () => {
 
   const renderedPixels = Object.entries(pixels).map(([key, color]) => {
     const [xStr, yStr] = key.split(":");
-    const x = Number(xStr);
-    const y = Number(yStr);
-
     return (
       <Rect
         key={key}
-        x={x * PIXEL_SIZE}
-        y={y * PIXEL_SIZE}
+        x={Number(xStr) * PIXEL_SIZE}
+        y={Number(yStr) * PIXEL_SIZE}
         width={PIXEL_SIZE}
         height={PIXEL_SIZE}
         fill={color}
