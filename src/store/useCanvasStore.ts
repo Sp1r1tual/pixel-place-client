@@ -15,10 +15,13 @@ interface IPixel {
 
 interface ICanvasState {
   pixels: Record<string, string>;
+  unpaintedPixels: Record<string, string>;
   selectedColor: string;
   isConnected: boolean;
   connectionError: string | null;
   setPixel: (x: number, y: number, color: string) => void;
+  addUnpaintedPixel: (x: number, y: number, color: string) => void;
+  clearUnpaintedPixels: () => void;
   setSelectedColor: (color: string) => void;
   setPixelsBatch: (batch: IPixel[]) => void;
   initSocket: () => void;
@@ -36,27 +39,39 @@ const resetSocketState = () => {
 
 const useCanvasStore = create<ICanvasState>((set) => ({
   pixels: {},
+  unpaintedPixels: {},
   selectedColor: "#000000",
   isConnected: false,
   connectionError: null,
 
   setPixel: (x, y, color) => {
-    console.log("[store] setPixel:", { x, y, color });
-    set((state) => ({ pixels: { ...state.pixels, [`${x}:${y}`]: color } }));
+    set((state) => ({
+      pixels: { ...state.pixels, [`${x}:${y}`]: color },
+    }));
+  },
+
+  addUnpaintedPixel: (x, y, color) => {
+    set((state) => ({
+      unpaintedPixels: { ...state.unpaintedPixels, [`${x}:${y}`]: color },
+    }));
+  },
+
+  clearUnpaintedPixels: () => {
+    set({ unpaintedPixels: {} });
   },
 
   setSelectedColor: (color) => {
-    console.log("[store] setSelectedColor:", color);
     set({ selectedColor: color });
   },
 
   setPixelsBatch: (batch) => {
-    console.log("[store] setPixelsBatch:", batch);
     set((state) => {
       const updated = { ...state.pixels };
+
       for (const p of batch) {
         updated[`${p.x}:${p.y}`] = p.color;
       }
+
       return { pixels: updated };
     });
   },
@@ -76,26 +91,28 @@ const useCanvasStore = create<ICanvasState>((set) => ({
       console.log("[socket] connected");
       set({ isConnected: true, connectionError: null });
     });
+
     socket.on("disconnect", () => {
       console.log("[socket] disconnected");
       if (!isSocketRefreshing())
         set({ isConnected: false, connectionError: "Connection lost" });
     });
+
     socket.on("canvasState", (state: Record<string, string>) => {
-      console.log("[socket] canvasState received", state);
       set({ pixels: state });
     });
+
     socket.on("updatePixels", (batch: IPixel[]) => {
-      console.log("[socket] updatePixels received", batch);
       useCanvasStore.getState().setPixelsBatch(batch);
     });
 
     if (!refreshListenerAdded) {
       refreshListenerAdded = true;
       window.addEventListener("socket:refresh_failed", () => {
-        console.warn("[socket] Global refresh fail — logging out");
         resetSocketState();
+
         set({ isConnected: false, connectionError: "Session expired" });
+
         disconnectSocket();
       });
     }
@@ -104,7 +121,6 @@ const useCanvasStore = create<ICanvasState>((set) => ({
   },
 
   cleanupSocket: () => {
-    console.log("[store] cleanupSocket");
     socketInitialized = false;
     disconnectSocket();
   },
