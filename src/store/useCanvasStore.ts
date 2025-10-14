@@ -80,10 +80,24 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   setPixel: (x, y, color) =>
     set((state) => ({ pixels: { ...state.pixels, [`${x}:${y}`]: color } })),
 
-  addUnpaintedPixel: (x, y, color) =>
-    set((state) => ({
-      unpaintedPixels: { ...state.unpaintedPixels, [`${x}:${y}`]: color },
-    })),
+  addUnpaintedPixel: (x, y, color) => {
+    const state = get();
+    const key = `${x}:${y}`;
+    const unpaintedCount = Object.keys(state.unpaintedPixels).length;
+
+    if (state.unpaintedPixels[key]) return;
+
+    if (unpaintedCount >= state.energy) {
+      return;
+    }
+
+    set({
+      unpaintedPixels: {
+        ...state.unpaintedPixels,
+        [key]: color,
+      },
+    });
+  },
 
   clearUnpaintedPixels: () => set({ unpaintedPixels: {} }),
 
@@ -121,7 +135,6 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     });
 
     socket.on("energyUpdate", (energy: number, maxEnergy?: number) => {
-      console.log("[socket] energyUpdate:", energy, "/", maxEnergy);
       set({ energy });
       if (typeof maxEnergy === "number") {
         set({ maxEnergy });

@@ -28,13 +28,11 @@ const setupSocketListeners = (sock: Socket) => {
   });
 
   sock.on("token_expired", async () => {
-    console.warn("[socket] Token expired — logging out...");
     isRefreshing = true;
     sock.disconnect();
 
     try {
       await refreshToken();
-      console.log("[socket] Token refreshed — reconnecting");
 
       socket = createSocket();
       setupSocketListeners(socket);
