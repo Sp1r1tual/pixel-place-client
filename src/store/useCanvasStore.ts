@@ -37,13 +37,35 @@ let socketInitialized = false;
 let refreshListenerAdded = false;
 let energyInterval: ReturnType<typeof setInterval> | null = null;
 
-const resetSocketState = () => {
-  socketInitialized = false;
-  refreshListenerAdded = false;
+const startEnergyInterval = (
+  get: () => ICanvasState,
+  set: (
+    partial:
+      | Partial<ICanvasState>
+      | ((state: ICanvasState) => Partial<ICanvasState>),
+  ) => void,
+) => {
+  if (energyInterval) clearInterval(energyInterval);
+
+  energyInterval = setInterval(() => {
+    const { energy, maxEnergy } = get();
+    if (energy < maxEnergy) {
+      set({ energy: energy + 1 });
+    }
+  }, 60_000);
+};
+
+const stopEnergyInterval = () => {
   if (energyInterval) {
     clearInterval(energyInterval);
     energyInterval = null;
   }
+};
+
+const resetSocketState = () => {
+  socketInitialized = false;
+  refreshListenerAdded = false;
+  stopEnergyInterval();
 };
 
 const useCanvasStore = create<ICanvasState>((set, get) => ({
@@ -57,12 +79,16 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
   setPixel: (x, y, color) =>
     set((state) => ({ pixels: { ...state.pixels, [`${x}:${y}`]: color } })),
+
   addUnpaintedPixel: (x, y, color) =>
     set((state) => ({
       unpaintedPixels: { ...state.unpaintedPixels, [`${x}:${y}`]: color },
     })),
+
   clearUnpaintedPixels: () => set({ unpaintedPixels: {} }),
+
   setSelectedColor: (color) => set({ selectedColor: color }),
+
   setPixelsBatch: (batch) =>
     set((state) => {
       const updated = { ...state.pixels };
@@ -90,32 +116,32 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
       socket.emit("getEnergy", null, (energy: number, maxEnergy: number) => {
         set({ energy, maxEnergy });
-
-        if (!energyInterval) {
-          energyInterval = setInterval(() => {
-            const { energy, maxEnergy } = get();
-            if (energy < maxEnergy) set({ energy: energy + 1 });
-          }, 60_000);
-        }
+        startEnergyInterval(get, set);
       });
     });
 
     socket.on("energyUpdate", (energy: number, maxEnergy?: number) => {
+      console.log("[socket] energyUpdate:", energy, "/", maxEnergy);
       set({ energy });
       if (typeof maxEnergy === "number") {
         set({ maxEnergy });
       }
+      startEnergyInterval(get, set);
     });
 
     socket.on("disconnect", () => {
       console.log("[socket] disconnected");
-      if (!isSocketRefreshing())
+
+      if (!isSocketRefreshing()) {
+        stopEnergyInterval();
         set({ isConnected: false, connectionError: "Connection lost" });
+      }
     });
 
     socket.on("canvasState", (state: Record<string, string>) =>
       set({ pixels: state }),
     );
+
     socket.on("updatePixels", (batch: IPixel[]) => get().setPixelsBatch(batch));
 
     if (!refreshListenerAdded) {
@@ -133,10 +159,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   cleanupSocket: () => {
     socketInitialized = false;
     disconnectSocket();
-    if (energyInterval) {
-      clearInterval(energyInterval);
-      energyInterval = null;
-    }
+    stopEnergyInterval();
   },
 }));
 
