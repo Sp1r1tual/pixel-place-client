@@ -16,6 +16,7 @@
     box-shadow 0.2s ease,
     background-color 0.2s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  gap: 0.5rem;
 }
 
 .primaryBtn:hover {
@@ -32,4 +33,21 @@
   height: 1rem;
   width: 1rem;
   pointer-events: none;
+}
+
+.textWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.text {
+  font-weight: 600;
+}
+
+.progress {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  font-weight: 500;
 }

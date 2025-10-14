@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import {
   getSocket,
   connectSocket,
-  disconnectSocket,
   isSocketRefreshing,
 } from "@/sockets/canvasSockets";
 
@@ -24,19 +23,16 @@ interface ICanvasState {
   connectionError: string | null;
   setPixel: (x: number, y: number, color: string) => void;
   addUnpaintedPixel: (x: number, y: number, color: string) => void;
+  removeUnpaintedPixel: (x: number, y: number) => void;
   clearUnpaintedPixels: () => void;
   setSelectedColor: (color: string) => void;
   setPixelsBatch: (batch: IPixel[]) => void;
-  removeUnpaintedPixel: (x: number, y: number) => void;
   setEnergy: (value: number) => void;
   setMaxEnergy: (value: number) => void;
   initSocket: () => void;
-  cleanupSocket: () => void;
-  setConnectionError: (error: string | null) => void;
 }
 
 let socketInitialized = false;
-let refreshListenerAdded = false;
 let energyInterval: ReturnType<typeof setInterval> | null = null;
 
 const startEnergyInterval = (
@@ -47,8 +43,7 @@ const startEnergyInterval = (
       | ((state: ICanvasState) => Partial<ICanvasState>),
   ) => void,
 ) => {
-  if (energyInterval) clearInterval(energyInterval);
-
+  if (energyInterval) return;
   energyInterval = setInterval(() => {
     const { energy, maxEnergy } = get();
     if (energy < maxEnergy) {
@@ -62,12 +57,6 @@ const stopEnergyInterval = () => {
     clearInterval(energyInterval);
     energyInterval = null;
   }
-};
-
-const resetSocketState = () => {
-  socketInitialized = false;
-  refreshListenerAdded = false;
-  stopEnergyInterval();
 };
 
 const useCanvasStore = create<ICanvasState>((set, get) => ({
@@ -85,21 +74,14 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   addUnpaintedPixel: (x, y, color) => {
     const state = get();
     const key = `${x}:${y}`;
-    const unpaintedCount = Object.keys(state.unpaintedPixels).length;
 
     if (state.unpaintedPixels[key]) return;
-
-    if (unpaintedCount >= state.energy) {
+    if (Object.keys(state.unpaintedPixels).length >= state.energy) {
       toast.warn("Not enough energy to add more pixels");
       return;
     }
 
-    set({
-      unpaintedPixels: {
-        ...state.unpaintedPixels,
-        [key]: color,
-      },
-    });
+    set({ unpaintedPixels: { ...state.unpaintedPixels, [key]: color } });
   },
 
   removeUnpaintedPixel: (x, y) =>
@@ -115,20 +97,15 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
   setSelectedColor: (color) => set({ selectedColor: color }),
 
-  setPixelsBatch: (batch) =>
+  setPixelsBatch: (batch: IPixel[]) =>
     set((state) => {
       const updated = { ...state.pixels };
       for (const p of batch) updated[`${p.x}:${p.y}`] = p.color;
       return { pixels: updated };
     }),
 
-  setEnergy: (value: number) => set({ energy: value }),
-  setMaxEnergy: (value: number) => set({ maxEnergy: value }),
-
-  setConnectionError: (error) => {
-    console.log("[store] setConnectionError:", error);
-    set({ connectionError: error });
-  },
+  setEnergy: (value) => set({ energy: value }),
+  setMaxEnergy: (value) => set({ maxEnergy: value }),
 
   initSocket: () => {
     if (socketInitialized) return;
@@ -137,54 +114,35 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     const socket = getSocket();
 
     socket.on("connect", () => {
-      console.log("[socket] connected");
       set({ isConnected: true, connectionError: null });
-
       socket.emit("getEnergy", null, (energy: number, maxEnergy: number) => {
         set({ energy, maxEnergy });
         startEnergyInterval(get, set);
       });
     });
 
+    socket.on("disconnect", () => {
+      set({ isConnected: false, connectionError: "Disconnected from server" });
+      if (!isSocketRefreshing()) stopEnergyInterval();
+    });
+
     socket.on("energyUpdate", (energy: number, maxEnergy?: number) => {
       set({ energy });
-      if (typeof maxEnergy === "number") {
-        set({ maxEnergy });
-      }
+      if (typeof maxEnergy === "number") set({ maxEnergy });
       startEnergyInterval(get, set);
     });
 
-    socket.on("disconnect", () => {
-      console.log("[socket] disconnected");
-
-      if (!isSocketRefreshing()) {
-        stopEnergyInterval();
-        set({ isConnected: false, connectionError: "Connection lost" });
-      }
-    });
-
-    socket.on("canvasState", (state: Record<string, string>) =>
-      set({ pixels: state }),
+    socket.on("canvasState", (pixels: Record<string, string>) =>
+      set({ pixels }),
     );
 
     socket.on("updatePixels", (batch: IPixel[]) => get().setPixelsBatch(batch));
-
-    if (!refreshListenerAdded) {
-      refreshListenerAdded = true;
-      window.addEventListener("socket:refresh_failed", () => {
-        resetSocketState();
-        set({ isConnected: false, connectionError: "Session expired" });
-        disconnectSocket();
-      });
-    }
 
     connectSocket();
   },
 
   cleanupSocket: () => {
     socketInitialized = false;
-    disconnectSocket();
-    stopEnergyInterval();
   },
 }));
 
