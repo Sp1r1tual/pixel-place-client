@@ -14,6 +14,8 @@ import { getSocket } from "@/sockets/canvasSockets";
 import brushSvg from "@/assets/brush-3-svgrepo-com.svg";
 import hideInterfaceSvg from "@/assets/eye-slash-visibility-visible-hide-hidden-show-watch-svgrepo-com.svg";
 import showIntrfaceSvg from "@/assets/eye-visibility-visible-hide-hidden-show-watch-svgrepo-com.svg";
+import eraseSvg from "@/assets/erase-svgrepo-com.svg";
+import eraseActiveSvg from "@/assets/erase-active-svgrepo-com.svg";
 
 import styles from "./styles/CanvasView.module.css";
 
@@ -21,6 +23,7 @@ const CanvasView = () => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEraserActive, setIsEraserActive] = useState(false);
 
   const { isHidden, toggleInterface } = useUserInterface();
   const {
@@ -44,6 +47,10 @@ const CanvasView = () => {
       setIsAnimating(false);
       clearUnpaintedPixels();
     }, 200);
+  };
+
+  const handleEraseToggle = () => {
+    setIsEraserActive((prev) => !prev);
   };
 
   const handlePaintClick = async () => {
@@ -86,18 +93,26 @@ const CanvasView = () => {
 
   return (
     <div className={styles.canvasView}>
-      <Canvas isPaletteOpen={isPaletteOpen} />
+      <Canvas isPaletteOpen={isPaletteOpen} isEraserActive={isEraserActive} />
       {!isHidden && isPaletteOpen && (
         <div
           className={`${styles.bottomContainer} ${isAnimating ? styles.closing : ""}`}
         >
           <div className={styles.topRow}>
-            <InterfaceBtn
-              id="hideInterface"
-              imgDefault={hideInterfaceSvg}
-              imgActive={showIntrfaceSvg}
-              onClick={toggleInterface}
-            />
+            <div className={styles.uiBtnWrapper}>
+              <InterfaceBtn
+                id="hideInterfaceBtn"
+                imgDefault={hideInterfaceSvg}
+                imgActive={showIntrfaceSvg}
+                onClick={toggleInterface}
+              />
+              <InterfaceBtn
+                id="EraseBtn"
+                imgDefault={eraseSvg}
+                imgActive={eraseActiveSvg}
+                onClick={handleEraseToggle}
+              />
+            </div>
 
             <span className={styles.paintPixels}>
               Paint pixels: {pixelsPainted}

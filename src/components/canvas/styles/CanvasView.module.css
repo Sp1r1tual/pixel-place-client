@@ -28,15 +28,21 @@
   width: 100%;
 }
 
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+}
+
 .paintPixels {
   font-size: 1rem;
   font-weight: 600;
   color: #000000;
-}
-
-.topRow > button.closeBtn {
-  position: static;
-  transform: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .paletteWrapper {
@@ -47,6 +53,13 @@
   width: 100%;
   overflow-x: auto;
   padding-bottom: 0.5rem;
+}
+
+.uiBtnWrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .btnWrapper {

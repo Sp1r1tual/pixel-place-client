@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { KonvaEventObject } from "konva/lib/Node";
+import { toast } from "react-toastify";
 import Konva from "konva";
 
 import { useCanvasStore } from "@/store/useCanvasStore";
-
 import { CANVAS_DATA } from "@/data/canvas";
 
-const useCanvas = (isPaletteOpen: boolean) => {
+const useCanvas = (isPaletteOpen: boolean, isEraserActive: boolean) => {
   const stageRef = useRef<Konva.Stage | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -19,6 +19,7 @@ const useCanvas = (isPaletteOpen: boolean) => {
     pixels,
     unpaintedPixels,
     addUnpaintedPixel,
+    removeUnpaintedPixel,
     selectedColor,
     initSocket,
     cleanupSocket,
@@ -67,7 +68,6 @@ const useCanvas = (isPaletteOpen: boolean) => {
     setIsDragging(false);
 
     if (!isPaletteOpen) return;
-
     if (state.distance > CANVAS_DATA.DRAG_THRESHOLD || state.hasMoved) return;
 
     const pointer = stage.getPointerPosition();
@@ -91,9 +91,25 @@ const useCanvas = (isPaletteOpen: boolean) => {
       y < CANVAS_DATA.CANVAS_HEIGHT;
     if (!isInsideBounds) return;
 
-    const color = selectedColor;
-    addUnpaintedPixel(x, y, color);
-  }, [isDragging, addUnpaintedPixel, selectedColor, isPaletteOpen]);
+    if (isEraserActive) {
+      const key = `${x}:${y}`;
+      if (unpaintedPixels[key]) {
+        removeUnpaintedPixel(x, y);
+      } else {
+        toast.warn("You can erase pixels that have not yet been sent");
+      }
+    } else {
+      addUnpaintedPixel(x, y, selectedColor);
+    }
+  }, [
+    isDragging,
+    isPaletteOpen,
+    isEraserActive,
+    addUnpaintedPixel,
+    removeUnpaintedPixel,
+    selectedColor,
+    unpaintedPixels,
+  ]);
 
   const handleTouchEnd = useCallback(() => setIsDragging(false), []);
 

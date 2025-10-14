@@ -27,6 +27,7 @@ interface ICanvasState {
   clearUnpaintedPixels: () => void;
   setSelectedColor: (color: string) => void;
   setPixelsBatch: (batch: IPixel[]) => void;
+  removeUnpaintedPixel: (x: number, y: number) => void;
   setEnergy: (value: number) => void;
   setMaxEnergy: (value: number) => void;
   initSocket: () => void;
@@ -100,6 +101,15 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
       },
     });
   },
+
+  removeUnpaintedPixel: (x, y) =>
+    set((state) => {
+      const key = `${x}:${y}`;
+      if (!(key in state.unpaintedPixels)) return state;
+      const updated = { ...state.unpaintedPixels };
+      delete updated[key];
+      return { unpaintedPixels: updated };
+    }),
 
   clearUnpaintedPixels: () => set({ unpaintedPixels: {} }),
 

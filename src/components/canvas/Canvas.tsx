@@ -4,7 +4,12 @@ import { useCanvas } from "@/hooks/useCanvas";
 
 import { CANVAS_DATA } from "@/data/canvas";
 
-const Canvas = ({ isPaletteOpen }: { isPaletteOpen: boolean }) => {
+interface ICanvasProps {
+  isPaletteOpen: boolean;
+  isEraserActive: boolean;
+}
+
+const Canvas = ({ isPaletteOpen, isEraserActive }: ICanvasProps) => {
   const {
     stageRef,
     pixels,
@@ -17,7 +22,7 @@ const Canvas = ({ isPaletteOpen }: { isPaletteOpen: boolean }) => {
     handleTouchMove,
     handleTouchEnd,
     handleWheel,
-  } = useCanvas(isPaletteOpen);
+  } = useCanvas(isPaletteOpen, isEraserActive);
 
   const renderedPixels = Object.entries(pixels).map(([key, color]) => {
     const [xStr, yStr] = key.split(":");
