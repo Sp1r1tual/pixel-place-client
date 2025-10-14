@@ -9,6 +9,7 @@ import { PageLayout } from "./layouts/PageLayout";
 import { MainPage } from "./pages/MainPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
+import { ShopPage } from "./pages/ShopPage";
 
 const Router = createBrowserRouter([
   {
@@ -33,6 +34,14 @@ const Router = createBrowserRouter([
             element: (
               <PageLayout>
                 <MainPage />
+              </PageLayout>
+            ),
+          },
+          {
+            path: "shop",
+            element: (
+              <PageLayout>
+                <ShopPage />
               </PageLayout>
             ),
           },

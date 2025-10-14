@@ -1,0 +1,46 @@
+.item {
+  background-color: rgba(20, 25, 35, 0.9);
+  border: 2px solid #242e3c;
+  border-radius: 10px;
+  padding: 1rem;
+  width: 100%;
+  max-width: 260px;
+  text-align: center;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.image {
+  width: 15rem;
+  height: 15rem;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 10px 0 4px 0;
+}
+
+.price {
+  font-size: 1rem;
+  color: #c0c0c0;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 480px) {
+  .name {
+    font-size: 1rem;
+  }
+
+  .price {
+    font-size: 0.9rem;
+  }
+}

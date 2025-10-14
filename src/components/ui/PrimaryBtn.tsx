@@ -19,17 +19,26 @@ const PrimaryBtn = ({
   progressCurrent,
   progressFull,
 }: IPrimaryBtnProps) => {
+  const showProgress =
+    progressText !== undefined &&
+    progressCurrent !== undefined &&
+    progressFull !== undefined;
+
   return (
     <button
       className={styles.primaryBtn}
       disabled={isLoading}
       onClick={onClick}
     >
-      <img src={image} className={styles.icon} />
+      {image && <img src={image} className={styles.icon} />}
 
       <div className={styles.info}>
         {text}
-        {progressText} {progressCurrent} / {progressFull}
+        {showProgress && (
+          <>
+            {progressText} {progressCurrent} / {progressFull}
+          </>
+        )}
       </div>
     </button>
   );

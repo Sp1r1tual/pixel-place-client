@@ -81,7 +81,7 @@ const connectSocket = async () => {
 const disconnectSocket = () => {
   if (socket) {
     socket.removeAllListeners();
-    socket.disconnect(); // без close()
+    socket.disconnect();
     socket = null;
   }
 };

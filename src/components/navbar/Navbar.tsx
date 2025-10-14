@@ -30,11 +30,19 @@ const Navbar = () => {
   return (
     <nav className={styles.navbar}>
       <img className={styles.logoImg} src={pixelPlacePng} alt="logo" />
-      <h1 className={styles.title}>Pixel Place</h1>
+      <a className={styles.title}>Pixel Place</a>
 
       <div className={styles.desktopMenu}>
         <NavLink
           to="/"
+          className={({ isActive }) => (isActive ? styles.active : "")}
+          onClick={closeMenu}
+        >
+          Main
+        </NavLink>
+
+        <NavLink
+          to="/shop"
           className={({ isActive }) => (isActive ? styles.active : "")}
           onClick={closeMenu}
         >
@@ -72,6 +80,14 @@ const Navbar = () => {
         <div className={styles.mobileMenu}>
           <NavLink
             to="/"
+            className={({ isActive }) => (isActive ? styles.active : "")}
+            onClick={closeMenu}
+          >
+            Main
+          </NavLink>
+
+          <NavLink
+            to="/shop"
             className={({ isActive }) => (isActive ? styles.active : "")}
             onClick={closeMenu}
           >

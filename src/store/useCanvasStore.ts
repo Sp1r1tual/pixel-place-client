@@ -90,7 +90,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     if (state.unpaintedPixels[key]) return;
 
     if (unpaintedCount >= state.energy) {
-      toast.warn("Not enough power to add more pixels");
+      toast.warn("Not enough energy to add more pixels");
       return;
     }
 
