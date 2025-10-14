@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import { toast } from "react-toastify";
 
 import { refreshToken } from "@/api/interceptors/authInterceptors";
 
@@ -6,13 +7,9 @@ let socket: Socket | null = null;
 let isRefreshing = false;
 
 const createSocket = (): Socket => {
-  if (socket) {
-    socket.removeAllListeners();
-    socket.close();
-    socket = null;
-  }
+  if (socket) return socket;
 
-  return io(import.meta.env.VITE_API_URL, {
+  const sock = io(import.meta.env.VITE_API_URL, {
     path: "/canvas/socket.io",
     auth: {
       authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -20,60 +17,63 @@ const createSocket = (): Socket => {
     withCredentials: true,
     autoConnect: false,
   });
+
+  setupSocketListeners(sock);
+  socket = sock;
+
+  return sock;
 };
 
 const setupSocketListeners = (sock: Socket) => {
   sock.on("connect_error", (err) => {
-    console.error("[socket] Connection error:", err.message);
+    toast.error(`Connection error: ${err.message}`);
   });
 
   sock.on("token_expired", async () => {
+    if (isRefreshing) return;
     isRefreshing = true;
-    sock.disconnect();
 
     try {
       await refreshToken();
 
-      socket = createSocket();
-      setupSocketListeners(socket);
-      socket.auth = {
-        authorization: `Bearer ${localStorage.getItem("token")}`,
-      };
-      socket.connect();
+      const newToken = localStorage.getItem("token");
+      if (!newToken) throw new Error("No new token after refresh");
 
-      isRefreshing = false;
-    } catch (err) {
-      console.error("[socket] Token refresh failed:", err);
+      sock.auth = { authorization: `Bearer ${newToken}` };
+      sock.connect();
+    } catch {
+      toast.error("Your session has ended. Please log in again");
+
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
-      isRefreshing = false;
-
       window.dispatchEvent(new CustomEvent("socket:refresh_failed"));
+    } finally {
+      isRefreshing = false;
     }
   });
 
-  sock.on("disconnect", () => {
-    console.log("[socket] Disconnected");
+  sock.on("disconnect", (reason) => {
+    console.log("[socket] Disconnected:", reason);
+    if (!isRefreshing) {
+      toast.warn("Connection lost. Trying to reconnect...");
+    }
   });
 };
 
 const getSocket = (): Socket => {
-  if (!socket) {
-    socket = createSocket();
-    setupSocketListeners(socket);
-  }
-  return socket;
+  return socket ?? createSocket();
 };
 
 const connectSocket = async () => {
   const token = localStorage.getItem("token");
-  if (!token) return console.error("[socket] No token available");
+  if (!token) {
+    console.error("[socket] No token available");
+    return;
+  }
 
   const sock = getSocket();
 
-  sock.auth = {
-    authorization: `Bearer ${token}`,
-  };
+  sock.auth = { authorization: `Bearer ${token}` };
 
   if (!sock.connected) sock.connect();
 };
@@ -81,7 +81,7 @@ const connectSocket = async () => {
 const disconnectSocket = () => {
   if (socket) {
     socket.removeAllListeners();
-    socket.close();
+    socket.disconnect(); // без close()
     socket = null;
   }
 };
