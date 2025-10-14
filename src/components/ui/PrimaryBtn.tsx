@@ -5,9 +5,20 @@ interface IPrimaryBtnProps {
   text?: string;
   onClick?: () => void;
   isLoading: boolean;
+  progressText?: string;
+  progressCurrent?: number;
+  progressFull?: number;
 }
 
-const PrimaryBtn = ({ onClick, image, text, isLoading }: IPrimaryBtnProps) => {
+const PrimaryBtn = ({
+  onClick,
+  image,
+  text,
+  isLoading,
+  progressText,
+  progressCurrent,
+  progressFull,
+}: IPrimaryBtnProps) => {
   return (
     <button
       className={styles.primaryBtn}
@@ -15,7 +26,11 @@ const PrimaryBtn = ({ onClick, image, text, isLoading }: IPrimaryBtnProps) => {
       onClick={onClick}
     >
       <img src={image} className={styles.icon} />
-      {text}
+
+      <div className={styles.info}>
+        {text}
+        {progressText} {progressCurrent} / {progressFull}
+      </div>
     </button>
   );
 };

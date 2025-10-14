@@ -10,8 +10,6 @@ import styles from "./styles/MainPage.module.css";
 const MainPage = () => {
   const { isHidden, toggleInterface } = useUserInterface();
 
-  console.log(isHidden);
-
   return (
     <div className={styles.mainPage}>
       <CanvasView />

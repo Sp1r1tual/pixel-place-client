@@ -23,8 +23,13 @@ const CanvasView = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { isHidden, toggleInterface } = useUserInterface();
-  const { unpaintedPixels, setPixelsBatch, clearUnpaintedPixels } =
-    useCanvasStore();
+  const {
+    unpaintedPixels,
+    setPixelsBatch,
+    clearUnpaintedPixels,
+    energy,
+    maxEnergy,
+  } = useCanvasStore();
 
   const pixelsPainted = Object.keys(unpaintedPixels).length;
 
@@ -56,17 +61,26 @@ const CanvasView = () => {
         },
       );
 
-      getSocket().emit("sendBatch", pixelsToSend, (err?: string) => {
-        if (err) {
-          console.error("[socket] Pixel error:", err);
+      getSocket().emit(
+        "sendBatch",
+        pixelsToSend,
+        (err?: string, energyLeft?: number, maxEnergy?: number) => {
+          if (err) {
+            console.error("[socket] Pixel error:", err);
+            setIsLoading(false);
+          } else {
+            setPixelsBatch(pixelsToSend);
+            clearUnpaintedPixels();
 
-          setIsLoading(false);
-        } else {
-          setPixelsBatch(pixelsToSend);
-          clearUnpaintedPixels();
-          setIsLoading(false);
-        }
-      });
+            if (typeof energyLeft === "number")
+              useCanvasStore.getState().setEnergy(energyLeft);
+            if (typeof maxEnergy === "number")
+              useCanvasStore.getState().setMaxEnergy(maxEnergy);
+
+            setIsLoading(false);
+          }
+        },
+      );
     }
   };
 
@@ -99,6 +113,8 @@ const CanvasView = () => {
           <div className={styles.btnWrapper}>
             <PrimaryBtn
               text="Paint"
+              progressCurrent={energy}
+              progressFull={maxEnergy}
               image={brushSvg}
               onClick={handlePaintClick}
               isLoading={isLoading}
@@ -118,6 +134,8 @@ const CanvasView = () => {
         >
           <PrimaryBtn
             text="Paint"
+            progressCurrent={energy}
+            progressFull={maxEnergy}
             image={brushSvg}
             onClick={handlePaintClick}
             isLoading={isLoading}
