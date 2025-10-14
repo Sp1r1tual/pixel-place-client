@@ -1,4 +1,4 @@
-import closeCircleSvg from "@/assets/close-circle-svgrepo-com.svg";
+import closeCircleSvg from "@/assets/close-sm-svgrepo-com.svg";
 
 import styles from "./styles/CloseBtn.module.css";
 

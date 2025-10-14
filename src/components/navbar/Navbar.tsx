@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
+import { useUserInterface } from "@/store/useUserInterface";
+
 import { Dropdown } from "../ui/Dropdown";
 import { DropdownBtn } from "../ui/DropdownBtn";
 
@@ -14,12 +16,16 @@ import styles from "./styles/Navbar.module.css";
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const { isHidden } = useUserInterface();
+
   const toggleMobileMenu = () => setMobileOpen((prev) => !prev);
   const closeMenu = () => setMobileOpen(false);
 
   const handleUserMenuClick = () => {
     closeMenu();
   };
+
+  if (isHidden) return null;
 
   return (
     <nav className={styles.navbar}>

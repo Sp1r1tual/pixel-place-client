@@ -1,14 +1,19 @@
 import { useState } from "react";
 
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { useUserInterface } from "@/store/useUserInterface";
 
 import { Canvas } from "./Canvas";
 import { PrimaryBtn } from "../ui/PrimaryBtn";
 import { Palette } from "./Palette";
+import { InterfaceBtn } from "../ui/InterfaceBtn";
 import { CloseBtn } from "../ui/CloseBtn";
 
 import { getSocket } from "@/sockets/canvasSockets";
+
 import brushSvg from "@/assets/brush-3-svgrepo-com.svg";
+import hideInterfaceSvg from "@/assets/eye-slash-visibility-visible-hide-hidden-show-watch-svgrepo-com.svg";
+import showIntrfaceSvg from "@/assets/eye-visibility-visible-hide-hidden-show-watch-svgrepo-com.svg";
 
 import styles from "./styles/CanvasView.module.css";
 
@@ -17,6 +22,7 @@ const CanvasView = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { isHidden, toggleInterface } = useUserInterface();
   const { unpaintedPixels, setPixelsBatch, clearUnpaintedPixels } =
     useCanvasStore();
 
@@ -67,19 +73,29 @@ const CanvasView = () => {
   return (
     <div className={styles.canvasView}>
       <Canvas isPaletteOpen={isPaletteOpen} />
-      {isPaletteOpen && (
+      {!isHidden && isPaletteOpen && (
         <div
           className={`${styles.bottomContainer} ${isAnimating ? styles.closing : ""}`}
         >
           <div className={styles.topRow}>
+            <InterfaceBtn
+              id="hideInterface"
+              imgDefault={hideInterfaceSvg}
+              imgActive={showIntrfaceSvg}
+              onClick={toggleInterface}
+            />
+
             <span className={styles.paintPixels}>
               Paint pixels: {pixelsPainted}
             </span>
+
             <CloseBtn onClick={handleClose} />
           </div>
+
           <div className={styles.paletteWrapper}>
             <Palette onSelectColor={handleColorSelect} />
           </div>
+
           <div className={styles.btnWrapper}>
             <PrimaryBtn
               text="Paint"

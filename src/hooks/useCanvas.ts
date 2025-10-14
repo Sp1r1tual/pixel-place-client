@@ -45,6 +45,20 @@ const useCanvas = (isPaletteOpen: boolean) => {
     return () => cleanupSocket();
   }, [initSocket, cleanupSocket]);
 
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
+    const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
+
+    const x = (window.innerWidth - canvasWidth) / 2;
+    const y = (window.innerHeight - canvasHeight) / 2;
+
+    stage.position({ x, y });
+    stage.batchDraw();
+  }, []);
+
   const handleMouseUp = useCallback(() => {
     const stage = stageRef.current;
     if (!stage || !isDragging) return;
