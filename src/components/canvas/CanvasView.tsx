@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 
+import { useAuthStore } from "@/store/useAuthStore";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useUserInterface } from "@/store/useUserInterface";
 
@@ -63,14 +65,25 @@ const CanvasView = () => {
       return;
     }
 
-    if (pixelsPainted === 0) return;
+    if (pixelsPainted === 0) {
+      toast.warn("Please place at least one pixel before painting!");
+      return;
+    }
 
     setIsLoading(true);
 
-    const pixelsToSend = Object.entries(unpaintedPixels).map(([key, color]) => {
+    const userId = useAuthStore.getState().user?.id ?? "";
+    const pixelsToSend: Omit<IPixel, "userId">[] = Object.entries(
+      unpaintedPixels,
+    ).map(([key, color]) => {
       const [xStr, yStr] = key.split(":");
       return { x: Number(xStr), y: Number(yStr), color };
     });
+
+    const localPixels: IPixel[] = pixelsToSend.map((p) => ({
+      ...p,
+      userId,
+    }));
 
     getSocket().emit(
       "sendBatch",
@@ -82,7 +95,7 @@ const CanvasView = () => {
           return;
         }
 
-        setPixelsBatch(pixelsToSend);
+        setPixelsBatch(localPixels);
         clearUnpaintedPixels();
 
         if (typeof energyLeft === "number")
@@ -148,19 +161,21 @@ const CanvasView = () => {
           </div>
 
           <div className={styles.btnWrapper}>
-            <PrimaryBtn
-              text="Paint"
-              progressCurrent={energy}
-              progressFull={maxEnergy}
-              image={brushSvg}
-              onClick={handlePaintClick}
-              isLoading={isLoading}
-            />
+            {!selectedPixel && (
+              <PrimaryBtn
+                text="Paint"
+                progressCurrent={energy}
+                progressFull={maxEnergy}
+                image={brushSvg}
+                onClick={handlePaintClick}
+                isLoading={isLoading}
+              />
+            )}
           </div>
         </div>
       )}
 
-      {!isPaletteOpen && (
+      {!isPaletteOpen && !selectedPixel && (
         <div
           className={styles.btnWrapper}
           style={{

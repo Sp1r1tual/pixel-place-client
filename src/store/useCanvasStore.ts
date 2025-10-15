@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
 
+import { useAuthStore } from "./useAuthStore";
 import { IPixel } from "@/types";
 
 import {
@@ -72,9 +73,21 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   connectionError: null,
 
   setPixel: (pixel: IPixel) =>
-    set((state) => ({
-      pixels: { ...state.pixels, [`${pixel.x}:${pixel.y}`]: pixel },
-    })),
+    set((state) => {
+      const userId = useAuthStore.getState().user?.id;
+
+      if (!userId) {
+        toast.warn("You must be logged in to place pixels");
+        return state;
+      }
+
+      return {
+        pixels: {
+          ...state.pixels,
+          [`${pixel.x}:${pixel.y}`]: { ...pixel, userId },
+        },
+      };
+    }),
 
   addUnpaintedPixel: (x, y, color) => {
     const state = get();
@@ -104,9 +117,10 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
   setPixelsBatch: (batch: IPixel[]) =>
     set((state) => {
+      const userId = useAuthStore.getState().user?.id ?? null;
       const updated = { ...state.pixels };
       for (const p of batch) {
-        updated[`${p.x}:${p.y}`] = p;
+        updated[`${p.x}:${p.y}`] = { ...p, userId: p.userId ?? userId };
       }
       return { pixels: updated };
     }),
