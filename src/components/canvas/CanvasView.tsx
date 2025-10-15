@@ -3,7 +3,10 @@ import { useState } from "react";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useUserInterface } from "@/store/useUserInterface";
 
+import { IPixel } from "@/types/canvas";
+
 import { Canvas } from "./Canvas";
+import { PixelDetails } from "./PixelDetails";
 import { PrimaryBtn } from "../ui/PrimaryBtn";
 import { Palette } from "./Palette";
 import { InterfaceBtn } from "../ui/InterfaceBtn";
@@ -24,6 +27,7 @@ const CanvasView = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isEraserActive, setIsEraserActive] = useState(false);
+  const [selectedPixel, setSelectedPixel] = useState<IPixel | null>(null);
 
   const { isHidden, toggleInterface } = useUserInterface();
   const {
@@ -40,7 +44,7 @@ const CanvasView = () => {
     useCanvasStore.getState().setSelectedColor(color);
   };
 
-  const handleClose = () => {
+  const handleClosePalette = () => {
     setIsAnimating(true);
     setTimeout(() => {
       setIsPaletteOpen(false);
@@ -56,47 +60,65 @@ const CanvasView = () => {
   const handlePaintClick = async () => {
     if (!isPaletteOpen) {
       setIsPaletteOpen(true);
-    } else {
-      if (pixelsPainted === 0) return;
-
-      setIsLoading(true);
-
-      const pixelsToSend = Object.entries(unpaintedPixels).map(
-        ([key, color]) => {
-          const [xStr, yStr] = key.split(":");
-          return { x: Number(xStr), y: Number(yStr), color };
-        },
-      );
-
-      getSocket().emit(
-        "sendBatch",
-        pixelsToSend,
-        (err?: string, energyLeft?: number, maxEnergy?: number) => {
-          if (err) {
-            console.error("[socket] Pixel error:", err);
-            setIsLoading(false);
-          } else {
-            setPixelsBatch(pixelsToSend);
-            clearUnpaintedPixels();
-
-            if (typeof energyLeft === "number")
-              useCanvasStore.getState().setEnergy(energyLeft);
-            if (typeof maxEnergy === "number")
-              useCanvasStore.getState().setMaxEnergy(maxEnergy);
-
-            setIsLoading(false);
-          }
-        },
-      );
+      return;
     }
+
+    if (pixelsPainted === 0) return;
+
+    setIsLoading(true);
+
+    const pixelsToSend = Object.entries(unpaintedPixels).map(([key, color]) => {
+      const [xStr, yStr] = key.split(":");
+      return { x: Number(xStr), y: Number(yStr), color };
+    });
+
+    getSocket().emit(
+      "sendBatch",
+      pixelsToSend,
+      (err?: string, energyLeft?: number, maxEnergy?: number) => {
+        if (err) {
+          console.error("[socket] Pixel error:", err);
+          setIsLoading(false);
+          return;
+        }
+
+        setPixelsBatch(pixelsToSend);
+        clearUnpaintedPixels();
+
+        if (typeof energyLeft === "number")
+          useCanvasStore.getState().setEnergy(energyLeft);
+        if (typeof maxEnergy === "number")
+          useCanvasStore.getState().setMaxEnergy(maxEnergy);
+
+        setIsLoading(false);
+      },
+    );
   };
+
+  const handleClosePixelDetails = () => setSelectedPixel(null);
 
   return (
     <div className={styles.canvasView}>
-      <Canvas isPaletteOpen={isPaletteOpen} isEraserActive={isEraserActive} />
+      <Canvas
+        isPaletteOpen={isPaletteOpen}
+        isEraserActive={isEraserActive}
+        onPixelClick={setSelectedPixel}
+      />
+
+      {selectedPixel && (
+        <div className={styles.pixelDetailsOverlay}>
+          <PixelDetails
+            pixel={selectedPixel}
+            onClose={handleClosePixelDetails}
+          />
+        </div>
+      )}
+
       {!isHidden && isPaletteOpen && (
         <div
-          className={`${styles.bottomContainer} ${isAnimating ? styles.closing : ""}`}
+          className={`${styles.bottomContainer} ${
+            isAnimating ? styles.closing : ""
+          }`}
         >
           <div className={styles.topRow}>
             <div className={styles.uiBtnWrapper}>
@@ -118,7 +140,7 @@ const CanvasView = () => {
               Paint pixels: {pixelsPainted}
             </span>
 
-            <CloseBtn onClick={handleClose} />
+            <CloseBtn onClick={handleClosePalette} />
           </div>
 
           <div className={styles.paletteWrapper}>
@@ -137,6 +159,7 @@ const CanvasView = () => {
           </div>
         </div>
       )}
+
       {!isPaletteOpen && (
         <div
           className={styles.btnWrapper}

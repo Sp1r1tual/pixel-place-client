@@ -2,14 +2,21 @@ import { Stage, Layer, Rect } from "react-konva";
 
 import { useCanvas } from "@/hooks/useCanvas";
 
+import { IPixel } from "@/types";
+
 import { CANVAS_DATA } from "@/data/canvas";
 
 interface ICanvasProps {
   isPaletteOpen: boolean;
   isEraserActive: boolean;
+  onPixelClick?: (pixel: IPixel) => void;
 }
 
-const Canvas = ({ isPaletteOpen, isEraserActive }: ICanvasProps) => {
+const Canvas = ({
+  isPaletteOpen,
+  isEraserActive,
+  onPixelClick,
+}: ICanvasProps) => {
   const {
     stageRef,
     pixels,
@@ -22,14 +29,11 @@ const Canvas = ({ isPaletteOpen, isEraserActive }: ICanvasProps) => {
     handleTouchMove,
     handleTouchEnd,
     handleWheel,
-  } = useCanvas(isPaletteOpen, isEraserActive);
+  } = useCanvas(isPaletteOpen, isEraserActive, onPixelClick);
 
-  const renderedPixels = Object.entries(pixels).map(([key, color]) => {
-    const [xStr, yStr] = key.split(":");
-    const x = Number(xStr);
-    const y = Number(yStr);
-    const xPos = Math.round(x * CANVAS_DATA.PIXEL_SIZE);
-    const yPos = Math.round(y * CANVAS_DATA.PIXEL_SIZE);
+  const renderedPixels = Object.entries(pixels).map(([key, pixel]) => {
+    const xPos = Math.round(pixel.x * CANVAS_DATA.PIXEL_SIZE);
+    const yPos = Math.round(pixel.y * CANVAS_DATA.PIXEL_SIZE);
     const size = Math.round(CANVAS_DATA.PIXEL_SIZE) + 0.1;
     return (
       <Rect
@@ -38,7 +42,7 @@ const Canvas = ({ isPaletteOpen, isEraserActive }: ICanvasProps) => {
         y={yPos}
         width={size}
         height={size}
-        fill={color}
+        fill={pixel.color}
         strokeWidth={0}
       />
     );

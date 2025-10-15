@@ -3,10 +3,17 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { toast } from "react-toastify";
 import Konva from "konva";
 
+import { IPixel } from "@/types";
+
 import { useCanvasStore } from "@/store/useCanvasStore";
+
 import { CANVAS_DATA } from "@/data/canvas";
 
-const useCanvas = (isPaletteOpen: boolean, isEraserActive: boolean) => {
+const useCanvas = (
+  isPaletteOpen: boolean,
+  isEraserActive: boolean,
+  onPixelClick?: (pixel: IPixel) => void,
+) => {
   const stageRef = useRef<Konva.Stage | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -67,7 +74,6 @@ const useCanvas = (isPaletteOpen: boolean, isEraserActive: boolean) => {
     const state = dragStateRef.current;
     setIsDragging(false);
 
-    if (!isPaletteOpen) return;
     if (state.distance > CANVAS_DATA.DRAG_THRESHOLD || state.hasMoved) return;
 
     const pointer = stage.getPointerPosition();
@@ -91,15 +97,26 @@ const useCanvas = (isPaletteOpen: boolean, isEraserActive: boolean) => {
       y < CANVAS_DATA.CANVAS_HEIGHT;
     if (!isInsideBounds) return;
 
-    if (isEraserActive) {
-      const key = `${x}:${y}`;
-      if (unpaintedPixels[key]) {
-        removeUnpaintedPixel(x, y);
+    if (isPaletteOpen) {
+      if (isEraserActive) {
+        const key = `${x}:${y}`;
+        if (unpaintedPixels[key]) {
+          removeUnpaintedPixel(x, y);
+        } else {
+          toast.warn("You can erase only unsent pixels");
+        }
       } else {
-        toast.warn("You can erase pixels that have not yet been sent");
+        addUnpaintedPixel(x, y, selectedColor);
       }
-    } else {
-      addUnpaintedPixel(x, y, selectedColor);
+      return;
+    }
+
+    if (!isPaletteOpen && onPixelClick) {
+      const key = `${x}:${y}`;
+      const pixel = pixels[key];
+      if (pixel) {
+        onPixelClick(pixel);
+      }
     }
   }, [
     isDragging,
@@ -109,6 +126,8 @@ const useCanvas = (isPaletteOpen: boolean, isEraserActive: boolean) => {
     removeUnpaintedPixel,
     selectedColor,
     unpaintedPixels,
+    pixels,
+    onPixelClick,
   ]);
 
   const handleTouchEnd = useCallback(() => setIsDragging(false), []);

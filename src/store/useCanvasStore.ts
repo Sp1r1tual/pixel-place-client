@@ -1,20 +1,16 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
 
+import { IPixel } from "@/types";
+
 import {
   getSocket,
   connectSocket,
   isSocketRefreshing,
 } from "@/sockets/canvasSockets";
 
-interface IPixel {
-  x: number;
-  y: number;
-  color: string;
-}
-
 interface ICanvasState {
-  pixels: Record<string, string>;
+  pixels: Record<string, IPixel>;
   unpaintedPixels: Record<string, string>;
   selectedColor: string;
   energy: number;
@@ -22,7 +18,7 @@ interface ICanvasState {
   lastEnergyUpdate: number;
   isConnected: boolean;
   connectionError: string | null;
-  setPixel: (x: number, y: number, color: string) => void;
+  setPixel: (pixel: IPixel) => void;
   addUnpaintedPixel: (x: number, y: number, color: string) => void;
   removeUnpaintedPixel: (x: number, y: number) => void;
   clearUnpaintedPixels: () => void;
@@ -31,6 +27,7 @@ interface ICanvasState {
   setEnergy: (value: number) => void;
   setMaxEnergy: (value: number) => void;
   initSocket: () => void;
+  cleanupSocket: () => void;
 }
 
 let socketInitialized = false;
@@ -74,8 +71,10 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   isConnected: false,
   connectionError: null,
 
-  setPixel: (x, y, color) =>
-    set((state) => ({ pixels: { ...state.pixels, [`${x}:${y}`]: color } })),
+  setPixel: (pixel: IPixel) =>
+    set((state) => ({
+      pixels: { ...state.pixels, [`${pixel.x}:${pixel.y}`]: pixel },
+    })),
 
   addUnpaintedPixel: (x, y, color) => {
     const state = get();
@@ -106,7 +105,9 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   setPixelsBatch: (batch: IPixel[]) =>
     set((state) => {
       const updated = { ...state.pixels };
-      for (const p of batch) updated[`${p.x}:${p.y}`] = p.color;
+      for (const p of batch) {
+        updated[`${p.x}:${p.y}`] = p;
+      }
       return { pixels: updated };
     }),
 
@@ -158,9 +159,13 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
       },
     );
 
-    socket.on("canvasState", (pixels: Record<string, string>) =>
-      set({ pixels }),
-    );
+    socket.on("canvasState", (pixelsArray: IPixel[]) => {
+      const pixelsMap: Record<string, IPixel> = {};
+      for (const pixel of pixelsArray) {
+        pixelsMap[`${pixel.x}:${pixel.y}`] = pixel;
+      }
+      set({ pixels: pixelsMap });
+    });
 
     socket.on("updatePixels", (batch: IPixel[]) => get().setPixelsBatch(batch));
 
