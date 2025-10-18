@@ -2,10 +2,34 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   min-height: 100vh;
   background-color: #f9fafb;
   overflow: hidden;
+}
+
+.topBar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.languageSelect {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  color: #111827;
+  font-size: 0.8rem;
+  text-align-last: center;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .backgroundCanvas {
@@ -39,4 +63,10 @@
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
   z-index: 1;
+}
+
+@media (max-width: 480px) {
+  .content {
+    margin-top: 2rem;
+  }
 }

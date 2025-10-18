@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { IShopItem } from "@/types";
 
 import { ShopList } from "./ShopList";
@@ -16,10 +18,12 @@ const items: IShopItem[] = [
 ];
 
 const Shop = () => {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.shopContainer}>
       <div className={styles.header}>
-        <h1>Shop</h1>
+        <h1>{t("shop.header")}</h1>
 
         <div className={styles.balanceWrapper}>
           <Balance amount={100500} />

@@ -4,6 +4,8 @@ export interface IAuthPayload {
   password: string;
 }
 
+export type IAuthPayloadWithoutId = Omit<IAuthPayload, "id">;
+
 export interface ILoginResponse {
   accessToken: string;
   user: IAuthPayload;

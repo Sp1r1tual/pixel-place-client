@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -40,6 +41,8 @@ const CanvasView = () => {
     maxEnergy,
   } = useCanvasStore();
 
+  const { t } = useTranslation();
+
   const pixelsPainted = Object.keys(unpaintedPixels).length;
 
   const handleColorSelect = (color: string) => {
@@ -66,7 +69,7 @@ const CanvasView = () => {
     }
 
     if (pixelsPainted === 0) {
-      toast.warn("Please place at least one pixel before painting!");
+      toast.warn(t("canvas.errors.place-pixel-required"));
       return;
     }
 
@@ -150,7 +153,7 @@ const CanvasView = () => {
             </div>
 
             <span className={styles.paintPixels}>
-              Paint pixels: {pixelsPainted}
+              {t("canvas.painted")} {pixelsPainted}
             </span>
 
             <CloseBtn onClick={handleClosePalette} />
@@ -163,7 +166,7 @@ const CanvasView = () => {
           <div className={styles.btnWrapper}>
             {!selectedPixel && (
               <PrimaryBtn
-                text="Paint"
+                text={t("canvas.buttons.paint")}
                 progressCurrent={energy}
                 progressFull={maxEnergy}
                 image={brushSvg}
@@ -186,7 +189,7 @@ const CanvasView = () => {
           }}
         >
           <PrimaryBtn
-            text="Paint"
+            text={t("canvas.buttons.paint")}
             progressCurrent={energy}
             progressFull={maxEnergy}
             image={brushSvg}

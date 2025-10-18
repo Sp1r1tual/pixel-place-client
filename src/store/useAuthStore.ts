@@ -1,6 +1,7 @@
 import { create } from "zustand";
+import i18n from "@/i18n";
 
-import { IAuthPayload, IApiError } from "@/types";
+import { IAuthPayload, IAuthPayloadWithoutId, IApiError } from "@/types";
 
 import { AuthService } from "@/services/authService";
 
@@ -8,9 +9,9 @@ interface IAuthState {
   user: IAuthPayload | null;
   isLoading: boolean;
   error: string | null;
-  login: (payload: IAuthPayload) => Promise<boolean>;
+  login: (payload: IAuthPayloadWithoutId) => Promise<boolean>;
   logout: () => void;
-  registration: (payload: IAuthPayload) => Promise<boolean>;
+  registration: (payload: IAuthPayloadWithoutId) => Promise<boolean>;
   requestPasswordReset: (email: string) => Promise<boolean>;
   resetPassword: (token: string, newPassword: string) => Promise<boolean>;
   setError: (message: string | null) => void;
@@ -34,7 +35,7 @@ const useAuthStore = create<IAuthState>((set) => ({
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
 
-      set({ error: error?.message || "Login failed" });
+      set({ error: error?.message || i18n.t("auth.errors.login-failed") });
 
       return false;
     } finally {
@@ -55,7 +56,9 @@ const useAuthStore = create<IAuthState>((set) => ({
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
 
-      set({ error: error?.message || "Registration failed" });
+      set({
+        error: error?.message || i18n.t("auth.errors.registration-failed"),
+      });
 
       return false;
     } finally {
@@ -79,7 +82,9 @@ const useAuthStore = create<IAuthState>((set) => ({
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
 
-      set({ error: error?.message || "Failed to send password reset link" });
+      set({
+        error: error?.message || i18n.t("auth.errors.password-reset-failed"),
+      });
 
       return false;
     } finally {
@@ -98,7 +103,9 @@ const useAuthStore = create<IAuthState>((set) => ({
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
 
-      set({ error: error?.message || "Failed to reset password" });
+      set({
+        error: error?.message || i18n.t("auth.errors.reset-password-failed"),
+      });
 
       return false;
     } finally {

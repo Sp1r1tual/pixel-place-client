@@ -1,9 +1,9 @@
 import { $api } from "@/api";
 
-import { IAuthPayload } from "@/types";
+import { IAuthPayloadWithoutId } from "@/types";
 
 class AuthService {
-  static login({ email, password }: IAuthPayload) {
+  static login({ email, password }: IAuthPayloadWithoutId) {
     return $api.post("/login", { email, password });
   }
 
@@ -11,7 +11,7 @@ class AuthService {
     return $api.post("/logout");
   }
 
-  static registration({ email, password }: IAuthPayload) {
+  static registration({ email, password }: IAuthPayloadWithoutId) {
     return $api.post("/registration", { email, password });
   }
 

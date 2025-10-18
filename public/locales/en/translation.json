@@ -1,0 +1,123 @@
+{
+  "preloader": { "loading": "Loading, please wait..." },
+
+  "footer": {
+    "header": "Pixel Place",
+    "about-us": "About us",
+    "contact-us": "Contact us"
+  },
+
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "button": "Login",
+      "no-account": "Do not have an account? ",
+      "register-here": "Register here!",
+      "forgot-password": "Forgot your password? ",
+      "restore-here": "Restore access here"
+    },
+
+    "resetPassword": {
+      "title": "Change password",
+      "password": "Password",
+      "confirm-password": "Confirm password",
+      "button": "Change password",
+      "success-message": "Password changed successfully. Redirecting to login...",
+      "invalid-token": "Invalid or missing reset token"
+    },
+
+    "registration": {
+      "title": "Registration",
+      "email": "Email",
+      "password": "Password",
+      "password-confirm": "Confirm Password",
+      "button": "Register",
+      "have-account": "Do you have an account? ",
+      "login-here": "Login here!",
+      "success-message": "Activation link has been sent to your email 💌"
+    },
+
+    "forgot-password": {
+      "title": "Restore access",
+      "email": "Email",
+      "button": "Send reset link",
+      "success-message": "A password reset link has been sent to your email. The link will be valid for 15 minutes.",
+      "back-to-login": "Back to login page"
+    },
+
+    "errors": {
+      "login-failed": "Login failed",
+      "user-not-found": "User not found",
+      "user-not-activated": "User is not activated",
+      "registration-failed": "Registration failed",
+      "user-already-exists": "User already exists",
+      "password-reset-failed": "Failed to send password reset link",
+      "reset-password-failed": "Failed to reset password",
+      "reset-token-invalid": "Reset token is invalid or expired",
+      "reset-token-used": "Reset token already used",
+      "missing-refresh-token": "Missing refresh token",
+      "invalid-refresh-token": "Invalid refresh token",
+      "token-verification-failed": "Token verification failed",
+
+      "invalid-activation-link": "Invalid or expired activation link",
+      "token-and-password-required": "Reset token and new password are required",
+      "incorrect-password": "Incorrect password",
+
+      "fill-all-fields": "Fill all fields",
+      "invalid-email": "Invalid email format",
+      "invalid-password": "Password must be 8-32 characters, include an uppercase letter, and contain only allowed symbols",
+      "passwords-not-match": "Passwords do not match"
+    }
+  },
+
+  "navbar": {
+    "header": "Pixel Place",
+    "main": "Main",
+    "shop": "Shop",
+    "dropdown": { "settings": "Settings", "logout": "Logout" }
+  },
+
+  "canvas": {
+    "painted": "Paint pixels:",
+
+    "buttons": {
+      "paint": "Paint"
+    },
+    "pixel-details": {
+      "coordinates": "Coordinates",
+      "color": "Color",
+      "user-id": "User ID"
+    },
+    "errors": {
+      "cannot-erase-unsent": "You can erase only unsent pixels",
+      "place-pixel-required": "You must place a pixel before painting",
+      "invalid-pixel-data": "Invalid pixel data",
+      "invalid-energy-amount": "Invalid energy amount",
+      "not-enough-energy": "Not enough energy to place a pixel",
+      "db-error": "Database error occurred while processing your request"
+    }
+  },
+
+  "shop": {
+    "header": "Shop",
+    "price": "Price",
+    "buy-upgrade": "Buy upgrade"
+  },
+
+  "socket": {
+    "connection-error": "Connection error: {{message}}",
+    "connection-lost": "Connection lost. Reconnecting...",
+    "disconnected": "Disconnected from server"
+  },
+
+  "settings": { "title": "Settings", "changeLanguage": "Change language:" },
+
+  "errors": {
+    "something-went-wrong": "Something went wrong",
+    "session-expired": "Session expired. Please login again",
+    "must-login-to-paint": "You must be logged in to place pixels",
+    "not-enough-energy": "Not enough energy to add more pixels"
+  }
+}

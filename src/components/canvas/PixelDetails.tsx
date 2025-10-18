@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { IPixel } from "@/types/canvas";
 
 import { CloseBtn } from "../ui/CloseBtn";
@@ -10,18 +12,24 @@ interface PixelDetailsProps {
 }
 
 const PixelDetails = ({ pixel, onClose }: PixelDetailsProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.details}>
       <div className={styles["details-header"]}>
         <p>
-          Coordinates: x:{pixel.x}, y:{pixel.y}
+          {t("canvas.pixel-details.coordinates")}: x:{pixel.x}, y:{pixel.y}
         </p>
 
         <CloseBtn onClick={onClose} />
       </div>
 
-      <p>Color: {pixel.color}</p>
-      <p>User ID: {pixel.userId}</p>
+      <p>
+        {t("canvas.pixel-details.color")}: {pixel.color}
+      </p>
+      <p>
+        {t("canvas.pixel-details.user-id")}: {pixel.userId}
+      </p>
     </div>
   );
 };

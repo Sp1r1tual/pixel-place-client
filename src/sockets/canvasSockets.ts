@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
-
+import i18n from "@/i18n";
 import { refreshToken } from "@/api/interceptors/authInterceptors";
 
 let socket: Socket | null = null;
@@ -25,7 +25,7 @@ const createSocket = (): Socket => {
 
 const setupListeners = (sock: Socket) => {
   sock.on("connect_error", (err) => {
-    toast.error(`Connection error: ${err.message}`);
+    toast.error(i18n.t("socket.connection-error", { message: err.message }));
   });
 
   sock.on("token_expired", async () => {
@@ -40,7 +40,7 @@ const setupListeners = (sock: Socket) => {
       sock.auth = { authorization: `Bearer ${newToken}` };
       if (!sock.connected) sock.connect();
     } catch {
-      toast.error("Session expired. Please log in again");
+      toast.error(i18n.t("errors.session-expired"));
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       window.dispatchEvent(new CustomEvent("socket:refresh_failed"));
@@ -52,7 +52,7 @@ const setupListeners = (sock: Socket) => {
   sock.on("disconnect", (reason) => {
     console.log("[socket] Disconnected:", reason);
     if (!isRefreshing) {
-      toast.warn("Connection lost. Reconnecting...");
+      toast.warn(i18n.t("socket.connection-lost"));
     }
   });
 };

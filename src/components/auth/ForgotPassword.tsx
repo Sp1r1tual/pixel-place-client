@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -10,9 +11,12 @@ import { Header } from "../ui/Header";
 import styles from "./styles/ForgotPassword.module.css";
 
 const ForgotPassword = () => {
+  const [successMessage, setSuccessMessage] = useState("");
+
   const { validateEmail, clearError, fieldErrors } = useFormValidation();
   const { requestPasswordReset, isLoading, error, setError } = useAuthStore();
-  const [successMessage, setSuccessMessage] = useState("");
+
+  const { t } = useTranslation();
 
   const requestResetPassword = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -29,9 +33,7 @@ const ForgotPassword = () => {
     const success = await requestPasswordReset(email);
 
     if (success) {
-      setSuccessMessage(
-        "A password reset link has been sent to your email. The link will be valid for 15 minutes.",
-      );
+      setSuccessMessage(t("auth.forgot-password.success-message"));
     }
   };
 
@@ -44,10 +46,10 @@ const ForgotPassword = () => {
       autoComplete="off"
       onSubmit={requestResetPassword}
     >
-      <Header title="Restore access" color="#2764EB" />
+      <Header title={t("auth.forgot-password.title")} color="#2764EB" />
 
       <div className={styles.formRow}>
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email">{t("auth.forgot-password.email")}</label>
         <input
           id="email"
           name="email"
@@ -58,7 +60,7 @@ const ForgotPassword = () => {
       </div>
 
       <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error}>{t(error)}</p>}
       </div>
 
       <div
@@ -69,7 +71,7 @@ const ForgotPassword = () => {
 
       <div className={styles.submitBtn}>
         <SubmitBtn
-          text="Send reset link"
+          text={t("auth.forgot-password.button")}
           isLoading={isLoading}
           form="forgotPassword"
         />
@@ -77,7 +79,7 @@ const ForgotPassword = () => {
 
       <p className={styles.registerLink}>
         <Link to="/login" className={styles.link} onClick={clearError}>
-          Back to login page
+          {t("auth.forgot-password.back-to-login")}
         </Link>
       </p>
     </form>

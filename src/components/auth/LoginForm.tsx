@@ -1,4 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { useFormValidation } from "@/hooks/useFormValidation";
@@ -14,6 +15,7 @@ const LoginForm = () => {
     useFormValidation();
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -43,10 +45,10 @@ const LoginForm = () => {
       autoComplete="off"
       onSubmit={handleLogin}
     >
-      <Header title="Login" color="#2764EB" />
+      <Header title={t("auth.login.title")} color="#2764EB" />
 
       <div className={styles.formRow}>
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email">{t("auth.login.email")}</label>
         <input
           id="email"
           name="email"
@@ -57,7 +59,7 @@ const LoginForm = () => {
       </div>
 
       <div className={styles.formRow}>
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">{t("auth.login.password")}</label>
         <input
           id="password"
           name="password"
@@ -68,29 +70,33 @@ const LoginForm = () => {
       </div>
 
       <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error}>{t(error)}</p>}
       </div>
 
       <div className={styles.submitBtn}>
-        <SubmitBtn text="Login" isLoading={isLoading} form="loginForm" />
+        <SubmitBtn
+          text={t("auth.login.button")}
+          isLoading={isLoading}
+          form="loginForm"
+        />
       </div>
 
       <div className={styles.linkGroup}>
         <p className={styles.registerLink}>
-          <span>Do not have an account? </span>
+          <span>{t("auth.login.no-account")}</span>
           <Link to="/registration" className={styles.link} onClick={clearError}>
-            Register here!
+            {t("auth.login.register-here")}
           </Link>
         </p>
 
         <p className={styles.registerLink}>
-          <span>Forgot your password? </span>
+          <span>{t("auth.login.forgot-password")}</span>
           <Link
             to="/forgot-password"
             className={styles.link}
             onClick={clearError}
           >
-            Restore access here
+            {t("auth.login.restore-here")}
           </Link>
         </p>
       </div>

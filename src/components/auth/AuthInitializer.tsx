@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -15,6 +16,8 @@ const AuthInitializer = ({ children }: AuthInitializerProps) => {
   const [ready, setReady] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     const verifyToken = async () => {
       const token = localStorage.getItem("token");
@@ -24,7 +27,7 @@ const AuthInitializer = ({ children }: AuthInitializerProps) => {
           const newToken = await refreshToken();
           localStorage.setItem("token", newToken);
         } catch {
-          setError("Session expired. Please login again");
+          setError(t("errors.session-expired"));
           logout();
         }
       }
@@ -34,7 +37,7 @@ const AuthInitializer = ({ children }: AuthInitializerProps) => {
     };
 
     verifyToken();
-  }, [logout, setError]);
+  }, [logout, setError, t]);
 
   if (!ready) return <PreLoader fadeOut={fadeOut} />;
 

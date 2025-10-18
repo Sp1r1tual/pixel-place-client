@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
+import i18n from "@/i18n";
 
 import { useAuthStore } from "./useAuthStore";
 import { IPixel } from "@/types";
@@ -77,7 +78,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
       const userId = useAuthStore.getState().user?.id;
 
       if (!userId) {
-        toast.warn("You must be logged in to place pixels");
+        toast.warn(i18n.t("errors.must-login-to-paint"));
         return state;
       }
 
@@ -95,7 +96,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     if (state.unpaintedPixels[key]) return;
 
     if (Object.keys(state.unpaintedPixels).length >= state.energy) {
-      toast.warn("Not enough energy to add more pixels");
+      toast.warn(i18n.t("errors.not-enough-energy"));
       return;
     }
 
@@ -155,7 +156,10 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     });
 
     socket.on("disconnect", () => {
-      set({ isConnected: false, connectionError: "Disconnected from server" });
+      set({
+        isConnected: false,
+        connectionError: i18n.t("socket.disconnected"),
+      });
       if (!isSocketRefreshing()) stopEnergyInterval();
     });
 

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import preloaderGif from "@/assets/pixel-dog-preloader.gif";
 
 import styles from "./styles/Preloader.module.css";
@@ -7,6 +9,8 @@ interface IPreLoaderProps {
 }
 
 const PreLoader = ({ fadeOut = false }: IPreLoaderProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className={`${styles.overlay} ${fadeOut ? styles.fadeOut : ""}`}>
       <div className={styles.content}>
@@ -15,7 +19,7 @@ const PreLoader = ({ fadeOut = false }: IPreLoaderProps) => {
           alt="Loading..."
           className={styles.preloaderGif}
         />
-        <p className={styles.loadingText}>Loading, please wait...</p>
+        <p className={styles.loadingText}>{t("preloader.loading")}</p>
       </div>
     </div>
   );

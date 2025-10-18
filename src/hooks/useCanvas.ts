@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { KonvaEventObject } from "konva/lib/Node";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import Konva from "konva";
 
@@ -40,6 +41,8 @@ const useCanvas = (
     distance: 0,
     hasMoved: false,
   });
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleResize = () =>
@@ -103,7 +106,7 @@ const useCanvas = (
         if (unpaintedPixels[key]) {
           removeUnpaintedPixel(x, y);
         } else {
-          toast.warn("You can erase only unsent pixels");
+          toast.warn(t("canvas.errors.cannot-erase-unsent"));
         }
       } else {
         addUnpaintedPixel(x, y, selectedColor);
@@ -128,6 +131,7 @@ const useCanvas = (
     unpaintedPixels,
     pixels,
     onPixelClick,
+    t,
   ]);
 
   const handleTouchEnd = useCallback(() => setIsDragging(false), []);
