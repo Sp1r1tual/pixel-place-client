@@ -24,6 +24,8 @@ import showIntrfaceSvg from "@/assets/eye-visibility-visible-hide-hidden-show-wa
 import eraseSvg from "@/assets/erase-svgrepo-com.svg";
 import eraseActiveSvg from "@/assets/erase-active-svgrepo-com.svg";
 
+import tapSoundMp3 from "@/assets/sounds/key-hit-sound.mp3";
+
 import styles from "./styles/CanvasView.module.css";
 
 const CanvasView = () => {
@@ -61,6 +63,12 @@ const CanvasView = () => {
 
   const handleEraseToggle = () => {
     setIsEraserActive((prev) => !prev);
+  };
+
+  const playTapSound = () => {
+    const audio = new Audio(tapSoundMp3);
+    audio.volume = 1;
+    audio.play().catch(() => {});
   };
 
   const handlePaintClick = async () => {
@@ -103,6 +111,8 @@ const CanvasView = () => {
 
         setPixelsBatch(localPixels);
         clearUnpaintedPixels();
+
+        playTapSound();
 
         if (typeof energyLeft === "number")
           useCanvasStore.getState().setEnergy(energyLeft);

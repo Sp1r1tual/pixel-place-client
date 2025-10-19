@@ -109,7 +109,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     const key = `${x}:${y}`;
     if (state.unpaintedPixels[key]) return;
 
-    if (Object.keys(state.unpaintedPixels).length >= state.energy) {
+    if (Object.keys(state.unpaintedPixels).length >= Math.floor(state.energy)) {
       toast.warn(i18n.t("errors.not-enough-energy"));
       return;
     }
