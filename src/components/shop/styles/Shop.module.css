@@ -1,6 +1,6 @@
 .shopContainer {
-  position: fixed;
-  top: 80px;
+  margin-top: 5rem;
+  position: relative;
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(31, 41, 55, 0.85);

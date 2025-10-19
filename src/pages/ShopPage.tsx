@@ -13,7 +13,7 @@ const ShopPage = () => {
 
   return (
     <div className={styles.shopPage}>
-      <canvas ref={canvasRef} className={styles.backgroundCanvas} />
+      <canvas ref={canvasRef} />
 
       <Shop />
     </div>

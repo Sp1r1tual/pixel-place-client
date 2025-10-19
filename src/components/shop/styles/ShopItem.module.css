@@ -3,8 +3,7 @@
   border: 2px solid #242e3c;
   border-radius: 10px;
   padding: 1rem;
-  width: 100%;
-  max-width: 260px;
+  width: 90%;
   text-align: center;
   transition:
     transform 0.2s,
