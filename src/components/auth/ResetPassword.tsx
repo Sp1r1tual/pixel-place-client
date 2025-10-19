@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -10,6 +11,8 @@ import { Header } from "../ui/Header";
 import styles from "./styles/ResetPassword.module.css";
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
+
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
@@ -37,16 +40,14 @@ const ResetPassword = () => {
       return;
 
     if (!token) {
-      setError("Invalid or missing reset token");
+      setError(t("auth.reset-password.invalid-token"));
       return;
     }
 
     const success = await resetPassword(token, password);
 
     if (success) {
-      setSuccessMessage(
-        "Password changed successfully. Redirecting to login...",
-      );
+      setSuccessMessage(t("auth.reset-password.success-message"));
       setTimeout(() => navigate("/login", { replace: true }), 3000);
     }
   };
@@ -60,10 +61,10 @@ const ResetPassword = () => {
       autoComplete="off"
       onSubmit={handleResetPassword}
     >
-      <Header title="Change password" color="#2764EB" />
+      <Header title={t("auth.reset-password.title")} color="#2764EB" />
 
       <div className={styles.formRow}>
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">{t("auth.reset-password.password")}</label>
         <input
           id="password"
           name="password"
@@ -74,7 +75,9 @@ const ResetPassword = () => {
       </div>
 
       <div className={styles.formRow}>
-        <label htmlFor="confirmPassword">Confirm password</label>
+        <label htmlFor="confirmPassword">
+          {t("auth.reset-password.confirm-password")}
+        </label>
         <input
           id="confirmPassword"
           name="confirmPassword"
@@ -85,7 +88,7 @@ const ResetPassword = () => {
       </div>
 
       <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error}>{t(error)}</p>}
       </div>
 
       <div
@@ -95,7 +98,7 @@ const ResetPassword = () => {
       </div>
 
       <SubmitBtn
-        text="Change password"
+        text={t("auth.reset-password.button")}
         isLoading={isLoading}
         form="resetPassword"
       />

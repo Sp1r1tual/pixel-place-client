@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -10,6 +11,8 @@ import { Header } from "../ui/Header";
 import styles from "./styles/RegistrationForm.module.css";
 
 const RegistrationForm = () => {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const { registration, isLoading, error } = useAuthStore();
   const {
     validateEmail,
@@ -20,7 +23,7 @@ const RegistrationForm = () => {
   } = useFormValidation();
 
   const navigate = useNavigate();
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const handleRegistration = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -41,7 +44,7 @@ const RegistrationForm = () => {
     const result = await registration({ email, password });
 
     if (result) {
-      setSuccessMessage("Activation link has been sent to your email 💌");
+      setSuccessMessage(t("auth.registration.success-message"));
       setTimeout(() => navigate("/login", { replace: true }), 5000);
     }
   };
@@ -55,10 +58,10 @@ const RegistrationForm = () => {
       autoComplete="off"
       onSubmit={handleRegistration}
     >
-      <Header title="Registration" color="#2764EB" />
+      <Header title={t("auth.registration.title")} color="#2764EB" />
 
       <div className={styles.formRow}>
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email">{t("auth.registration.email")}</label>
         <input
           id="email"
           name="email"
@@ -69,7 +72,7 @@ const RegistrationForm = () => {
       </div>
 
       <div className={styles.formRow}>
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">{t("auth.registration.password")}</label>
         <input
           id="password"
           name="password"
@@ -80,7 +83,9 @@ const RegistrationForm = () => {
       </div>
 
       <div className={styles.formRow}>
-        <label htmlFor="passwordConfirm">Confirm Password</label>
+        <label htmlFor="passwordConfirm">
+          {t("auth.registration.password-confirm")}
+        </label>
         <input
           id="passwordConfirm"
           name="passwordConfirm"
@@ -91,7 +96,7 @@ const RegistrationForm = () => {
       </div>
 
       <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error}>{t(error)}</p>}
       </div>
 
       <div
@@ -102,16 +107,16 @@ const RegistrationForm = () => {
 
       <div className={styles.submitBtn}>
         <SubmitBtn
-          text="Register"
+          text={t("auth.registration.button")}
           isLoading={isLoading}
           form="registrationForm"
         />
       </div>
 
       <p className={styles.loginLink}>
-        <span>Do you have an account? </span>
+        <span>{t("auth.registration.have-account")}</span>
         <Link to="/login" className={styles.link} onClick={clearError}>
-          Login here!
+          {t("auth.registration.login-here")}
         </Link>
       </p>
     </form>

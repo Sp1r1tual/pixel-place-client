@@ -1,19 +1,170 @@
 .navbar {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 0.5rem 1rem;
-  background-color: #1f2937;
-  color: white;
+  background-color: rgba(31, 41, 55, 0.85);
+  border-radius: 12px;
+  z-index: 100;
+  width: 80%;
+}
+
+.logoImg {
+  height: 2.5rem;
+  width: 2.5rem;
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: bold;
+  color: #fff;
+  margin-right: 2rem;
+}
+
+.desktopMenu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.desktopMenu a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.burgerMenu {
+  display: none;
+  cursor: pointer;
+}
+
+.burgerMenu img {
+  width: 2rem;
+  height: 2rem;
+}
+
+.burgerMenu:hover {
+  transform: scale(1.1);
+}
+
+.desktopMenu a,
+.mobileMenu a,
+.mobileMenu [role="link"] {
+  position: relative;
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(71, 85, 105, 0.9);
+  border-radius: 4px;
+  z-index: -1;
+  transition: all 0.2s ease;
+}
+
+.active {
+  color: #60a5fa;
+  font-weight: 600;
+}
+.mobileMenu {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(31, 41, 55, 0.95);
+  border-radius: 12px;
+  padding: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  z-index: 101;
+  width: 100%;
+  box-sizing: border-box;
+  animation: dropdownFadeIn 0.3s ease forwards;
+  backdrop-filter: blur(6px);
+}
+
+.mobileMenu a,
+.mobileMenu [role="link"] {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.mobileMenu a:hover,
+.mobileMenu [role="link"]:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #dbeafe;
+}
+
+.mobileMenu a:last-child,
+.mobileMenu [role="link"]:last-child {
+  border-bottom: none;
 }
 
 .userIcon {
-  width: 24px;
-  height: 24px;
+  width: 2rem;
+  height: 2rem;
   cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  margin-left: auto;
+}
+
+.userIcon:hover {
+  transform: scale(1.1);
+}
+
+.mobileMenu :is(a, [role="link"]) {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.mobileMenu :is(a, [role="link"]):hover {
+  text-decoration: underline;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .desktopMenu {
+    display: none;
+  }
+
+  .burgerMenu {
+    display: block;
+  }
 }

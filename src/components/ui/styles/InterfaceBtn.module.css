@@ -1,0 +1,51 @@
+.interfaceBtn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: none;
+  background-color: #404955;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.interfaceBtn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.interfaceBtn:active:not(:disabled) {
+  transform: scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.interfaceBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  width: 60%;
+  height: 60%;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.text {
+  display: none;
+}
+
+.active {
+  background-color: #ffffff;
+}
+
+.active:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.1);
+}

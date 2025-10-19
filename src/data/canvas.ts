@@ -1,0 +1,33 @@
+export const CANVAS_DATA = {
+  PIXEL_SIZE: 10,
+  CANVAS_WIDTH: 1000,
+  CANVAS_HEIGHT: 1000,
+  DRAG_THRESHOLD: 5,
+  MIN_SCALE: 0.2,
+  MAX_SCALE: 5,
+};
+
+export const PALETTE_COLORS = [
+  "#000000",
+  "#FFFFFF",
+  "#FF0000",
+  "#00FF00",
+  "#0000FF",
+  "#FFFF00",
+  "#FF00FF",
+  "#00FFFF",
+  "#FFA500",
+  "#800080",
+  "#FFC0CB",
+  "#A52A2A",
+  "#808080",
+  "#FFD700",
+  "#FF6347",
+  "#32CD32",
+  "#1E90FF",
+  "#FF1493",
+  "#00CED1",
+  "#228B22",
+  "#4B0082",
+  "#FF4500",
+];

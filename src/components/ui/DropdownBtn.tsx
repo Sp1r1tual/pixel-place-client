@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./styles/DropdownBtn.module.css";
 
 interface DropdownBtnProps {
@@ -16,23 +15,25 @@ const DropdownBtn: React.FC<DropdownBtnProps> = ({
   onClick,
   className,
 }) => {
+  const btnClass = [styles.btn, className].filter(Boolean).join(" ");
+
   const content = (
-    <div className={`${styles.btn} ${className || ""}`}>
+    <>
       {icon && <img src={icon} alt={text} className={styles.icon} />}
       {text && <span>{text}</span>}
-    </div>
+    </>
   );
 
   if (href) {
     return (
-      <a href={href} onClick={onClick}>
+      <a href={href} onClick={onClick} className={btnClass}>
         {content}
       </a>
     );
   }
 
   return (
-    <button type="button" onClick={onClick}>
+    <button type="button" onClick={onClick} className={btnClass}>
       {content}
     </button>
   );

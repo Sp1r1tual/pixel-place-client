@@ -1,8 +1,12 @@
+import { useTranslation } from "react-i18next";
+
 import { CONTACTS } from "@/data/contacts";
 
 import styles from "./styles/Footer.module.css";
 
 const Footer = () => {
+  const { t } = useTranslation();
+
   const mail = CONTACTS.email;
 
   return (
@@ -11,7 +15,7 @@ const Footer = () => {
         <div className={styles.copyright}>
           © {new Date().getFullYear()}{" "}
           <a href="/" className={styles.link}>
-            Pixel Place
+            {t("footer.header")}
           </a>
         </div>
 
@@ -22,10 +26,10 @@ const Footer = () => {
             rel="noopener noreferrer"
             className={styles.link}
           >
-            About us
+            {t("footer.about-us")}
           </a>
           <a href={`mailto:${mail}`} className={styles.link}>
-            Contact us
+            {t("footer.contact-us")}
           </a>
         </div>
       </div>

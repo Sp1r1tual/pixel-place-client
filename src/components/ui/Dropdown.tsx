@@ -1,4 +1,15 @@
-import { useState, ReactNode, useRef, useEffect } from "react";
+import {
+  useState,
+  ReactNode,
+  useRef,
+  useEffect,
+  cloneElement,
+  Children,
+  isValidElement,
+  ReactElement,
+  MouseEventHandler,
+  useCallback,
+} from "react";
 
 import styles from "./styles/Dropdown.module.css";
 
@@ -12,33 +23,47 @@ interface IDropdownProps {
 const Dropdown: React.FC<IDropdownProps> = ({
   trigger,
   children,
-  className,
-  menuClassName,
+  className = "",
+  menuClassName = "",
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = (event: MouseEvent) => {
+  const handleClickOutside = useCallback((event: MouseEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
       setOpen(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [handleClickOutside]);
+
+  const toggleOpen = () => setOpen((prev) => !prev);
 
   return (
-    <div className={`${styles.dropdown} ${className || ""}`} ref={ref}>
-      <div className={styles.trigger} onClick={() => setOpen(!open)}>
+    <div className={`${styles.dropdown} ${className}`} ref={ref}>
+      <div className={styles.trigger} onClick={toggleOpen}>
         {trigger}
       </div>
+
       {open && (
-        <div className={`${styles.menu} ${menuClassName || ""}`}>
-          {children}
+        <div className={`${styles.menu} ${menuClassName}`}>
+          {Children.map(children, (child) => {
+            if (!isValidElement(child)) return child;
+
+            const typedChild = child as ReactElement<{
+              onClick?: MouseEventHandler;
+            }>;
+
+            return cloneElement(typedChild, {
+              onClick: (e: React.MouseEvent<HTMLElement>) => {
+                typedChild.props.onClick?.(e);
+                setOpen(false);
+              },
+            });
+          })}
         </div>
       )}
     </div>
