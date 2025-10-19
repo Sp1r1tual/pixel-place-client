@@ -134,7 +134,17 @@ const useCanvas = (
     t,
   ]);
 
-  const handleTouchEnd = useCallback(() => setIsDragging(false), []);
+  const handleTouchEnd = useCallback(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const state = dragStateRef.current;
+    setIsDragging(false);
+
+    if (state.distance <= CANVAS_DATA.DRAG_THRESHOLD && !state.hasMoved) {
+      handleMouseUp();
+    }
+  }, [handleMouseUp]);
 
   useEffect(() => {
     const handleWindowMouseUp = () => handleMouseUp();
@@ -199,7 +209,7 @@ const useCanvas = (
 
   const handleTouchStart = (e: KonvaEventObject<TouchEvent>) => {
     const stage = stageRef.current;
-    if (!stage || e.evt.touches.length !== 2) return;
+    if (!stage || e.evt.touches.length < 1) return;
 
     e.evt.preventDefault();
     const pointer = stage.getPointerPosition();
@@ -218,7 +228,7 @@ const useCanvas = (
 
   const handleTouchMove = (e: KonvaEventObject<TouchEvent>) => {
     const stage = stageRef.current;
-    if (!stage || !isDragging || e.evt.touches.length !== 2) return;
+    if (!stage || !isDragging || e.evt.touches.length < 1) return;
 
     e.evt.preventDefault();
     handleMouseMove();
