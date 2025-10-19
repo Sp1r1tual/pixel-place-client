@@ -2,8 +2,6 @@ import { IShopItem } from "@/types";
 
 import { ShopItem } from "./ShopItem";
 
-import { v4 as uuidv4 } from "uuid";
-
 import styles from "./styles/ShopList.module.css";
 
 interface IShopListProps {
@@ -15,8 +13,8 @@ const ShopList = ({ items, loading = false }: IShopListProps) => {
   if (loading) {
     return (
       <div className={styles.list}>
-        {Array.from({ length: 3 }).map(() => (
-          <ShopItem key={uuidv4()} loading />
+        {[0, 1, 2].map((i) => (
+          <ShopItem key={i} loading />
         ))}
       </div>
     );

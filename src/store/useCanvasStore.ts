@@ -2,8 +2,9 @@ import { create } from "zustand";
 import { toast } from "react-toastify";
 import i18n from "@/i18n";
 
-import { useAuthStore } from "./useAuthStore";
 import { IPixel } from "@/types";
+
+import { useAuthStore } from "./useAuthStore";
 
 import {
   getSocket,
@@ -17,6 +18,7 @@ interface ICanvasState {
   selectedColor: string;
   energy: number;
   maxEnergy: number;
+  pixelReward: number;
   recoverySpeed: number;
   lastEnergyUpdate: number;
   isConnected: boolean;
@@ -27,6 +29,7 @@ interface ICanvasState {
   clearUnpaintedPixels: () => void;
   setSelectedColor: (color: string) => void;
   setPixelsBatch: (batch: IPixel[]) => void;
+  setPixelReward: (value: number) => void;
   setEnergy: (value: number) => void;
   setRecoverySpeed: (value: number) => void;
   setMaxEnergy: (value: number) => void;
@@ -82,6 +85,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   selectedColor: "#000000",
   energy: 0,
   maxEnergy: 0,
+  pixelReward: 0,
   recoverySpeed: 60,
   lastEnergyUpdate: Date.now(),
   isConnected: false,
@@ -147,6 +151,8 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   setMaxEnergy: (value) => {
     set({ maxEnergy: value });
   },
+
+  setPixelReward: (value) => set({ pixelReward: value }),
 
   setRecoverySpeed: (value) => {
     set({ recoverySpeed: value });

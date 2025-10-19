@@ -12,6 +12,7 @@ interface IShopState {
   currency: number;
   loading: boolean;
   error: string | null;
+  upgradingItemType: string | null;
   fetchShop: (force?: boolean) => Promise<void>;
   buyUpgrade: (
     itemType: "energyLimit" | "recoverySpeed" | "pixelReward",
@@ -23,6 +24,7 @@ const useShopStore = create<IShopState>((set, get) => ({
   currency: 0,
   loading: false,
   error: null,
+  upgradingItemType: null,
 
   fetchShop: async (force = false) => {
     const { items } = get();
@@ -47,29 +49,40 @@ const useShopStore = create<IShopState>((set, get) => ({
   },
 
   buyUpgrade: async (itemType) => {
-    set({ loading: true, error: null });
+    set({ upgradingItemType: itemType, error: null });
+
     try {
       const response = await ShopService.buyUpgrade(itemType);
       const { effectValue } = response.data;
 
+      const canvasStore = useCanvasStore.getState();
+
       if (itemType === "energyLimit") {
-        const canvasStore = useCanvasStore.getState();
         canvasStore.setMaxEnergy(canvasStore.maxEnergy + 1);
         canvasStore.setEnergy(canvasStore.energy + 1);
       }
-
       if (itemType === "recoverySpeed") {
-        const canvasStore = useCanvasStore.getState();
         canvasStore.setRecoverySpeed(effectValue);
       }
+      if (itemType === "pixelReward") {
+        canvasStore.setPixelReward(effectValue);
+      }
 
-      await get().fetchShop(true);
+      set((state) => ({
+        currency:
+          state.currency -
+          (state.items.find((i) => i.type === itemType)?.price || 0),
+        items: state.items.map((i) =>
+          i.type === itemType && i.level! < i.maxLevel!
+            ? { ...i, level: i.level! + 1 }
+            : i,
+        ),
+        upgradingItemType: null,
+      }));
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : i18n.t("shop.cannot-fetch");
-      set({ error: message });
-    } finally {
-      set({ loading: false });
+      set({ error: message, upgradingItemType: null });
     }
   },
 }));

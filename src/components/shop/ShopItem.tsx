@@ -27,14 +27,18 @@ const ShopItem = ({
   maxLevel,
   loading = false,
 }: IShopItemProps) => {
-  const { buyUpgrade } = useShopStore();
+  const buyUpgrade = useShopStore((state) => state.buyUpgrade);
+  const upgradingItemType = useShopStore((state) => state.upgradingItemType);
   const { t } = useTranslation();
 
-  const skeletonProps = {
+  const isUpgrading = upgradingItemType === type;
+  const isAnyUpgrading = upgradingItemType !== null;
+
+  const skeletonProps = () => ({
     baseColor: "#404955",
     highlightColor: "#f8f8f8",
     borderRadius: 8,
-  };
+  });
 
   const handleBuy = () => {
     if (!type) return;
@@ -101,9 +105,9 @@ const ShopItem = ({
       ) : (
         <PrimaryBtn
           text={t("shop.buy-upgrade")}
-          isLoading={false}
+          isLoading={isUpgrading}
           onClick={handleBuy}
-          disabled={level === maxLevel}
+          disabled={level === maxLevel || isAnyUpgrading}
         />
       )}
     </div>
