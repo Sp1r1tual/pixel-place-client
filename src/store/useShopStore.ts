@@ -13,7 +13,7 @@ interface IShopState {
   loading: boolean;
   error: string | null;
   upgradingItemType: string | null;
-  fetchShop: (force?: boolean) => Promise<void>;
+  fetchShop: (force?: boolean, silent?: boolean) => Promise<void>;
   buyUpgrade: (
     itemType: "energyLimit" | "recoverySpeed" | "pixelReward",
   ) => Promise<void>;
@@ -26,11 +26,13 @@ const useShopStore = create<IShopState>((set, get) => ({
   error: null,
   upgradingItemType: null,
 
-  fetchShop: async (force = false) => {
+  fetchShop: async (force = false, silent = false) => {
     const { items } = get();
     if (!force && items.length > 0) return;
 
-    set({ loading: true, error: null });
+    if (!silent) {
+      set({ loading: true, error: null });
+    }
 
     try {
       const response = await ShopService.getShop();
@@ -79,6 +81,9 @@ const useShopStore = create<IShopState>((set, get) => ({
         ),
         upgradingItemType: null,
       }));
+
+      const { fetchShop } = get();
+      fetchShop(true, true);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : i18n.t("shop.cannot-fetch");
