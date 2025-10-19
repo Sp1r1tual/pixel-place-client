@@ -1,6 +1,14 @@
 export interface IShopItem {
-  id: number;
+  id: string;
   name: string;
+  type: "energyLimit" | "recoverySpeed" | "pixelReward";
   price: number;
-  image: string;
+  level: number;
+  maxLevel: number;
+  image_url: string;
+}
+
+export interface IShopResponse {
+  items: IShopItem[];
+  currency: number;
 }

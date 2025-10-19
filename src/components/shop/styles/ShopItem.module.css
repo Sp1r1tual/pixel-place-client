@@ -28,6 +28,12 @@
   margin: 10px 0 4px 0;
 }
 
+.level {
+  font-size: 0.95rem;
+  color: #a0a0a0;
+  margin-bottom: 8px;
+}
+
 .price {
   font-size: 1rem;
   color: #c0c0c0;

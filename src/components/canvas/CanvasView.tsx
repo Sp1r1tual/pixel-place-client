@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCanvasStore } from "@/store/useCanvasStore";
+import { useShopStore } from "@/store/useShopStore";
 import { useUserInterface } from "@/store/useUserInterface";
 
 import { IPixel } from "@/types/canvas";
@@ -91,10 +92,12 @@ const CanvasView = () => {
     getSocket().emit(
       "sendBatch",
       pixelsToSend,
-      (err?: string, energyLeft?: number, maxEnergy?: number) => {
+      async (err?: string, energyLeft?: number, maxEnergy?: number) => {
+        setIsLoading(false);
+
         if (err) {
           console.error("[socket] Pixel error:", err);
-          setIsLoading(false);
+          toast.error(t(err));
           return;
         }
 
@@ -106,7 +109,7 @@ const CanvasView = () => {
         if (typeof maxEnergy === "number")
           useCanvasStore.getState().setMaxEnergy(maxEnergy);
 
-        setIsLoading(false);
+        useShopStore.getState().fetchShop(true);
       },
     );
   };

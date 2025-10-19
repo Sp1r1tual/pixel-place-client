@@ -1,6 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
 import i18n from "@/i18n";
+
 import { refreshToken } from "@/api/interceptors/authInterceptors";
 
 let socket: Socket | null = null;
@@ -24,6 +25,11 @@ const createSocket = (): Socket => {
 };
 
 const setupListeners = (sock: Socket) => {
+  sock.on("server_error", (err: { message: string; errors?: string[] }) => {
+    console.error("[Socket Server Error]", err);
+    toast.error(i18n.t(err.message));
+  });
+
   sock.on("connect_error", (err) => {
     toast.error(i18n.t("socket.connection-error", { message: err.message }));
   });

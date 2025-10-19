@@ -103,7 +103,18 @@
   "shop": {
     "header": "Shop",
     "price": "Price",
-    "buy-upgrade": "Buy upgrade"
+    "buy-upgrade": "Buy Upgrade",
+    "level": "Level:",
+
+    "energy-limit": "Energy Limit",
+    "recovery-speed": "Recovery Speed",
+    "pixel-reward": "Pixel Reward",
+
+    "cannot-fetch": "Failed to fetch shop items",
+    "user-stats-not-found": "User stats not found",
+    "item-max-level": "Upgrade already at max level",
+    "not-enough-currency": "Not enough currency to purchase",
+    "shop-item-not-found": "Shop item not found"
   },
 
   "socket": {

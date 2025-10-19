@@ -17,6 +17,7 @@ interface ICanvasState {
   selectedColor: string;
   energy: number;
   maxEnergy: number;
+  recoverySpeed: number;
   lastEnergyUpdate: number;
   isConnected: boolean;
   connectionError: string | null;
@@ -27,6 +28,7 @@ interface ICanvasState {
   setSelectedColor: (color: string) => void;
   setPixelsBatch: (batch: IPixel[]) => void;
   setEnergy: (value: number) => void;
+  setRecoverySpeed: (value: number) => void;
   setMaxEnergy: (value: number) => void;
   initSocket: () => void;
   cleanupSocket: () => void;
@@ -44,16 +46,27 @@ const startEnergyInterval = (
   ) => void,
 ) => {
   if (energyInterval) return;
-  energyInterval = setInterval(() => {
-    const { energy, maxEnergy, lastEnergyUpdate } = get();
-    const now = Date.now();
-    const minutesPassed = Math.floor((now - lastEnergyUpdate) / 60_000);
 
-    if (minutesPassed > 0 && energy < maxEnergy) {
-      const newEnergy = Math.min(energy + minutesPassed, maxEnergy);
-      set({ energy: newEnergy, lastEnergyUpdate: now });
+  energyInterval = setInterval(() => {
+    const { energy, maxEnergy, lastEnergyUpdate, recoverySpeed } = get();
+    const now = Date.now();
+
+    if (energy >= maxEnergy) {
+      return;
     }
-  }, 10_000);
+
+    const secondsPassed = (now - lastEnergyUpdate) / 1000;
+
+    const energyToAdd = secondsPassed / recoverySpeed;
+
+    if (energyToAdd <= 0) {
+      return;
+    }
+
+    const newEnergy = Math.min(energy + energyToAdd, maxEnergy);
+
+    set({ energy: newEnergy, lastEnergyUpdate: now });
+  }, 5_000);
 };
 
 const stopEnergyInterval = () => {
@@ -69,6 +82,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   selectedColor: "#000000",
   energy: 0,
   maxEnergy: 0,
+  recoverySpeed: 60,
   lastEnergyUpdate: Date.now(),
   isConnected: false,
   connectionError: null,
@@ -126,9 +140,17 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
       return { pixels: updated };
     }),
 
-  setEnergy: (value) => set({ energy: value, lastEnergyUpdate: Date.now() }),
+  setEnergy: (value) => {
+    set({ energy: value, lastEnergyUpdate: Date.now() });
+  },
 
-  setMaxEnergy: (value) => set({ maxEnergy: value }),
+  setMaxEnergy: (value) => {
+    set({ maxEnergy: value });
+  },
+
+  setRecoverySpeed: (value) => {
+    set({ recoverySpeed: value });
+  },
 
   initSocket: () => {
     if (socketInitialized) return;
@@ -137,15 +159,22 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     const socket = getSocket();
 
     socket.on("connect", () => {
+      console.log("[Socket] Connected");
       set({ isConnected: true, connectionError: null });
 
       socket.emit(
         "getEnergy",
         null,
-        (energy: number, maxEnergy: number, updatedAt?: string) => {
+        (
+          energy: number,
+          maxEnergy: number,
+          recoverySpeed: number,
+          updatedAt?: string,
+        ) => {
           set({
             energy,
             maxEnergy,
+            recoverySpeed,
             lastEnergyUpdate: updatedAt
               ? new Date(updatedAt).getTime()
               : Date.now(),
@@ -156,6 +185,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     });
 
     socket.on("disconnect", () => {
+      console.log("[Socket] Disconnected");
       set({
         isConnected: false,
         connectionError: i18n.t("socket.disconnected"),
@@ -165,7 +195,12 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
     socket.on(
       "energyUpdate",
-      (energy: number, maxEnergy?: number, updatedAt?: string) => {
+      (
+        energy: number,
+        maxEnergy?: number,
+        recoverySpeed?: number,
+        updatedAt?: string,
+      ) => {
         set({
           energy,
           lastEnergyUpdate: updatedAt
@@ -173,6 +208,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
             : Date.now(),
         });
         if (typeof maxEnergy === "number") set({ maxEnergy });
+        if (typeof recoverySpeed === "number") set({ recoverySpeed });
         startEnergyInterval(get, set);
       },
     );
@@ -192,6 +228,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
   cleanupSocket: () => {
     socketInitialized = false;
+    stopEnergyInterval();
   },
 }));
 
