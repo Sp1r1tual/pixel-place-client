@@ -19,7 +19,7 @@
       "restore-here": "Відновити доступ тут"
     },
 
-    "resetPassword": {
+    "reset-password": {
       "title": "Зміна пароля",
       "password": "Пароль",
       "confirm-password": "Підтвердьте пароль",
