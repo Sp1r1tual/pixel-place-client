@@ -5,21 +5,27 @@ import axios, {
   AxiosResponse,
 } from "axios";
 
+import { IUserPublic } from "@/types";
+import { useAuthStore } from "@/store/useAuthStore";
+
 const API_URL = import.meta.env.VITE_API_URL as string;
 
 let refreshPromise: Promise<string> | null = null;
 
-const refreshToken = (): Promise<string> => {
+const refreshToken = async (): Promise<string> => {
   if (!refreshPromise) {
     refreshPromise = axios
-      .get<{ accessToken: string }>(`${API_URL}/refresh`, {
+      .get<{ accessToken: string; user: IUserPublic }>(`${API_URL}/refresh`, {
         withCredentials: true,
       })
       .then((response) => {
-        const newToken = response.data.accessToken;
+        const { accessToken, user } = response.data;
+        localStorage.setItem("token", accessToken);
 
-        localStorage.setItem("token", newToken);
-        return newToken;
+        const { setUser } = useAuthStore.getState();
+        if (user) setUser(user);
+
+        return accessToken;
       })
       .finally(() => {
         refreshPromise = null;

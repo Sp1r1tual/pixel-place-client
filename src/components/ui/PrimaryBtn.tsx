@@ -26,11 +26,15 @@ const PrimaryBtn = ({
 
   return (
     <button
-      className={styles.primaryBtn}
+      className={`${styles.primaryBtn} ${isLoading ? styles.loading : ""}`}
       disabled={isLoading}
       onClick={onClick}
     >
-      {image && <img src={image} className={styles.icon} alt="icon" />}
+      {isLoading ? (
+        <div className={styles.loader} />
+      ) : (
+        image && <img src={image} className={styles.icon} alt="icon" />
+      )}
 
       <div className={styles.textWrapper}>
         {text && <span className={styles.text}>{text}</span>}

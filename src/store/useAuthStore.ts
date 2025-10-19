@@ -1,14 +1,20 @@
 import { create } from "zustand";
 import i18n from "@/i18n";
 
-import { IAuthPayload, IAuthPayloadWithoutId, IApiError } from "@/types";
+import {
+  IUserPublic,
+  IAuthPayloadWithoutId,
+  IApiError,
+  ILoginResponse,
+} from "@/types";
 
 import { AuthService } from "@/services/authService";
 
 interface IAuthState {
-  user: IAuthPayload | null;
+  user: IUserPublic | null;
   isLoading: boolean;
   error: string | null;
+  setUser: (user: IUserPublic | null) => void;
   login: (payload: IAuthPayloadWithoutId) => Promise<boolean>;
   logout: () => void;
   registration: (payload: IAuthPayloadWithoutId) => Promise<boolean>;
@@ -22,21 +28,22 @@ const useAuthStore = create<IAuthState>((set) => ({
   isLoading: false,
   error: null,
 
+  setUser: (user: IUserPublic | null) => set({ user }),
+
   login: async (payload) => {
     set({ isLoading: true, error: null });
     try {
       const { data } = await AuthService.login(payload);
+      const { accessToken, user } = data as ILoginResponse;
 
-      localStorage.setItem("token", data.accessToken);
-      set({ user: data.user });
+      localStorage.setItem("token", accessToken);
+      set({ user });
 
       return true;
     } catch (err) {
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
-
       set({ error: error?.message || i18n.t("auth.errors.login-failed") });
-
       return false;
     } finally {
       set({ isLoading: false });
@@ -47,19 +54,18 @@ const useAuthStore = create<IAuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const { data } = await AuthService.registration(payload);
+      const { accessToken, user } = data as ILoginResponse;
 
-      localStorage.setItem("token", data.accessToken);
-      set({ user: data.user });
+      localStorage.setItem("token", accessToken);
+      set({ user });
 
       return true;
     } catch (err) {
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
-
       set({
         error: error?.message || i18n.t("auth.errors.registration-failed"),
       });
-
       return false;
     } finally {
       set({ isLoading: false });
@@ -72,41 +78,34 @@ const useAuthStore = create<IAuthState>((set) => ({
     set({ user: null });
   },
 
-  requestPasswordReset: async (email: string) => {
+  requestPasswordReset: async (email) => {
     set({ isLoading: true, error: null });
     try {
       await AuthService.requestPasswordReset(email);
-
       return true;
     } catch (err) {
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
-
       set({
         error: error?.message || i18n.t("auth.errors.password-reset-failed"),
       });
-
       return false;
     } finally {
       set({ isLoading: false });
     }
   },
 
-  resetPassword: async (token: string, newPassword: string) => {
+  resetPassword: async (token, newPassword) => {
     set({ isLoading: true, error: null });
-
     try {
       await AuthService.resetPassword(token, newPassword);
-
       return true;
     } catch (err) {
       const error = (err as { response?: { data?: IApiError } })?.response
         ?.data;
-
       set({
         error: error?.message || i18n.t("auth.errors.reset-password-failed"),
       });
-
       return false;
     } finally {
       set({ isLoading: false });
