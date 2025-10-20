@@ -42,6 +42,10 @@ const useCanvas = (
     hasMoved: false,
   });
 
+  const pinchRef = useRef<{ startDist: number; startScale: number } | null>(
+    null,
+  );
+
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -135,6 +139,7 @@ const useCanvas = (
   ]);
 
   const handleTouchEnd = useCallback(() => {
+    pinchRef.current = null;
     const stage = stageRef.current;
     if (!stage) return;
 
@@ -209,29 +214,96 @@ const useCanvas = (
 
   const handleTouchStart = (e: KonvaEventObject<TouchEvent>) => {
     const stage = stageRef.current;
-    if (!stage || e.evt.touches.length < 1) return;
+    if (!stage) return;
 
     e.evt.preventDefault();
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
 
-    setIsDragging(true);
-    dragStateRef.current = {
-      startX: pointer.x,
-      startY: pointer.y,
-      stageStartX: stage.x(),
-      stageStartY: stage.y(),
-      distance: 0,
-      hasMoved: false,
-    };
+    if (e.evt.touches.length === 2) {
+      const [touch1, touch2] = e.evt.touches;
+      if (!touch1 || !touch2) return;
+
+      const dist = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY,
+      );
+      pinchRef.current = { startDist: dist, startScale: stage.scaleX() };
+      return;
+    }
+
+    if (e.evt.touches.length === 1) {
+      const pointer = stage.getPointerPosition();
+      if (!pointer) return;
+
+      setIsDragging(true);
+      dragStateRef.current = {
+        startX: pointer.x,
+        startY: pointer.y,
+        stageStartX: stage.x(),
+        stageStartY: stage.y(),
+        distance: 0,
+        hasMoved: false,
+      };
+    }
   };
 
   const handleTouchMove = (e: KonvaEventObject<TouchEvent>) => {
     const stage = stageRef.current;
-    if (!stage || !isDragging || e.evt.touches.length < 1) return;
+    if (!stage) return;
 
-    e.evt.preventDefault();
-    handleMouseMove();
+    if (e.evt.touches.length === 2 && pinchRef.current) {
+      const [touch1, touch2] = e.evt.touches;
+      if (!touch1 || !touch2) return;
+
+      e.evt.preventDefault();
+      const dist = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY,
+      );
+
+      const newScale =
+        (dist / pinchRef.current.startDist) * pinchRef.current.startScale;
+      const limitedScale = Math.max(
+        CANVAS_DATA.MIN_SCALE,
+        Math.min(newScale, CANVAS_DATA.MAX_SCALE),
+      );
+
+      const pointer = {
+        x: (touch1.clientX + touch2.clientX) / 2,
+        y: (touch1.clientY + touch2.clientY) / 2,
+      };
+
+      const mousePointTo = {
+        x: (pointer.x - stage.x()) / stage.scaleX(),
+        y: (pointer.y - stage.y()) / stage.scaleY(),
+      };
+
+      stage.scale({ x: limitedScale, y: limitedScale });
+
+      const scaledWidth =
+        CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * limitedScale;
+      const scaledHeight =
+        CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * limitedScale;
+      const minX = Math.min(0, stageSize.width - scaledWidth);
+      const maxX = 0;
+      const minY = Math.min(0, stageSize.height - scaledHeight);
+      const maxY = 0;
+
+      const newX = pointer.x - mousePointTo.x * limitedScale;
+      const newY = pointer.y - mousePointTo.y * limitedScale;
+
+      stage.position({
+        x: Math.max(minX, Math.min(maxX, newX)),
+        y: Math.max(minY, Math.min(maxY, newY)),
+      });
+
+      stage.batchDraw();
+      return;
+    }
+
+    if (isDragging) {
+      e.evt.preventDefault();
+      handleMouseMove();
+    }
   };
 
   const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
