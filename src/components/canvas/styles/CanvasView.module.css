@@ -1,21 +1,38 @@
 .canvasView {
   width: 100%;
   height: 100dvh;
-  padding-bottom: env(safe-area-inset-bottom);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.pixelDetailsOverlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
 }
 
 .bottomContainer {
   position: fixed;
+  bottom: 0;
   bottom: env(safe-area-inset-bottom, 0);
   left: 50%;
   transform: translateX(-50%);
   width: 80%;
+  max-width: 600px;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 0.5rem 0.5rem 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
   gap: 0.5rem;
   z-index: 10;
   opacity: 1;
@@ -25,13 +42,6 @@
 .bottomContainer.closing {
   opacity: 0;
   pointer-events: none;
-}
-
-.topRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
 }
 
 .topRow {
@@ -92,23 +102,30 @@
 }
 
 @media (max-width: 768px) {
+  .bottomContainer {
+    width: 90%;
+  }
+
+  .btnWrapper {
+    width: 60%;
+  }
+
+  .paintPixels {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bottomContainer {
+    width: 95%;
+  }
+
   .btnWrapper {
     width: 80%;
   }
 
   .paintPixels {
-    font-size: 1rem;
-    margin-left: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .btnWrapper {
-    width: 95%;
-  }
-
-  .paintPixels {
-    font-size: 1rem;
-    margin-left: 1.2rem;
+    font-size: 0.95rem;
+    max-width: 50%;
   }
 }

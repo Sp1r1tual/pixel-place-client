@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { KonvaEventObject } from "konva/lib/Node";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -18,10 +18,6 @@ const useCanvas = (
   const stageRef = useRef<Konva.Stage | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
-  const [stageSize, setStageSize] = useState({
-    width: window.innerWidth,
-    height: window.visualViewport?.height || window.innerHeight,
-  });
 
   const {
     pixels,
@@ -49,41 +45,38 @@ const useCanvas = (
   const { t } = useTranslation();
 
   useEffect(() => {
-    const updateStageSize = () => {
-      setStageSize({
-        width: window.innerWidth,
-        height: window.visualViewport?.height || window.innerHeight,
-      });
-    };
-
-    updateStageSize();
-    window.addEventListener("resize", updateStageSize);
-    window.visualViewport?.addEventListener("resize", updateStageSize);
-
-    return () => {
-      window.removeEventListener("resize", updateStageSize);
-      window.visualViewport?.removeEventListener("resize", updateStageSize);
-    };
-  }, []);
-
-  useEffect(() => {
     initSocket();
     return () => cleanupSocket();
   }, [initSocket, cleanupSocket]);
 
-  useEffect(() => {
+  const centerCanvas = useCallback(() => {
     const stage = stageRef.current;
     if (!stage) return;
+
+    const container = stage.container();
+    const stageWidth = container.offsetWidth;
+    const stageHeight = container.offsetHeight;
 
     const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
     const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
-    const x = (stageSize.width - canvasWidth) / 2;
-    const y = (stageSize.height - canvasHeight) / 2;
+    const x = (stageWidth - canvasWidth) / 2;
+    const y = (stageHeight - canvasHeight) / 2;
 
     stage.position({ x, y });
     stage.batchDraw();
-  }, [stageSize.width, stageSize.height]);
+  }, []);
+
+  const getStageSize = useCallback(() => {
+    const stage = stageRef.current;
+    if (!stage) return { width: window.innerWidth, height: window.innerHeight };
+
+    const container = stage.container();
+    return {
+      width: container.offsetWidth,
+      height: container.offsetHeight,
+    };
+  }, []);
 
   const handleMouseUp = useCallback(() => {
     const stage = stageRef.current;
@@ -207,13 +200,14 @@ const useCanvas = (
       const scale = stage.scaleX();
       const newX = state.stageStartX + dx;
       const newY = state.stageStartY + dy;
+      const { width: stageWidth, height: stageHeight } = getStageSize();
       const scaledWidth =
         CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * scale;
       const scaledHeight =
         CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * scale;
-      const minX = Math.min(0, stageSize.width - scaledWidth);
+      const minX = Math.min(0, stageWidth - scaledWidth);
       const maxX = 0;
-      const minY = Math.min(0, stageSize.height - scaledHeight);
+      const minY = Math.min(0, stageHeight - scaledHeight);
       const maxY = 0;
 
       stage.x(Math.max(minX, Math.min(maxX, newX)));
@@ -288,13 +282,14 @@ const useCanvas = (
 
       stage.scale({ x: limitedScale, y: limitedScale });
 
+      const { width: stageWidth, height: stageHeight } = getStageSize();
       const scaledWidth =
         CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * limitedScale;
       const scaledHeight =
         CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * limitedScale;
-      const minX = Math.min(0, stageSize.width - scaledWidth);
+      const minX = Math.min(0, stageWidth - scaledWidth);
       const maxX = 0;
-      const minY = Math.min(0, stageSize.height - scaledHeight);
+      const minY = Math.min(0, stageHeight - scaledHeight);
       const maxY = 0;
 
       const newX = pointer.x - mousePointTo.x * limitedScale;
@@ -341,13 +336,14 @@ const useCanvas = (
       x: pointer.x - mousePointTo.x * limitedScale,
       y: pointer.y - mousePointTo.y * limitedScale,
     };
+    const { width: stageWidth, height: stageHeight } = getStageSize();
     const scaledWidth =
       CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * limitedScale;
     const scaledHeight =
       CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * limitedScale;
-    const minX = Math.min(0, stageSize.width - scaledWidth);
+    const minX = Math.min(0, stageWidth - scaledWidth);
     const maxX = 0;
-    const minY = Math.min(0, stageSize.height - scaledHeight);
+    const minY = Math.min(0, stageHeight - scaledHeight);
     const maxY = 0;
 
     stage.position({
@@ -360,7 +356,6 @@ const useCanvas = (
     stageRef,
     pixels,
     unpaintedPixels,
-    stageSize,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
@@ -368,6 +363,7 @@ const useCanvas = (
     handleTouchMove,
     handleTouchEnd,
     handleWheel,
+    centerCanvas,
   };
 };
 

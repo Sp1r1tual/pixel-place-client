@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Stage, Layer, Rect } from "react-konva";
 
 import { useCanvas } from "@/hooks/useCanvas";
@@ -21,7 +22,6 @@ const Canvas = ({
     stageRef,
     pixels,
     unpaintedPixels,
-    stageSize,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
@@ -29,7 +29,12 @@ const Canvas = ({
     handleTouchMove,
     handleTouchEnd,
     handleWheel,
+    centerCanvas,
   } = useCanvas(isPaletteOpen, isEraserActive, onPixelClick);
+
+  useEffect(() => {
+    centerCanvas();
+  }, [centerCanvas]);
 
   const renderedPixels = Object.entries(pixels).map(([key, pixel]) => {
     const xPos = Math.round(pixel.x * CANVAS_DATA.PIXEL_SIZE);
@@ -75,11 +80,12 @@ const Canvas = ({
   const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
   return (
-    <div>
+    <div style={{ width: "100%", height: "100%" }}>
       <Stage
         ref={stageRef}
-        width={stageSize.width}
-        height={stageSize.height}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        style={{ width: "100%", height: "100%" }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
