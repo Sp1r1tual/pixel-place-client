@@ -11,9 +11,9 @@
 
 .pixelDetailsOverlay {
   position: fixed;
-  top: 50%;
+  bottom: 12rem;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%);
   z-index: 20;
 }
 
