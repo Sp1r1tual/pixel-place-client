@@ -18,14 +18,23 @@ import styles from "./styles/Navbar.module.css";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const { isHidden } = useUserInterface();
   const { toggleSettings } = useSettingsStore();
-
   const { t } = useTranslation();
 
-  const toggleMobileMenu = () => setMobileOpen((prev) => !prev);
-  const closeMenu = () => setMobileOpen(false);
+  const toggleMobileMenu = () => {
+    setMobileOpen((prev) => !prev);
+    if (!mobileOpen) setDropdownOpen(false);
+  };
+
+  const handleDropdownToggle = () => {
+    setDropdownOpen((prev) => !prev);
+    if (!dropdownOpen) setMobileOpen(false);
+  };
+
+  const closeMobileMenu = () => setMobileOpen(false);
 
   if (isHidden) return null;
 
@@ -38,15 +47,14 @@ const Navbar = () => {
         <NavLink
           to="/"
           className={({ isActive }) => (isActive ? styles.active : "")}
-          onClick={closeMenu}
+          onClick={closeMobileMenu}
         >
           {t("navbar.main")}
         </NavLink>
-
         <NavLink
           to="/shop"
           className={({ isActive }) => (isActive ? styles.active : "")}
-          onClick={closeMenu}
+          onClick={closeMobileMenu}
         >
           {t("navbar.shop")}
         </NavLink>
@@ -57,6 +65,8 @@ const Navbar = () => {
           <img src={userSvg} alt="User menu" className={styles.userIcon} />
         }
         menuClassName={styles.menu}
+        isOpen={dropdownOpen}
+        onToggle={handleDropdownToggle}
       >
         <DropdownBtn
           text={t("navbar.dropdown.settings")}
@@ -64,7 +74,6 @@ const Navbar = () => {
           onClick={toggleSettings}
           className={styles.dropdownBtn}
         />
-
         <DropdownBtn
           text={t("navbar.dropdown.logout")}
           icon={logoutSvg}
@@ -85,15 +94,14 @@ const Navbar = () => {
           <NavLink
             to="/"
             className={({ isActive }) => (isActive ? styles.active : "")}
-            onClick={closeMenu}
+            onClick={closeMobileMenu}
           >
             {t("navbar.main")}
           </NavLink>
-
           <NavLink
             to="/shop"
             className={({ isActive }) => (isActive ? styles.active : "")}
-            onClick={closeMenu}
+            onClick={closeMobileMenu}
           >
             {t("navbar.shop")}
           </NavLink>

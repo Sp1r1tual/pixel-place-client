@@ -234,7 +234,6 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
   cleanupSocket: () => {
     socketInitialized = false;
-    stopEnergyInterval();
   },
 }));
 

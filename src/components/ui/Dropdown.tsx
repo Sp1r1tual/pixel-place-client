@@ -16,8 +16,10 @@ import styles from "./styles/Dropdown.module.css";
 interface IDropdownProps {
   trigger: ReactNode;
   children: ReactNode;
-  className?: string | undefined;
+  className?: string;
   menuClassName?: string | undefined;
+  isOpen?: boolean | undefined;
+  onToggle?: (() => void) | undefined;
 }
 
 const Dropdown: React.FC<IDropdownProps> = ({
@@ -25,9 +27,17 @@ const Dropdown: React.FC<IDropdownProps> = ({
   children,
   className = "",
   menuClassName = "",
+  isOpen,
+  onToggle,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof isOpen === "boolean") {
+      Promise.resolve().then(() => setOpen(isOpen));
+    }
+  }, [isOpen]);
 
   const handleClickOutside = useCallback((event: MouseEvent | TouchEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -53,7 +63,10 @@ const Dropdown: React.FC<IDropdownProps> = ({
     };
   }, [handleClickOutside, handleKeyDown]);
 
-  const toggleOpen = () => setOpen((prev) => !prev);
+  const toggleOpen = () => {
+    if (onToggle) onToggle();
+    else setOpen((prev) => !prev);
+  };
 
   return (
     <div className={`${styles.dropdown} ${className}`} ref={ref}>
@@ -63,7 +76,7 @@ const Dropdown: React.FC<IDropdownProps> = ({
 
       {open && (
         <div
-          className={`${styles.menu} ${menuClassName}`}
+          className={`${styles.menu} ${menuClassName || ""}`}
           onClick={(e) => e.stopPropagation()}
         >
           {Children.map(children, (child) => {
