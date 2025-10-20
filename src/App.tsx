@@ -1,7 +1,21 @@
-import "./App.css";
+import { Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 
-function App() {
-  return <div>Hello world</div>;
-}
+import "react-toastify/dist/ReactToastify.css";
+import styles from "./App.module.css";
+
+const App = () => {
+  return (
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        className={styles.toastContainer as string}
+      />
+
+      <Outlet />
+    </>
+  );
+};
 
 export default App;
