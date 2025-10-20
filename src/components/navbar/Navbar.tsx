@@ -60,33 +60,35 @@ const Navbar = () => {
         </NavLink>
       </div>
 
-      <Dropdown
-        trigger={
-          <img src={userSvg} alt="User menu" className={styles.userIcon} />
-        }
-        menuClassName={styles.menu}
-        isOpen={dropdownOpen}
-        onToggle={handleDropdownToggle}
-      >
-        <DropdownBtn
-          text={t("navbar.dropdown.settings")}
-          icon={settingsSvg}
-          onClick={toggleSettings}
-          className={styles.dropdownBtn}
-        />
-        <DropdownBtn
-          text={t("navbar.dropdown.logout")}
-          icon={logoutSvg}
-          onClick={() => {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-          }}
-          className={styles.dropdownBtn}
-        />
-      </Dropdown>
+      <div className={styles.navRight}>
+        <Dropdown
+          trigger={
+            <img src={userSvg} alt="User menu" className={styles.userIcon} />
+          }
+          menuClassName={styles.menu}
+          isOpen={dropdownOpen}
+          onToggle={handleDropdownToggle}
+        >
+          <DropdownBtn
+            text={t("navbar.dropdown.settings")}
+            icon={settingsSvg}
+            onClick={toggleSettings}
+            className={styles.dropdownBtn}
+          />
+          <DropdownBtn
+            text={t("navbar.dropdown.logout")}
+            icon={logoutSvg}
+            onClick={() => {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }}
+            className={styles.dropdownBtn}
+          />
+        </Dropdown>
 
-      <div className={styles.burgerMenu} onClick={toggleMobileMenu}>
-        <img src={burgerSvg} alt="Menu" />
+        <div className={styles.burgerMenu} onClick={toggleMobileMenu}>
+          <img src={burgerSvg} alt="Menu" />
+        </div>
       </div>
 
       {mobileOpen && (

@@ -19,7 +19,7 @@
 }
 
 .copyright {
-  font-size: 0.75rem;
+  font-size: 1rem;
   text-align: left;
   white-space: nowrap;
 }
@@ -32,7 +32,7 @@
 }
 
 .link {
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: #ffffff;
   text-decoration: none;
   transition: color 0.2s ease;
@@ -58,7 +58,7 @@
 
   .copyright,
   .link {
-    font-size: 0.6875rem;
+    font-size: 1rem;
   }
 
   .linkGroup {
@@ -79,6 +79,6 @@
 
   .copyright,
   .link {
-    font-size: 0.75rem;
+    font-size: 1rem;
   }
 }
