@@ -1,0 +1,134 @@
+{
+  "preloader": { "loading": "読み込み中です。しばらくお待ちください…" },
+
+  "footer": {
+    "header": "ピクセルプレイス",
+    "about-us": "私たちについて",
+    "contact-us": "お問い合わせ"
+  },
+
+  "auth": {
+    "login": {
+      "title": "ログイン",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "button": "ログイン",
+      "no-account": "アカウントをお持ちでないですか？ ",
+      "register-here": "こちらで登録！",
+      "forgot-password": "パスワードをお忘れですか？ ",
+      "restore-here": "こちらで再設定"
+    },
+
+    "reset-password": {
+      "title": "パスワード変更",
+      "password": "パスワード",
+      "confirm-password": "パスワード確認",
+      "button": "パスワードを変更",
+      "success-message": "パスワードが正常に変更されました。ログインページへ移動します…",
+      "invalid-token": "無効または存在しないリセットトークンです"
+    },
+
+    "registration": {
+      "title": "新規登録",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "password-confirm": "パスワード確認",
+      "button": "登録する",
+      "have-account": "既にアカウントをお持ちですか？ ",
+      "login-here": "こちらでログイン！",
+      "success-message": "アクティベーションリンクをメールに送信しました 💌"
+    },
+
+    "forgot-password": {
+      "title": "パスワード再設定",
+      "email": "メールアドレス",
+      "button": "再設定リンクを送信",
+      "success-message": "パスワードリセット用のリンクをメールに送信しました。リンクは15分間有効です。",
+      "back-to-login": "ログインページに戻る"
+    },
+
+    "errors": {
+      "login-failed": "ログインに失敗しました",
+      "user-not-found": "ユーザーが見つかりません",
+      "user-not-activated": "ユーザーは未アクティブです",
+      "registration-failed": "登録に失敗しました",
+      "user-already-exists": "ユーザーは既に存在します",
+      "password-reset-failed": "パスワード再設定リンクの送信に失敗しました",
+      "reset-password-failed": "パスワードの変更に失敗しました",
+      "reset-token-invalid": "リセットトークンが無効または期限切れです",
+      "reset-token-used": "リセットトークンは既に使用されています",
+      "missing-refresh-token": "リフレッシュトークンが存在しません",
+      "invalid-refresh-token": "リフレッシュトークンが無効です",
+      "token-verification-failed": "トークンの確認に失敗しました",
+
+      "invalid-activation-link": "無効または期限切れのアクティベーションリンクです",
+      "token-and-password-required": "リセットトークンと新しいパスワードが必要です",
+      "incorrect-password": "パスワードが間違っています",
+
+      "fill-all-fields": "すべての項目を入力してください",
+      "invalid-email": "メールアドレスの形式が正しくありません",
+      "invalid-password": "パスワードは8〜32文字で、大文字1文字を含む必要があります",
+      "passwords-not-match": "パスワードが一致しません"
+    }
+  },
+
+  "navbar": {
+    "header": "ピクセルプレイス",
+    "main": "ホーム",
+    "shop": "ショップ",
+    "dropdown": { "settings": "設定", "logout": "ログアウト" }
+  },
+
+  "canvas": {
+    "painted": "ペイント:",
+
+    "buttons": {
+      "paint": "描く"
+    },
+    "pixel-details": {
+      "coordinates": "座標",
+      "color": "色",
+      "user-id": "ユーザーID"
+    },
+    "errors": {
+      "cannot-erase-unsent": "未承認のピクセルのみ削除可能です",
+      "place-pixel-required": "まずピクセルを配置してください",
+      "invalid-pixel-data": "ピクセルデータが無効です",
+      "invalid-energy-amount": "エネルギー量が無効です",
+      "not-enough-energy": "ピクセルを配置するのに十分なエネルギーがありません",
+      "db-error": "データベース処理中にエラーが発生しました"
+    }
+  },
+
+  "shop": {
+    "header": "ショップ",
+    "price": "価格",
+    "buy-upgrade": "アップグレードを購入",
+    "level": "レベル:",
+
+    "energy-limit": "エネルギー上限",
+    "recovery-speed": "回復速度",
+    "pixel-reward": "ピクセル報酬",
+
+    "cannot-fetch": "アイテムを取得できません",
+    "user-stats-not-found": "ユーザーの統計が見つかりません",
+    "item-max-level": "アップグレードは最大レベルです",
+    "not-enough-currency": "購入に必要な通貨が不足しています",
+    "shop-item-not-found": "ショップアイテムが見つかりません"
+  },
+
+  "socket": {
+    "connection-error": "接続エラー: {{message}}",
+    "connection-lost": "接続が失われました。再接続中…",
+    "disconnected": "サーバーから切断されました"
+  },
+
+  "settings": { "title": "設定", "changeLanguage": "言語を変更:" },
+
+  "errors": {
+    "something-went-wrong": "何かがうまくいきませんでした",
+    "session-expired": "セッションが期限切れです。再度ログインしてください",
+    "must-login-to-paint": "ピクセルを描くにはログインが必要です",
+    "not-enough-energy": "ピクセルを描くのに十分なエネルギーがありません"
+  }
+}

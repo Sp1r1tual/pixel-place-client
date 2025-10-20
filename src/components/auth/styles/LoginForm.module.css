@@ -72,12 +72,17 @@
 .linkGroup {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
-.registerLink {
+.loginLink {
   text-align: center;
   font-size: 0.9rem;
   color: #4b5563;
+  display: inline-flex;
+  gap: 0.25rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .link {
@@ -98,5 +103,13 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .loginLink {
+    flex-direction: column;
+    gap: 0.25rem;
+    line-height: 1.4;
   }
 }

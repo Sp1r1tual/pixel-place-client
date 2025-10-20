@@ -113,7 +113,7 @@ const RegistrationForm = () => {
         />
       </div>
 
-      <p className={styles.loginLink}>
+      <p className={styles.registerLink}>
         <span>{t("auth.registration.have-account")}</span>
         <Link to="/login" className={styles.link} onClick={clearError}>
           {t("auth.registration.login-here")}

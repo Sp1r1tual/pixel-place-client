@@ -1,8 +1,9 @@
 {
   "name": "pixel-place-client",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -33,7 +34,6 @@
     "react-router-dom": "^7.9.4",
     "react-toastify": "^11.0.5",
     "socket.io-client": "^4.8.1",
-    "uuid": "^13.0.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

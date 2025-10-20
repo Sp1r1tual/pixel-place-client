@@ -19,7 +19,7 @@
       "restore-here": "Відновити доступ тут"
     },
 
-    "resetPassword": {
+    "reset-password": {
       "title": "Зміна пароля",
       "password": "Пароль",
       "confirm-password": "Підтвердьте пароль",
@@ -80,7 +80,7 @@
   },
 
   "canvas": {
-    "painted": "Буде намальовано:",
+    "painted": "Намальовано:",
 
     "buttons": {
       "paint": "Фарбувати"
