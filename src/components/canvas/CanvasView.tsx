@@ -196,7 +196,7 @@ const CanvasView = () => {
           className={styles.btnWrapper}
           style={{
             position: "absolute",
-            bottom: 20,
+            bottom: "calc(env(safe-area-inset-bottom, 0) + 20px)",
             left: "50%",
             transform: "translateX(-50%)",
           }}

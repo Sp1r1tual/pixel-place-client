@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import Konva from "konva";
 
-import { IPixel } from "@/types";
-
 import { useCanvasStore } from "@/store/useCanvasStore";
+
+import { IPixel } from "@/types";
 
 import { CANVAS_DATA } from "@/data/canvas";
 
@@ -20,7 +20,7 @@ const useCanvas = (
   const [isDragging, setIsDragging] = useState(false);
   const [stageSize, setStageSize] = useState({
     width: window.innerWidth,
-    height: window.innerHeight,
+    height: window.visualViewport?.height || window.innerHeight,
   });
 
   const {
@@ -49,10 +49,21 @@ const useCanvas = (
   const { t } = useTranslation();
 
   useEffect(() => {
-    const handleResize = () =>
-      setStageSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const updateStageSize = () => {
+      setStageSize({
+        width: window.innerWidth,
+        height: window.visualViewport?.height || window.innerHeight,
+      });
+    };
+
+    updateStageSize();
+    window.addEventListener("resize", updateStageSize);
+    window.visualViewport?.addEventListener("resize", updateStageSize);
+
+    return () => {
+      window.removeEventListener("resize", updateStageSize);
+      window.visualViewport?.removeEventListener("resize", updateStageSize);
+    };
   }, []);
 
   useEffect(() => {
@@ -67,12 +78,12 @@ const useCanvas = (
     const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
     const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
-    const x = (window.innerWidth - canvasWidth) / 2;
-    const y = (window.innerHeight - canvasHeight) / 2;
+    const x = (stageSize.width - canvasWidth) / 2;
+    const y = (stageSize.height - canvasHeight) / 2;
 
     stage.position({ x, y });
     stage.batchDraw();
-  }, []);
+  }, [stageSize.width, stageSize.height]);
 
   const handleMouseUp = useCallback(() => {
     const stage = stageRef.current;
@@ -121,9 +132,7 @@ const useCanvas = (
     if (!isPaletteOpen && onPixelClick) {
       const key = `${x}:${y}`;
       const pixel = pixels[key];
-      if (pixel) {
-        onPixelClick(pixel);
-      }
+      if (pixel) onPixelClick(pixel);
     }
   }, [
     isDragging,
