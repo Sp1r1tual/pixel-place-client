@@ -77,7 +77,7 @@ const ForgotPassword = () => {
         />
       </div>
 
-      <p className={styles.registerLink}>
+      <p className={styles.forgotPasswordLink}>
         <Link to="/login" className={styles.link} onClick={clearError}>
           {t("auth.forgot-password.back-to-login")}
         </Link>

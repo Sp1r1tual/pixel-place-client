@@ -29,16 +29,29 @@ const Dropdown: React.FC<IDropdownProps> = ({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = useCallback((event: MouseEvent) => {
+  const handleClickOutside = useCallback((event: MouseEvent | TouchEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
       setOpen(false);
     }
   }, []);
 
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Escape") setOpen(false);
+  }, []);
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [handleClickOutside]);
+    document.addEventListener("touchstart", handleClickOutside, {
+      passive: true,
+    });
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleClickOutside, handleKeyDown]);
 
   const toggleOpen = () => setOpen((prev) => !prev);
 
@@ -49,7 +62,10 @@ const Dropdown: React.FC<IDropdownProps> = ({
       </div>
 
       {open && (
-        <div className={`${styles.menu} ${menuClassName}`}>
+        <div
+          className={`${styles.menu} ${menuClassName}`}
+          onClick={(e) => e.stopPropagation()}
+        >
           {Children.map(children, (child) => {
             if (!isValidElement(child)) return child;
 

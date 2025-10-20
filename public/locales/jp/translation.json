@@ -80,7 +80,7 @@
   },
 
   "canvas": {
-    "painted": "描画されるピクセル:",
+    "painted": "ペイント:",
 
     "buttons": {
       "paint": "描く"

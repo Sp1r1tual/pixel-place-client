@@ -82,14 +82,14 @@ const LoginForm = () => {
       </div>
 
       <div className={styles.linkGroup}>
-        <p className={styles.registerLink}>
+        <p className={styles.loginLink}>
           <span>{t("auth.login.no-account")}</span>
           <Link to="/registration" className={styles.link} onClick={clearError}>
             {t("auth.login.register-here")}
           </Link>
         </p>
 
-        <p className={styles.registerLink}>
+        <p className={styles.loginLink}>
           <span>{t("auth.login.forgot-password")}</span>
           <Link
             to="/forgot-password"

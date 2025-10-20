@@ -37,12 +37,21 @@
 }
 
 .paintPixels {
-  font-size: 1rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: #000000;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+  text-align: center;
+  pointer-events: none;
+  background-color: #f0f0f0;
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.35rem;
 }
 
 .paletteWrapper {
@@ -78,12 +87,22 @@
 
 @media (max-width: 768px) {
   .btnWrapper {
-    width: 60%;
+    width: 80%;
+  }
+
+  .paintPixels {
+    font-size: 1rem;
+    margin-left: 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .btnWrapper {
-    width: 70%;
+    width: 95%;
+  }
+
+  .paintPixels {
+    font-size: 1rem;
+    margin-left: 1rem;
   }
 }

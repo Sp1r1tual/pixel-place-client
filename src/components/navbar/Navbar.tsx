@@ -27,10 +27,6 @@ const Navbar = () => {
   const toggleMobileMenu = () => setMobileOpen((prev) => !prev);
   const closeMenu = () => setMobileOpen(false);
 
-  const handleUserMenuClick = () => {
-    closeMenu();
-  };
-
   if (isHidden) return null;
 
   return (
@@ -58,12 +54,7 @@ const Navbar = () => {
 
       <Dropdown
         trigger={
-          <img
-            src={userSvg}
-            alt="User menu"
-            className={styles.userIcon}
-            onClick={handleUserMenuClick}
-          />
+          <img src={userSvg} alt="User menu" className={styles.userIcon} />
         }
         menuClassName={styles.menu}
       >

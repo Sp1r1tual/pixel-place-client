@@ -80,7 +80,7 @@
   },
 
   "canvas": {
-    "painted": "Paint pixels:",
+    "painted": "Paint:",
 
     "buttons": {
       "paint": "Paint"
