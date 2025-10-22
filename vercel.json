@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://pixel-place-api.onrender.com"
+      "source": "/api/refresh",
+      "destination": "https://pixel-place-api.onrender.com/refresh"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
