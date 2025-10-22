@@ -1,3 +1,9 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://pixel-place-api.onrender.com"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

@@ -21,4 +21,13 @@ export default defineConfig({
     target: "esnext",
     sourcemap: true,
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://pixel-place-api.onrender.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
 });
