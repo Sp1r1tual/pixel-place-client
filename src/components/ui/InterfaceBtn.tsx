@@ -1,10 +1,9 @@
-import { useState } from "react";
-
 import styles from "./styles/InterfaceBtn.module.css";
 
 interface IInterfaceBtnProps {
   imgDefault?: string;
   imgActive?: string;
+  isActive?: boolean;
   onClick: (state: boolean) => void;
   disabled?: boolean;
   text?: string;
@@ -15,18 +14,15 @@ interface IInterfaceBtnProps {
 const InterfaceBtn = ({
   imgDefault,
   imgActive,
+  isActive,
   onClick,
   disabled = false,
   text,
   id,
   className,
 }: IInterfaceBtnProps) => {
-  const [isActive, setIsActive] = useState(false);
-
   const handleClick = () => {
-    const newState = !isActive;
-    setIsActive(newState);
-    onClick(newState);
+    onClick(!isActive);
   };
 
   return (

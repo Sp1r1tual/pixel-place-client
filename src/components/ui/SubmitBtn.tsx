@@ -2,7 +2,7 @@ import styles from "./styles/SubmitBtn.module.css";
 
 interface ISubmitBtnProps {
   text: string;
-  isLoading: boolean;
+  isLoading?: boolean;
   form: string;
 }
 
@@ -15,6 +15,7 @@ const SubmitBtn = ({ text, isLoading, form }: ISubmitBtnProps) => {
       disabled={isLoading}
     >
       {text}
+      {isLoading && <span className={styles.spinner} />}
     </button>
   );
 };

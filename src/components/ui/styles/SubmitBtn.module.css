@@ -8,6 +8,10 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
   transition:
     background 0.25s ease,
     transform 0.1s ease,
@@ -15,15 +19,22 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-.submitBtn:hover {
-  background: #1e40af;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
 
-.submitBtn:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .submitBtn:disabled {
