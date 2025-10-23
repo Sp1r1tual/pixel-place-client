@@ -19,7 +19,7 @@
       "restore-here": "Restore access here"
     },
 
-    "resetPassword": {
+    "reset-password": {
       "title": "Change password",
       "password": "Password",
       "confirm-password": "Confirm password",
