@@ -84,7 +84,7 @@
     "dropdown": {
       "settings": "Налаштування",
       "logout": "Вийти",
-      "confirm-logout-message": "Підтвердьте вихід",
+      "confirm-logout-message": "Підтвердити вихід",
       "confirm-logout-title": "Ви впевнені, що хочете вийти?"
     }
   },
