@@ -19,11 +19,16 @@ const Settings = ({ isOpen, onClose }: ISettingsProps) => {
 
   const { t } = useTranslation();
 
-  if (!isOpen) return null;
+  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) onClose();
+  };
 
   return (
-    <div className={styles.backdrop}>
-      <div className={styles.modal}>
+    <div
+      className={`${styles.backdrop} ${isOpen ? styles.show : ""}`}
+      onClick={handleBackdropClick}
+    >
+      <div className={`${styles.modal} ${isOpen ? styles.show : ""}`}>
         <div className={styles.closeBtnWrapper}>
           <CloseBtn onClick={onClose} />
         </div>

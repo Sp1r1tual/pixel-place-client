@@ -1,4 +1,9 @@
 {
+  "shared": {
+    "yes": "Yes",
+    "no": "No"
+  },
+
   "preloader": { "loading": "Loading, please wait..." },
 
   "footer": {
@@ -76,7 +81,12 @@
     "header": "Pixel Place",
     "main": "Main",
     "shop": "Shop",
-    "dropdown": { "settings": "Settings", "logout": "Logout" }
+    "dropdown": {
+      "settings": "Settings",
+      "logout": "Logout",
+      "confirm-logout-message": "Confirm Logout",
+      "confirm-logout-title": "Are you sure you want to log out?"
+    }
   },
 
   "canvas": {

@@ -74,27 +74,25 @@ const Dropdown: React.FC<IDropdownProps> = ({
         {trigger}
       </div>
 
-      {open && (
-        <div
-          className={`${styles.menu} ${menuClassName || ""}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {Children.map(children, (child) => {
-            if (!isValidElement(child)) return child;
+      <div
+        className={`${styles.menu} ${menuClassName || ""} ${open ? styles.show : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {Children.map(children, (child) => {
+          if (!isValidElement(child)) return child;
 
-            const typedChild = child as ReactElement<{
-              onClick?: MouseEventHandler;
-            }>;
+          const typedChild = child as ReactElement<{
+            onClick?: MouseEventHandler;
+          }>;
 
-            return cloneElement(typedChild, {
-              onClick: (e: React.MouseEvent<HTMLElement>) => {
-                typedChild.props.onClick?.(e);
-                setOpen(false);
-              },
-            });
-          })}
-        </div>
-      )}
+          return cloneElement(typedChild, {
+            onClick: (e: React.MouseEvent<HTMLElement>) => {
+              typedChild.props.onClick?.(e);
+              setOpen(false);
+            },
+          });
+        })}
+      </div>
     </div>
   );
 };

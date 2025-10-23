@@ -16,7 +16,11 @@ import burgerSvg from "@/assets/burger-menu-svgrepo-com.svg";
 
 import styles from "./styles/Navbar.module.css";
 
-const Navbar = () => {
+interface INavbarProps {
+  onLogout: () => void;
+}
+
+const Navbar = ({ onLogout }: INavbarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -41,7 +45,7 @@ const Navbar = () => {
   return (
     <nav className={styles.navbar}>
       <img className={styles.logoImg} src={pixelPlacePng} alt="logo" />
-      <a className={styles.title}>{t("navbar.header")}</a>
+      <span className={styles.title}>{t("navbar.header")}</span>
 
       <div className={styles.desktopMenu}>
         <NavLink
@@ -78,10 +82,7 @@ const Navbar = () => {
           <DropdownBtn
             text={t("navbar.dropdown.logout")}
             icon={logoutSvg}
-            onClick={() => {
-              localStorage.removeItem("token");
-              window.location.href = "/login";
-            }}
+            onClick={onLogout}
             className={styles.dropdownBtn}
           />
         </Dropdown>
