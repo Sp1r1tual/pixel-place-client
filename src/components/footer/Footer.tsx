@@ -21,7 +21,7 @@ const Footer = () => {
 
         <div className={styles.linkGroup}>
           <a
-            href="https://github.com/Sp1r1tual/questanizer-pet-project"
+            href="https://github.com/Sp1r1tual/pixel-place-client"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.link}

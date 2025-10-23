@@ -3,7 +3,7 @@
   height: 2rem;
   border-radius: 50%;
   border: none;
-  background-color: #404955;
+  background-color: rgba(31, 41, 55, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;

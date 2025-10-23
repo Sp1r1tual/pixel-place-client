@@ -26,6 +26,7 @@ interface ICanvasState {
   setPixel: (pixel: IPixel) => void;
   addUnpaintedPixel: (x: number, y: number, color: string) => void;
   removeUnpaintedPixel: (x: number, y: number) => void;
+  undoLastPixel: () => void;
   clearUnpaintedPixels: () => void;
   setSelectedColor: (color: string) => void;
   setPixelsBatch: (batch: IPixel[]) => void;
@@ -106,6 +107,19 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
           [`${pixel.x}:${pixel.y}`]: { ...pixel, userId },
         },
       };
+    }),
+
+  undoLastPixel: () =>
+    set((state) => {
+      const keys = Object.keys(state.unpaintedPixels);
+      const lastKey = keys.at(-1);
+
+      if (!lastKey) return {};
+
+      const updated = { ...state.unpaintedPixels };
+      delete updated[lastKey];
+
+      return { unpaintedPixels: updated };
     }),
 
   addUnpaintedPixel: (x, y, color) => {

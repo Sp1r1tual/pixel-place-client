@@ -1,4 +1,9 @@
 {
+  "shared": {
+    "yes": "Так",
+    "no": "Ні"
+  },
+
   "preloader": { "loading": "Завантаження, будь ласка, зачекайте..." },
 
   "footer": {
@@ -76,7 +81,12 @@
     "header": "Pixel Place",
     "main": "Головна",
     "shop": "Магазин",
-    "dropdown": { "settings": "Налаштування", "logout": "Вийти" }
+    "dropdown": {
+      "settings": "Налаштування",
+      "logout": "Вийти",
+      "confirm-logout-message": "Підтвердити вихід",
+      "confirm-logout-title": "Ви впевнені, що хочете вийти?"
+    }
   },
 
   "canvas": {

@@ -54,62 +54,58 @@
   }
 }
 
-.closeBtnWrapper {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-}
-
-.modal h2 {
+.header h3 {
   margin: 0;
   font-size: 1.5rem;
+  text-align: center;
 }
 
-.modal p {
+.body p {
   margin: 0;
   font-size: 1rem;
   line-height: 1.5;
   text-align: center;
 }
 
-.languageRow {
+.footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
   gap: 1rem;
+  justify-content: center;
+  width: 100%;
 }
 
-.languageRow select {
-  padding: 0.5rem 0.75rem;
+.button {
+  padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  background-color: #fff;
-  color: #111827;
+  border: none;
   font-size: 1rem;
-  text-align-last: center;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+  cursor: pointer;
   transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
+    background-color 0.2s,
+    transform 0.1s;
 }
 
-.languageRow select:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+.button:hover {
+  transform: scale(1.05);
+  transform: translateY(-2px);
 }
 
-.languageRow p {
-  margin: 0;
-  font-size: 1rem;
+.button.highlight {
+  background-color: rgba(31, 41, 55, 0.85);
+  color: #fff;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+}
+
+.button.highlight:hover {
+  transform: scale(1.1);
+  background-color: rgba(31, 41, 55, 1);
 }
 
 @media (max-width: 480px) {
   .modal {
+    width: 90%;
     padding: 1.5rem;
-    width: 80%;
   }
 }

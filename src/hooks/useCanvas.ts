@@ -16,6 +16,8 @@ const useCanvas = (
   onPixelClick?: (pixel: IPixel) => void,
 ) => {
   const stageRef = useRef<Konva.Stage | null>(null);
+  const isPinchingRef = useRef(false);
+  const isDraggingRef = useRef(false);
 
   const [isDragging, setIsDragging] = useState(false);
 
@@ -43,6 +45,10 @@ const useCanvas = (
   );
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
 
   useEffect(() => {
     initSocket();
@@ -80,7 +86,7 @@ const useCanvas = (
 
   const handleMouseUp = useCallback(() => {
     const stage = stageRef.current;
-    if (!stage || !isDragging) return;
+    if (!stage || !isDraggingRef.current) return;
 
     const state = dragStateRef.current;
     setIsDragging(false);
@@ -128,7 +134,6 @@ const useCanvas = (
       if (pixel) onPixelClick(pixel);
     }
   }, [
-    isDragging,
     isPaletteOpen,
     isEraserActive,
     addUnpaintedPixel,
@@ -141,10 +146,17 @@ const useCanvas = (
   ]);
 
   const handleTouchEnd = useCallback(() => {
-    pinchRef.current = null;
     const stage = stageRef.current;
     if (!stage) return;
 
+    if (isPinchingRef.current) {
+      isPinchingRef.current = false;
+      pinchRef.current = null;
+      setIsDragging(false);
+      return;
+    }
+
+    pinchRef.current = null;
     const state = dragStateRef.current;
     setIsDragging(false);
 
@@ -153,38 +165,9 @@ const useCanvas = (
     }
   }, [handleMouseUp]);
 
-  useEffect(() => {
-    const handleWindowMouseUp = () => handleMouseUp();
-    const handleWindowTouchEnd = () => handleTouchEnd();
-    window.addEventListener("mouseup", handleWindowMouseUp);
-    window.addEventListener("touchend", handleWindowTouchEnd);
-    return () => {
-      window.removeEventListener("mouseup", handleWindowMouseUp);
-      window.removeEventListener("touchend", handleWindowTouchEnd);
-    };
-  }, [handleMouseUp, handleTouchEnd]);
-
-  const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
+  const handleMouseMove = useCallback(() => {
     const stage = stageRef.current;
-    if (!stage || (e.evt.button !== 0 && e.evt.button !== 1)) return;
-
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
-
-    setIsDragging(true);
-    dragStateRef.current = {
-      startX: pointer.x,
-      startY: pointer.y,
-      stageStartX: stage.x(),
-      stageStartY: stage.y(),
-      distance: 0,
-      hasMoved: false,
-    };
-  };
-
-  const handleMouseMove = () => {
-    const stage = stageRef.current;
-    if (!stage || !isDragging) return;
+    if (!stage || !isDraggingRef.current) return;
 
     const pointer = stage.getPointerPosition();
     if (!pointer) return;
@@ -213,15 +196,35 @@ const useCanvas = (
       stage.x(Math.max(minX, Math.min(maxX, newX)));
       stage.y(Math.max(minY, Math.min(maxY, newY)));
     }
-  };
+  }, [getStageSize]);
 
-  const handleTouchStart = (e: KonvaEventObject<TouchEvent>) => {
+  const handleMouseDown = useCallback((e: KonvaEventObject<MouseEvent>) => {
+    const stage = stageRef.current;
+    if (!stage || (e.evt.button !== 0 && e.evt.button !== 1)) return;
+
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    setIsDragging(true);
+    dragStateRef.current = {
+      startX: pointer.x,
+      startY: pointer.y,
+      stageStartX: stage.x(),
+      stageStartY: stage.y(),
+      distance: 0,
+      hasMoved: false,
+    };
+  }, []);
+
+  const handleTouchStart = useCallback((e: KonvaEventObject<TouchEvent>) => {
     const stage = stageRef.current;
     if (!stage) return;
 
     e.evt.preventDefault();
 
     if (e.evt.touches.length === 2) {
+      setIsDragging(false);
+      isPinchingRef.current = true;
       const [touch1, touch2] = e.evt.touches;
       if (!touch1 || !touch2) return;
 
@@ -247,41 +250,100 @@ const useCanvas = (
         hasMoved: false,
       };
     }
-  };
+  }, []);
 
-  const handleTouchMove = (e: KonvaEventObject<TouchEvent>) => {
-    const stage = stageRef.current;
-    if (!stage) return;
+  const handleTouchMove = useCallback(
+    (e: KonvaEventObject<TouchEvent>) => {
+      const stage = stageRef.current;
+      if (!stage) return;
 
-    if (e.evt.touches.length === 2 && pinchRef.current) {
-      const [touch1, touch2] = e.evt.touches;
-      if (!touch1 || !touch2) return;
+      if (e.evt.touches.length === 2 && pinchRef.current) {
+        const [touch1, touch2] = e.evt.touches;
+        if (!touch1 || !touch2) return;
+
+        e.evt.preventDefault();
+        const dist = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY,
+        );
+
+        const newScale =
+          (dist / pinchRef.current.startDist) * pinchRef.current.startScale;
+        const limitedScale = Math.max(
+          CANVAS_DATA.MIN_SCALE,
+          Math.min(newScale, CANVAS_DATA.MAX_SCALE),
+        );
+
+        const pointer = {
+          x: (touch1.clientX + touch2.clientX) / 2,
+          y: (touch1.clientY + touch2.clientY) / 2,
+        };
+
+        const mousePointTo = {
+          x: (pointer.x - stage.x()) / stage.scaleX(),
+          y: (pointer.y - stage.y()) / stage.scaleY(),
+        };
+
+        stage.scale({ x: limitedScale, y: limitedScale });
+
+        const { width: stageWidth, height: stageHeight } = getStageSize();
+        const scaledWidth =
+          CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * limitedScale;
+        const scaledHeight =
+          CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * limitedScale;
+        const minX = Math.min(0, stageWidth - scaledWidth);
+        const maxX = 0;
+        const minY = Math.min(0, stageHeight - scaledHeight);
+        const maxY = 0;
+
+        const newX = pointer.x - mousePointTo.x * limitedScale;
+        const newY = pointer.y - mousePointTo.y * limitedScale;
+
+        stage.position({
+          x: Math.max(minX, Math.min(maxX, newX)),
+          y: Math.max(minY, Math.min(maxY, newY)),
+        });
+
+        stage.batchDraw();
+        return;
+      }
+
+      if (isDraggingRef.current) {
+        e.evt.preventDefault();
+        handleMouseMove();
+      }
+    },
+    [handleMouseMove, getStageSize],
+  );
+
+  const handleWheel = useCallback(
+    (e: KonvaEventObject<WheelEvent>) => {
+      const stage = stageRef.current;
+      if (!stage) return;
 
       e.evt.preventDefault();
-      const dist = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY,
-      );
+      const oldScale = stage.scaleX();
+      const pointer = stage.getPointerPosition();
+      if (!pointer) return;
 
+      const mousePointTo = {
+        x: (pointer.x - stage.x()) / oldScale,
+        y: (pointer.y - stage.y()) / oldScale,
+      };
+      const scaleBy = 1.1;
       const newScale =
-        (dist / pinchRef.current.startDist) * pinchRef.current.startScale;
+        e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
       const limitedScale = Math.max(
         CANVAS_DATA.MIN_SCALE,
         Math.min(newScale, CANVAS_DATA.MAX_SCALE),
       );
 
-      const pointer = {
-        x: (touch1.clientX + touch2.clientX) / 2,
-        y: (touch1.clientY + touch2.clientY) / 2,
-      };
-
-      const mousePointTo = {
-        x: (pointer.x - stage.x()) / stage.scaleX(),
-        y: (pointer.y - stage.y()) / stage.scaleY(),
-      };
-
       stage.scale({ x: limitedScale, y: limitedScale });
 
+      const newPos = {
+        x: pointer.x - mousePointTo.x * limitedScale,
+        y: pointer.y - mousePointTo.y * limitedScale,
+      };
       const { width: stageWidth, height: stageHeight } = getStageSize();
       const scaledWidth =
         CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * limitedScale;
@@ -292,65 +354,22 @@ const useCanvas = (
       const minY = Math.min(0, stageHeight - scaledHeight);
       const maxY = 0;
 
-      const newX = pointer.x - mousePointTo.x * limitedScale;
-      const newY = pointer.y - mousePointTo.y * limitedScale;
-
       stage.position({
-        x: Math.max(minX, Math.min(maxX, newX)),
-        y: Math.max(minY, Math.min(maxY, newY)),
+        x: Math.max(minX, Math.min(maxX, newPos.x)),
+        y: Math.max(minY, Math.min(maxY, newPos.y)),
       });
+    },
+    [getStageSize],
+  );
 
-      stage.batchDraw();
-      return;
-    }
-
-    if (isDragging) {
-      e.evt.preventDefault();
-      handleMouseMove();
-    }
-  };
-
-  const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    e.evt.preventDefault();
-    const oldScale = stage.scaleX();
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
-
-    const mousePointTo = {
-      x: (pointer.x - stage.x()) / oldScale,
-      y: (pointer.y - stage.y()) / oldScale,
+  useEffect(() => {
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
-    const scaleBy = 1.1;
-    const newScale = e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
-    const limitedScale = Math.max(
-      CANVAS_DATA.MIN_SCALE,
-      Math.min(newScale, CANVAS_DATA.MAX_SCALE),
-    );
-
-    stage.scale({ x: limitedScale, y: limitedScale });
-
-    const newPos = {
-      x: pointer.x - mousePointTo.x * limitedScale,
-      y: pointer.y - mousePointTo.y * limitedScale,
-    };
-    const { width: stageWidth, height: stageHeight } = getStageSize();
-    const scaledWidth =
-      CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * limitedScale;
-    const scaledHeight =
-      CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * limitedScale;
-    const minX = Math.min(0, stageWidth - scaledWidth);
-    const maxX = 0;
-    const minY = Math.min(0, stageHeight - scaledHeight);
-    const maxY = 0;
-
-    stage.position({
-      x: Math.max(minX, Math.min(maxX, newPos.x)),
-      y: Math.max(minY, Math.min(maxY, newPos.y)),
-    });
-  };
+  }, [handleMouseUp, handleTouchEnd]);
 
   return {
     stageRef,

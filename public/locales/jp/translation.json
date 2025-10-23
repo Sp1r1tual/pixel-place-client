@@ -1,4 +1,9 @@
 {
+  "shared": {
+    "yes": "はい",
+    "no": "いいえ"
+  },
+
   "preloader": { "loading": "読み込み中です。しばらくお待ちください…" },
 
   "footer": {
@@ -76,7 +81,12 @@
     "header": "ピクセルプレイス",
     "main": "ホーム",
     "shop": "ショップ",
-    "dropdown": { "settings": "設定", "logout": "ログアウト" }
+    "dropdown": {
+      "settings": "設定",
+      "logout": "ログアウト",
+      "confirm-logout-message": "ログアウトを確認してください",
+      "confirm-logout-title": "本当にログアウトしますか？"
+    }
   },
 
   "canvas": {
