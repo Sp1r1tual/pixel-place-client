@@ -8,6 +8,7 @@ export const CANVAS_DATA = {
 };
 
 export const PALETTE_COLORS = [
+  "#000000",
   "#8B0000",
   "#A52A2A",
   "#B22222",
@@ -91,6 +92,5 @@ export const PALETTE_COLORS = [
   "#D3D3D3",
   "#DCDCDC",
   "#F5F5F5",
-  "#000000",
   "#FFFFFF",
 ];

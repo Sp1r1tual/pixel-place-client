@@ -15,22 +15,17 @@ import tapSoundMp3 from "@/assets/sounds/key-hit-sound.mp3";
 
 const useCanvasView = () => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isEraserActive, setIsEraserActive] = useState(false);
   const [selectedPixel, setSelectedPixel] = useState<IPixel | null>(null);
 
   const { isHidden, toggleInterface } = useUserInterface();
-  const {
-    unpaintedPixels,
-    setPixelsBatch,
-    clearUnpaintedPixels,
-    energy,
-    maxEnergy,
-    lastEnergyUpdate,
-    recoverySpeed,
-    undoLastPixel,
-  } = useCanvasStore();
+
+  const unpaintedPixels = useCanvasStore((state) => state.unpaintedPixels);
+  const energy = useCanvasStore((state) => state.energy);
+  const maxEnergy = useCanvasStore((state) => state.maxEnergy);
+  const lastEnergyUpdate = useCanvasStore((state) => state.lastEnergyUpdate);
+  const recoverySpeed = useCanvasStore((state) => state.recoverySpeed);
 
   const { t } = useTranslation();
 
@@ -41,13 +36,9 @@ const useCanvasView = () => {
   }, []);
 
   const handleClosePalette = useCallback(() => {
-    setIsAnimating(true);
-    setTimeout(() => {
-      setIsPaletteOpen(false);
-      setIsAnimating(false);
-      clearUnpaintedPixels();
-    }, 200);
-  }, [clearUnpaintedPixels]);
+    setIsPaletteOpen(false);
+    useCanvasStore.getState().clearUnpaintedPixels();
+  }, []);
 
   const handleEraseToggle = useCallback(() => {
     setIsEraserActive((prev) => !prev);
@@ -77,7 +68,7 @@ const useCanvasView = () => {
       unpaintedPixels,
     ).map(([key, color]) => {
       const [xStr, yStr] = key.split(":");
-      return { x: Number(xStr), y: Number(yStr), color };
+      return { x: Number(xStr), y: Number(yStr), color: String(color) };
     });
 
     const localPixels: IPixel[] = pixelsToSend.map((p) => ({ ...p, userId }));
@@ -93,34 +84,28 @@ const useCanvasView = () => {
           return;
         }
 
-        setPixelsBatch(localPixels);
-        clearUnpaintedPixels();
+        const store = useCanvasStore.getState();
+        store.setPixelsBatch(localPixels);
+        store.clearUnpaintedPixels();
         playTapSound();
 
-        if (typeof energyLeft === "number")
-          useCanvasStore.getState().setEnergy(energyLeft);
-        if (typeof maxEnergy === "number")
-          useCanvasStore.getState().setMaxEnergy(maxEnergy);
+        if (typeof energyLeft === "number") store.setEnergy(energyLeft);
+        if (typeof maxEnergy === "number") store.setMaxEnergy(maxEnergy);
 
         useShopStore.getState().fetchShop(true);
       },
     );
-  }, [
-    clearUnpaintedPixels,
-    isPaletteOpen,
-    pixelsPainted,
-    playTapSound,
-    setPixelsBatch,
-    t,
-    unpaintedPixels,
-  ]);
+  }, [isPaletteOpen, pixelsPainted, unpaintedPixels, playTapSound, t]);
 
   const handleClosePixelDetails = useCallback(() => setSelectedPixel(null), []);
+
+  const undoLastPixel = useCallback(() => {
+    useCanvasStore.getState().undoLastPixel();
+  }, []);
 
   return {
     isPaletteOpen,
     setIsPaletteOpen,
-    isAnimating,
     isLoading,
     isEraserActive,
     selectedPixel,

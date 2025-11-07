@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useRef } from "react";
+
+import { useEnergyTimer } from "@/hooks/useEnergyTimer";
 
 import styles from "./styles/PrimaryBtn.module.css";
 
@@ -9,8 +11,6 @@ interface IPrimaryBtnProps {
   isLoading: boolean;
   disabled?: boolean;
   progressText?: string;
-  progressCurrent?: number;
-  progressFull?: number;
   showTimer?: boolean;
   timerData?: {
     energy: number;
@@ -27,58 +27,12 @@ const PrimaryBtn = ({
   isLoading,
   disabled = false,
   progressText,
-  progressCurrent,
-  progressFull,
   showTimer = false,
   timerData,
 }: IPrimaryBtnProps) => {
-  const [timeUntilNext, setTimeUntilNext] = useState<string>("");
+  const displayRef = useRef<HTMLSpanElement | null>(null);
 
-  const showProgress =
-    progressCurrent !== undefined &&
-    progressFull !== undefined &&
-    progressFull > 0;
-
-  useEffect(() => {
-    if (!showTimer || !timerData || !showProgress) {
-      return;
-    }
-
-    const { energy, maxEnergy, lastEnergyUpdate, recoverySpeed } = timerData;
-
-    const updateTimer = () => {
-      if (energy >= maxEnergy) {
-        setTimeUntilNext("");
-        return;
-      }
-
-      const now = Date.now();
-      const secondsPassed = (now - lastEnergyUpdate) / 1000;
-      const energyToAdd = secondsPassed / recoverySpeed;
-      const currentEnergy = Math.min(energy + energyToAdd, maxEnergy);
-
-      if (currentEnergy >= maxEnergy) {
-        setTimeUntilNext("");
-        return;
-      }
-
-      const fractionalEnergy = currentEnergy % 1;
-      const energyUntilNext = 1 - fractionalEnergy;
-
-      const secondsUntilNext = Math.ceil(energyUntilNext * recoverySpeed);
-      const minutes = Math.floor(secondsUntilNext / 60);
-      const seconds = secondsUntilNext % 60;
-
-      setTimeUntilNext(
-        `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`,
-      );
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(interval);
-  }, [showTimer, showProgress, timerData]);
+  useEnergyTimer(timerData, displayRef, progressText, showTimer);
 
   return (
     <button
@@ -94,16 +48,7 @@ const PrimaryBtn = ({
 
       <div className={styles.textWrapper}>
         {text && <span className={styles.text}>{text}</span>}
-        {showProgress && (
-          <span className={styles.progress}>
-            {progressText
-              ? `${progressText} ${progressCurrent} / ${progressFull}`
-              : `${Math.floor(progressCurrent)} / ${progressFull}`}
-            {timeUntilNext &&
-              progressCurrent < progressFull &&
-              ` (${timeUntilNext})`}
-          </span>
-        )}
+        {showTimer && <span ref={displayRef} className={styles.progress} />}
       </div>
     </button>
   );

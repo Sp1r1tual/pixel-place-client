@@ -18,9 +18,9 @@ import undoSvg from "@/assets/undo-svgrepo-com.svg";
 import styles from "./styles/CanvasView.module.css";
 
 const CanvasView = () => {
+  console.log("Canvas View");
   const {
     isPaletteOpen,
-    isAnimating,
     isLoading,
     isEraserActive,
     selectedPixel,
@@ -63,7 +63,7 @@ const CanvasView = () => {
         <div
           className={`${styles.bottomContainer} ${
             isPaletteOpen ? styles.open : ""
-          } ${isAnimating ? styles.closing : ""}`}
+          } `}
         >
           {isPaletteOpen && (
             <>
@@ -111,8 +111,6 @@ const CanvasView = () => {
         <div className={styles.paintBtnFixed}>
           <PrimaryBtn
             text={t("canvas.buttons.paint")}
-            progressCurrent={energy}
-            progressFull={maxEnergy}
             image={brushSvg}
             onClick={handlePaintClick}
             isLoading={isLoading}
