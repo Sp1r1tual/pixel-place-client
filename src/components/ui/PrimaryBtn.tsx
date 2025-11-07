@@ -46,17 +46,16 @@ const PrimaryBtn = ({
 
     const { energy, maxEnergy, lastEnergyUpdate, recoverySpeed } = timerData;
 
-    if (energy >= maxEnergy) {
-      return;
-    }
-
     const updateTimer = () => {
+      if (energy >= maxEnergy) {
+        setTimeUntilNext("");
+        return;
+      }
+
       const now = Date.now();
-      const minutesPassed = (now - lastEnergyUpdate) / 60000;
-      const currentEnergy = Math.min(
-        energy + minutesPassed * recoverySpeed,
-        maxEnergy,
-      );
+      const secondsPassed = (now - lastEnergyUpdate) / 1000;
+      const energyToAdd = secondsPassed / recoverySpeed;
+      const currentEnergy = Math.min(energy + energyToAdd, maxEnergy);
 
       if (currentEnergy >= maxEnergy) {
         setTimeUntilNext("");
@@ -64,9 +63,9 @@ const PrimaryBtn = ({
       }
 
       const fractionalEnergy = currentEnergy % 1;
-      const minutesUntilNext = (1 - fractionalEnergy) / recoverySpeed;
-      const secondsUntilNext = Math.ceil(minutesUntilNext * 60);
+      const energyUntilNext = 1 - fractionalEnergy;
 
+      const secondsUntilNext = Math.ceil(energyUntilNext * recoverySpeed);
       const minutes = Math.floor(secondsUntilNext / 60);
       const seconds = secondsUntilNext % 60;
 

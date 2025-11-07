@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -6,10 +7,13 @@ import { useFormValidation } from "@/hooks/useFormValidation";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
 import { Header } from "../ui/Header";
+import { PasswordToggleBtn } from "../ui/PasswordToggleBtn";
 
 import styles from "./styles/LoginForm.module.css";
 
 const LoginForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
   const { login, isLoading, error } = useAuthStore();
   const { validateEmail, validatePassword, fieldErrors, clearError } =
     useFormValidation();
@@ -60,13 +64,19 @@ const LoginForm = () => {
 
       <div className={styles.formRow}>
         <label htmlFor="password">{t("auth.login.password")}</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          onChange={handleInputChange}
-          className={fieldErrors.password ? styles.errorInput : ""}
-        />
+        <div className={styles.passwordWrapper}>
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            onChange={handleInputChange}
+            className={fieldErrors.password ? styles.errorInput : ""}
+          />
+          <PasswordToggleBtn
+            passwordVisible={showPassword}
+            setPasswordVisible={setShowPassword}
+          />
+        </div>
       </div>
 
       <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>

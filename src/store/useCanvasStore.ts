@@ -70,7 +70,7 @@ const startEnergyInterval = (
     const newEnergy = Math.min(energy + energyToAdd, maxEnergy);
 
     set({ energy: newEnergy, lastEnergyUpdate: now });
-  }, 5_000);
+  }, 1_000);
 };
 
 const stopEnergyInterval = () => {

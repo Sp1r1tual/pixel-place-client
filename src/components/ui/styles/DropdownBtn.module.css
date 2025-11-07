@@ -1,20 +1,22 @@
 .btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   width: 100%;
-  padding: 0.5rem 1rem;
+  padding: 0.2rem;
   border-radius: 0.5rem;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 2px solid rgba(207, 203, 203, 0.25);
-  color: #1f2937;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  color: #1e293b;
   font-size: 1rem;
   font-weight: 600;
   text-align: left;
   cursor: pointer;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transition:
     background 0.2s ease,
     color 0.2s ease,
@@ -24,29 +26,37 @@
 }
 
 .btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  color: #111827;
+  background: rgba(255, 255, 255, 0.95);
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .btn.active {
-  background: rgba(255, 255, 255, 0.3);
-  color: #111827;
-  font-weight: 600;
-  transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(245, 245, 245, 0.85)
+  );
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.04);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: #0f172a;
 }
 
 .btn .icon {
   width: 1.5rem;
   height: 1.5rem;
+  color: #1e293b;
 }
 
 @media (max-width: 768px) {
   .btn {
-    padding: 0.3rem 0.65rem;
+    padding: 0.4rem 0.75rem;
     font-size: 1rem;
   }
 

@@ -6,13 +6,13 @@ import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
+import { PasswordToggleBtn } from "../ui/PasswordToggleBtn";
 import { Header } from "../ui/Header";
 
 import styles from "./styles/ResetPassword.module.css";
 
 const ResetPassword = () => {
-  const { t } = useTranslation();
-
+  const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
@@ -21,6 +21,7 @@ const ResetPassword = () => {
     useFormValidation();
 
   const { token } = useParams<{ token: string }>();
+  const { t } = useTranslation();
 
   const handleResetPassword = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -65,26 +66,40 @@ const ResetPassword = () => {
 
       <div className={styles.formRow}>
         <label htmlFor="password">{t("auth.reset-password.password")}</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          onChange={handleInputChange}
-          className={fieldErrors.password ? styles.errorInput : ""}
-        />
+        <div className={styles.passwordWrapper}>
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            onChange={handleInputChange}
+            className={fieldErrors.password ? styles.errorInput : ""}
+          />
+
+          <PasswordToggleBtn
+            passwordVisible={showPassword}
+            setPasswordVisible={setShowPassword}
+          />
+        </div>
       </div>
 
       <div className={styles.formRow}>
         <label htmlFor="confirmPassword">
           {t("auth.reset-password.confirm-password")}
         </label>
-        <input
-          id="confirmPassword"
-          name="confirmPassword"
-          type="password"
-          onChange={handleInputChange}
-          className={fieldErrors.passwordConfirm ? styles.errorInput : ""}
-        />
+        <div className={styles.passwordWrapper}>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type={showPassword ? "text" : "password"}
+            onChange={handleInputChange}
+            className={fieldErrors.passwordConfirm ? styles.errorInput : ""}
+          />
+
+          <PasswordToggleBtn
+            passwordVisible={showPassword}
+            setPasswordVisible={setShowPassword}
+          />
+        </div>
       </div>
 
       <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>

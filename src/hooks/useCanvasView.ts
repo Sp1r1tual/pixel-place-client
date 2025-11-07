@@ -27,6 +27,8 @@ const useCanvasView = () => {
     clearUnpaintedPixels,
     energy,
     maxEnergy,
+    lastEnergyUpdate,
+    recoverySpeed,
     undoLastPixel,
   } = useCanvasStore();
 
@@ -129,6 +131,8 @@ const useCanvasView = () => {
     pixelsPainted,
     energy,
     maxEnergy,
+    lastEnergyUpdate,
+    recoverySpeed,
     undoLastPixel,
     handleColorSelect,
     handleClosePalette,

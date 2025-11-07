@@ -4,7 +4,18 @@
   position: relative;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(31, 41, 55, 0.85);
+  background: linear-gradient(
+    145deg,
+    rgba(31, 41, 55, 0.9) 0%,
+    rgba(31, 41, 55, 0.7) 100%
+  );
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   border-radius: 12px;
   padding: 1rem;
   width: 80%;

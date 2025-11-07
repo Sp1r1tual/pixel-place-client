@@ -10,8 +10,10 @@
 }
 
 .colorBox {
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 1rem;
+  height: 1rem;
+  min-width: 0.8rem;
+  min-height: 0.8rem;
   border-radius: 0.25rem;
   cursor: pointer;
   border: 2px solid transparent;
@@ -29,20 +31,35 @@
 }
 
 @media (max-width: 768px) {
+  .palette {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    padding: 0.35rem;
+  }
+
   .colorBox {
-    width: 1.3rem;
-    height: 1.3rem;
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    min-width: 1rem;
+    min-height: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .colorBox {
-    width: 1.1rem;
-    height: 1.1rem;
-  }
-
   .palette {
     gap: 0.35rem;
     padding: 0.35rem;
+  }
+
+  .colorBox {
+    width: 1rem;
+    height: 1rem;
+    min-width: 1rem;
+    min-height: 1rem;
   }
 }
