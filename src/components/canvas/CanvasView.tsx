@@ -30,6 +30,8 @@ const CanvasView = () => {
     pixelsPainted,
     energy,
     maxEnergy,
+    lastEnergyUpdate,
+    recoverySpeed,
     undoLastPixel,
     handleColorSelect,
     handleClosePalette,
@@ -114,6 +116,13 @@ const CanvasView = () => {
             image={brushSvg}
             onClick={handlePaintClick}
             isLoading={isLoading}
+            showTimer={true}
+            timerData={{
+              energy,
+              maxEnergy,
+              lastEnergyUpdate,
+              recoverySpeed,
+            }}
           />
         </div>
       )}
