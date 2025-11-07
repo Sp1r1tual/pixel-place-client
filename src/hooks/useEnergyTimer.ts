@@ -1,5 +1,7 @@
 import { useRef, useEffect } from "react";
 
+import { useCanvasStore } from "@/store/useCanvasStore";
+
 interface ITimerData {
   energy: number;
   maxEnergy: number;
@@ -14,21 +16,30 @@ const useEnergyTimer = (
   showTimer?: boolean,
 ) => {
   const frameRef = useRef<number | undefined>(undefined);
+  const setEnergy = useCanvasStore((state) => state.setEnergy);
+  const unpaintedPixels = useCanvasStore((state) => state.unpaintedPixels);
 
   useEffect(() => {
     if (!showTimer || !timerData || !displayRef?.current) return;
 
-    const { energy, maxEnergy, lastEnergyUpdate, recoverySpeed } = timerData;
+    const { maxEnergy, recoverySpeed } = timerData;
 
     const updateTimer = () => {
       const now = Date.now();
+      const { energy: prevEnergy, lastEnergyUpdate } =
+        useCanvasStore.getState();
+
       const secondsPassed = (now - lastEnergyUpdate) / 1000;
       const currentEnergy = Math.min(
-        energy + secondsPassed / recoverySpeed,
+        prevEnergy + secondsPassed / recoverySpeed,
         maxEnergy,
       );
 
-      const displayEnergy = Math.floor(currentEnergy);
+      const availableEnergy =
+        Math.floor(currentEnergy) - Object.keys(unpaintedPixels).length;
+      const displayEnergy = Math.max(availableEnergy, 0);
+
+      setEnergy(currentEnergy);
 
       let timeText = "";
       if (displayEnergy < maxEnergy) {
@@ -57,7 +68,14 @@ const useEnergyTimer = (
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
-  }, [timerData, displayRef, progressText, showTimer]);
+  }, [
+    timerData,
+    displayRef,
+    progressText,
+    showTimer,
+    setEnergy,
+    unpaintedPixels,
+  ]);
 };
 
 export { useEnergyTimer };
