@@ -94,6 +94,17 @@
   margin-top: 0.5rem;
 }
 
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordWrapper input {
+  flex: 1;
+  padding-right: 2.5rem;
+}
+
 .registerLink {
   text-align: center;
   font-size: 1rem;

@@ -6,11 +6,13 @@ import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
+import { PasswordToggleBtn } from "../ui/PasswordToggleBtn";
 import { Header } from "../ui/Header";
 
 import styles from "./styles/RegistrationForm.module.css";
 
 const RegistrationForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { registration, isLoading, error } = useAuthStore();
@@ -73,26 +75,40 @@ const RegistrationForm = () => {
 
       <div className={styles.formRow}>
         <label htmlFor="password">{t("auth.registration.password")}</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          onChange={handleInputChange}
-          className={fieldErrors.password ? styles.errorInput : ""}
-        />
+        <div className={styles.passwordWrapper}>
+          <input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            onChange={handleInputChange}
+            className={fieldErrors.password ? styles.errorInput : ""}
+          />
+
+          <PasswordToggleBtn
+            passwordVisible={showPassword}
+            setPasswordVisible={setShowPassword}
+          />
+        </div>
       </div>
 
       <div className={styles.formRow}>
         <label htmlFor="passwordConfirm">
           {t("auth.registration.password-confirm")}
         </label>
-        <input
-          id="passwordConfirm"
-          name="passwordConfirm"
-          type="password"
-          onChange={handleInputChange}
-          className={fieldErrors.passwordConfirm ? styles.errorInput : ""}
-        />
+        <div className={styles.passwordWrapper}>
+          <input
+            id="passwordConfirm"
+            name="passwordConfirm"
+            type={showPassword ? "text" : "password"}
+            onChange={handleInputChange}
+            className={fieldErrors.passwordConfirm ? styles.errorInput : ""}
+          />
+
+          <PasswordToggleBtn
+            passwordVisible={showPassword}
+            setPasswordVisible={setShowPassword}
+          />
+        </div>
       </div>
 
       <div className={`${styles.errorWrapper} ${error ? styles.active : ""}`}>
