@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-
 import { useCanvasView } from "@/hooks/useCanvasView";
 
 import { Canvas } from "./Canvas";
@@ -58,73 +57,56 @@ const CanvasView = () => {
         </div>
       )}
 
-      {!isHidden && isPaletteOpen && (
+      {!isHidden && (
         <div
           className={`${styles.bottomContainer} ${
-            isAnimating ? styles.closing : ""
-          }`}
+            isPaletteOpen ? styles.open : ""
+          } ${isAnimating ? styles.closing : ""}`}
         >
-          <div className={styles.topRow}>
-            <div className={styles.uiBtnWrapper}>
-              <InterfaceBtn
-                id="hideInterfaceBtn"
-                imgDefault={hideInterfaceSvg}
-                imgActive={showIntrfaceSvg}
-                onClick={toggleInterface}
-                isActive={isHidden}
-              />
-              <InterfaceBtn
-                id="EraseBtn"
-                imgDefault={eraseSvg}
-                imgActive={eraseActiveSvg}
-                onClick={handleEraseToggle}
-                isActive={isEraserActive}
-              />
-            </div>
+          {isPaletteOpen && (
+            <>
+              <div className={styles.topRow}>
+                <div className={styles.uiBtnWrapper}>
+                  <InterfaceBtn
+                    id="hideInterfaceBtn"
+                    imgDefault={hideInterfaceSvg}
+                    imgActive={showIntrfaceSvg}
+                    onClick={toggleInterface}
+                    isActive={isHidden}
+                  />
+                  <InterfaceBtn
+                    id="EraseBtn"
+                    imgDefault={eraseSvg}
+                    imgActive={eraseActiveSvg}
+                    onClick={handleEraseToggle}
+                    isActive={isEraserActive}
+                  />
+                </div>
 
-            <span className={styles.paintPixels}>
-              {t("canvas.painted")} {pixelsPainted}
-            </span>
+                <span className={styles.paintPixels}>
+                  {t("canvas.painted")} {pixelsPainted}
+                </span>
 
-            <div className={styles.uiBtnWrapper}>
-              <InterfaceBtn
-                id="undoPixelBtn"
-                imgDefault={undoSvg}
-                onClick={undoLastPixel}
-              />
-              <CloseBtn onClick={handleClosePalette} />
-            </div>
-          </div>
+                <div className={styles.uiBtnWrapper}>
+                  <InterfaceBtn
+                    id="undoPixelBtn"
+                    imgDefault={undoSvg}
+                    onClick={undoLastPixel}
+                  />
+                  <CloseBtn onClick={handleClosePalette} />
+                </div>
+              </div>
 
-          <div className={styles.paletteWrapper}>
-            <Palette onSelectColor={handleColorSelect} />
-          </div>
-
-          <div className={styles.btnWrapper}>
-            {!selectedPixel && (
-              <PrimaryBtn
-                text={t("canvas.buttons.paint")}
-                progressCurrent={energy}
-                progressFull={maxEnergy}
-                image={brushSvg}
-                onClick={handlePaintClick}
-                isLoading={isLoading}
-              />
-            )}
-          </div>
+              <div className={styles.paletteWrapper}>
+                <Palette onSelectColor={handleColorSelect} />
+              </div>
+            </>
+          )}
         </div>
       )}
 
-      {!isPaletteOpen && !selectedPixel && (
-        <div
-          className={styles.btnWrapper}
-          style={{
-            position: "absolute",
-            bottom: "calc(env(safe-area-inset-bottom, 0) + 20px)",
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        >
+      {!selectedPixel && (
+        <div className={styles.paintBtnFixed}>
           <PrimaryBtn
             text={t("canvas.buttons.paint")}
             progressCurrent={energy}

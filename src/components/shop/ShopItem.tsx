@@ -35,8 +35,8 @@ const ShopItem = ({
   const isAnyUpgrading = upgradingItemType !== null;
 
   const skeletonProps = () => ({
-    baseColor: "#404955",
-    highlightColor: "#f8f8f8",
+    baseColor: "rgba(31, 41, 55, 0.8)",
+    highlightColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 8,
   });
 
@@ -51,7 +51,7 @@ const ShopItem = ({
         <Skeleton
           width={240}
           height={240}
-          {...skeletonProps}
+          {...skeletonProps()}
           style={{ marginBottom: 12 }}
         />
       ) : (
@@ -62,7 +62,7 @@ const ShopItem = ({
         <Skeleton
           width={120}
           height={24}
-          {...skeletonProps}
+          {...skeletonProps()}
           style={{ marginBottom: 8 }}
         />
       ) : (
@@ -73,7 +73,7 @@ const ShopItem = ({
         <Skeleton
           width={80}
           height={20}
-          {...skeletonProps}
+          {...skeletonProps()}
           style={{ marginBottom: 4 }}
         />
       ) : (
@@ -86,7 +86,7 @@ const ShopItem = ({
         <Skeleton
           width={80}
           height={20}
-          {...skeletonProps}
+          {...skeletonProps()}
           style={{ marginBottom: 12 }}
         />
       ) : (
@@ -99,7 +99,7 @@ const ShopItem = ({
         <Skeleton
           width={140}
           height={40}
-          {...skeletonProps}
+          {...skeletonProps()}
           style={{ borderRadius: 10 }}
         />
       ) : (
