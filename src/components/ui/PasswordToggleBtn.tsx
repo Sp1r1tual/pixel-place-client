@@ -1,5 +1,5 @@
 import showPasswordSvg from "@/assets/eye-password-show-svgrepo-com.svg";
-import hidePasswordSvg from "@/assets//hide-svgrepo-com.svg";
+import hidePasswordSvg from "@/assets/hide-svgrepo-com.svg";
 
 import styles from "./styles/PasswordToggleBtn.module.css";
 

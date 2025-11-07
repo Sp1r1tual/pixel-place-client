@@ -6,11 +6,7 @@ import { IPixel } from "@/types";
 
 import { useAuthStore } from "./useAuthStore";
 
-import {
-  getSocket,
-  connectSocket,
-  isSocketRefreshing,
-} from "@/sockets/canvasSockets";
+import { getSocket, connectSocket } from "@/sockets/canvasSockets";
 
 interface ICanvasState {
   pixels: Record<string, IPixel>;
@@ -39,46 +35,6 @@ interface ICanvasState {
 }
 
 let socketInitialized = false;
-let energyInterval: ReturnType<typeof setInterval> | null = null;
-
-const startEnergyInterval = (
-  get: () => ICanvasState,
-  set: (
-    partial:
-      | Partial<ICanvasState>
-      | ((state: ICanvasState) => Partial<ICanvasState>),
-  ) => void,
-) => {
-  if (energyInterval) return;
-
-  energyInterval = setInterval(() => {
-    const { energy, maxEnergy, lastEnergyUpdate, recoverySpeed } = get();
-    const now = Date.now();
-
-    if (energy >= maxEnergy) {
-      return;
-    }
-
-    const secondsPassed = (now - lastEnergyUpdate) / 1000;
-
-    const energyToAdd = secondsPassed / recoverySpeed;
-
-    if (energyToAdd <= 0) {
-      return;
-    }
-
-    const newEnergy = Math.min(energy + energyToAdd, maxEnergy);
-
-    set({ energy: newEnergy, lastEnergyUpdate: now });
-  }, 1_000);
-};
-
-const stopEnergyInterval = () => {
-  if (energyInterval) {
-    clearInterval(energyInterval);
-    energyInterval = null;
-  }
-};
 
 const useCanvasStore = create<ICanvasState>((set, get) => ({
   pixels: {},
@@ -92,33 +48,27 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   isConnected: false,
   connectionError: null,
 
-  setPixel: (pixel: IPixel) =>
-    set((state) => {
-      const userId = useAuthStore.getState().user?.id;
-
-      if (!userId) {
-        toast.warn(i18n.t("errors.must-login-to-paint"));
-        return state;
-      }
-
-      return {
-        pixels: {
-          ...state.pixels,
-          [`${pixel.x}:${pixel.y}`]: { ...pixel, userId },
-        },
-      };
-    }),
+  setPixel: (pixel: IPixel) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) {
+      toast.warn(i18n.t("errors.must-login-to-paint"));
+      return;
+    }
+    set((state) => ({
+      pixels: {
+        ...state.pixels,
+        [`${pixel.x}:${pixel.y}`]: { ...pixel, userId },
+      },
+    }));
+  },
 
   undoLastPixel: () =>
     set((state) => {
       const keys = Object.keys(state.unpaintedPixels);
       const lastKey = keys.at(-1);
-
       if (!lastKey) return {};
-
       const updated = { ...state.unpaintedPixels };
       delete updated[lastKey];
-
       return { unpaintedPixels: updated };
     }),
 
@@ -126,12 +76,10 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     const state = get();
     const key = `${x}:${y}`;
     if (state.unpaintedPixels[key]) return;
-
     if (Object.keys(state.unpaintedPixels).length >= Math.floor(state.energy)) {
       toast.warn(i18n.t("errors.not-enough-energy"));
       return;
     }
-
     set({ unpaintedPixels: { ...state.unpaintedPixels, [key]: color } });
   },
 
@@ -145,9 +93,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     }),
 
   clearUnpaintedPixels: () => set({ unpaintedPixels: {} }),
-
   setSelectedColor: (color) => set({ selectedColor: color }),
-
   setPixelsBatch: (batch: IPixel[]) =>
     set((state) => {
       const userId = useAuthStore.getState().user?.id ?? null;
@@ -158,19 +104,10 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
       return { pixels: updated };
     }),
 
-  setEnergy: (value) => {
-    set({ energy: value, lastEnergyUpdate: Date.now() });
-  },
-
-  setMaxEnergy: (value) => {
-    set({ maxEnergy: value });
-  },
-
+  setEnergy: (value) => set({ energy: value, lastEnergyUpdate: Date.now() }),
+  setMaxEnergy: (value) => set({ maxEnergy: value }),
   setPixelReward: (value) => set({ pixelReward: value }),
-
-  setRecoverySpeed: (value) => {
-    set({ recoverySpeed: value });
-  },
+  setRecoverySpeed: (value) => set({ recoverySpeed: value }),
 
   initSocket: () => {
     if (socketInitialized) return;
@@ -180,7 +117,6 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
     socket.on("connect", () => {
       console.log("[Socket] Connected");
-      set({ isConnected: true, connectionError: null });
 
       socket.emit(
         "getEnergy",
@@ -192,6 +128,8 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
           updatedAt?: string,
         ) => {
           set({
+            isConnected: true,
+            connectionError: null,
             energy,
             maxEnergy,
             recoverySpeed,
@@ -199,7 +137,6 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
               ? new Date(updatedAt).getTime()
               : Date.now(),
           });
-          startEnergyInterval(get, set);
         },
       );
     });
@@ -210,28 +147,18 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
         isConnected: false,
         connectionError: i18n.t("socket.disconnected"),
       });
-      if (!isSocketRefreshing()) stopEnergyInterval();
     });
 
-    socket.on(
-      "energyUpdate",
-      (
-        energy: number,
-        maxEnergy?: number,
-        recoverySpeed?: number,
-        updatedAt?: string,
-      ) => {
-        set({
-          energy,
-          lastEnergyUpdate: updatedAt
-            ? new Date(updatedAt).getTime()
-            : Date.now(),
-        });
-        if (typeof maxEnergy === "number") set({ maxEnergy });
-        if (typeof recoverySpeed === "number") set({ recoverySpeed });
-        startEnergyInterval(get, set);
-      },
-    );
+    socket.on("energyUpdate", (energy, maxEnergy, recoverySpeed, updatedAt) => {
+      set({
+        energy,
+        lastEnergyUpdate: updatedAt
+          ? new Date(updatedAt).getTime()
+          : Date.now(),
+        ...(typeof maxEnergy === "number" ? { maxEnergy } : {}),
+        ...(typeof recoverySpeed === "number" ? { recoverySpeed } : {}),
+      });
+    });
 
     socket.on("canvasState", (pixelsArray: IPixel[]) => {
       const pixelsMap: Record<string, IPixel> = {};

@@ -51,11 +51,6 @@
   transition: all 0.35s ease-in-out;
 }
 
-.bottomContainer.closing {
-  opacity: 0;
-  pointer-events: none;
-}
-
 .topRow {
   display: flex;
   align-items: center;
