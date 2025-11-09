@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+
 import { useCanvasView } from "@/hooks/useCanvasView";
 
 import { Canvas } from "./Canvas";
@@ -18,7 +19,6 @@ import undoSvg from "@/assets/undo-svgrepo-com.svg";
 import styles from "./styles/CanvasView.module.css";
 
 const CanvasView = () => {
-  console.log("Canvas View");
   const {
     isPaletteOpen,
     isLoading,
@@ -107,7 +107,7 @@ const CanvasView = () => {
         </div>
       )}
 
-      {!selectedPixel && (
+      {!isHidden && !selectedPixel && (
         <div className={styles.paintBtnFixed}>
           <PrimaryBtn
             text={t("canvas.buttons.paint")}

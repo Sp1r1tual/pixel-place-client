@@ -1,8 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { KonvaEventObject } from "konva/lib/Node";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import Konva from "konva";
 
 import { useCanvasStore } from "@/store/useCanvasStore";
 
@@ -10,16 +8,30 @@ import { IPixel } from "@/types";
 
 import { CANVAS_DATA } from "@/data/canvas";
 
+interface DragState {
+  startX: number;
+  startY: number;
+  stageStartX: number;
+  stageStartY: number;
+  distance: number;
+  hasMoved: boolean;
+  clientX?: number;
+  clientY?: number;
+}
+
 const useCanvas = (
   isPaletteOpen: boolean,
   isEraserActive: boolean,
   onPixelClick?: (pixel: IPixel) => void,
 ) => {
-  const stageRef = useRef<Konva.Stage | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const isPinchingRef = useRef(false);
   const isDraggingRef = useRef(false);
 
   const [isDragging, setIsDragging] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   const {
     pixels,
@@ -31,7 +43,7 @@ const useCanvas = (
     cleanupSocket,
   } = useCanvasStore();
 
-  const dragStateRef = useRef({
+  const dragStateRef = useRef<DragState>({
     startX: 0,
     startY: 0,
     stageStartX: 0,
@@ -55,100 +67,179 @@ const useCanvas = (
     return () => cleanupSocket();
   }, [initSocket, cleanupSocket]);
 
+  const getContainerSize = useCallback(() => {
+    if (!containerRef.current) {
+      return { width: window.innerWidth, height: window.innerHeight };
+    }
+    return {
+      width: containerRef.current.offsetWidth,
+      height: containerRef.current.offsetHeight,
+    };
+  }, []);
+
   const centerCanvas = useCallback(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    const container = stage.container();
-    const stageWidth = container.offsetWidth;
-    const stageHeight = container.offsetHeight;
-
+    const { width: stageWidth, height: stageHeight } = getContainerSize();
     const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
     const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
     const x = (stageWidth - canvasWidth) / 2;
     const y = (stageHeight - canvasHeight) / 2;
 
-    stage.position({ x, y });
-    stage.batchDraw();
-  }, []);
+    setPosition({ x, y });
+  }, [getContainerSize]);
 
-  const getStageSize = useCallback(() => {
-    const stage = stageRef.current;
-    if (!stage) return { width: window.innerWidth, height: window.innerHeight };
+  const drawCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const container = stage.container();
-    return {
-      width: container.offsetWidth,
-      height: container.offsetHeight,
-    };
-  }, []);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-  const handleMouseUp = useCallback(() => {
-    const stage = stageRef.current;
-    if (!stage || !isDraggingRef.current) return;
+    const { width, height } = getContainerSize();
+    canvas.width = width;
+    canvas.height = height;
 
-    const state = dragStateRef.current;
-    setIsDragging(false);
+    ctx.clearRect(0, 0, width, height);
 
-    if (state.distance > CANVAS_DATA.DRAG_THRESHOLD || state.hasMoved) return;
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    ctx.scale(scale, scale);
 
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
+    const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
+    const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
-    const scale = stage.scaleX();
-    const stageX = stage.x();
-    const stageY = stage.y();
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    const x = Math.floor(
-      (pointer.x - stageX) / (CANVAS_DATA.PIXEL_SIZE * scale),
-    );
-    const y = Math.floor(
-      (pointer.y - stageY) / (CANVAS_DATA.PIXEL_SIZE * scale),
-    );
+    Object.entries(pixels).forEach(([_, pixel]) => {
+      ctx.fillStyle = pixel.color;
+      ctx.fillRect(
+        pixel.x * CANVAS_DATA.PIXEL_SIZE,
+        pixel.y * CANVAS_DATA.PIXEL_SIZE,
+        CANVAS_DATA.PIXEL_SIZE,
+        CANVAS_DATA.PIXEL_SIZE,
+      );
+    });
 
-    const isInsideBounds =
-      x >= 0 &&
-      y >= 0 &&
-      x < CANVAS_DATA.CANVAS_WIDTH &&
-      y < CANVAS_DATA.CANVAS_HEIGHT;
-    if (!isInsideBounds) return;
+    Object.entries(unpaintedPixels).forEach(([key, color]) => {
+      const [xStr, yStr] = key.split(":");
+      const x = Number(xStr);
+      const y = Number(yStr);
 
-    if (isPaletteOpen) {
-      if (isEraserActive) {
-        const key = `${x}:${y}`;
-        if (unpaintedPixels[key]) {
-          removeUnpaintedPixel(x, y);
+      ctx.fillStyle = color;
+      ctx.fillRect(
+        x * CANVAS_DATA.PIXEL_SIZE,
+        y * CANVAS_DATA.PIXEL_SIZE,
+        CANVAS_DATA.PIXEL_SIZE,
+        CANVAS_DATA.PIXEL_SIZE,
+      );
+
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
+        x * CANVAS_DATA.PIXEL_SIZE,
+        y * CANVAS_DATA.PIXEL_SIZE,
+        CANVAS_DATA.PIXEL_SIZE,
+        CANVAS_DATA.PIXEL_SIZE,
+      );
+    });
+
+    ctx.strokeStyle = "#888888";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
+
+    ctx.shadowColor = "#000000";
+    ctx.shadowBlur = 4;
+    ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
+
+    ctx.restore();
+  }, [pixels, unpaintedPixels, position, scale, getContainerSize]);
+
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
+
+  const getCanvasCoordinates = useCallback(
+    (clientX: number, clientY: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return null;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor(
+        (clientX - rect.left - position.x) / (CANVAS_DATA.PIXEL_SIZE * scale),
+      );
+      const y = Math.floor(
+        (clientY - rect.top - position.y) / (CANVAS_DATA.PIXEL_SIZE * scale),
+      );
+
+      return { x, y };
+    },
+    [position, scale],
+  );
+
+  const handleClick = useCallback(
+    (clientX: number, clientY: number) => {
+      const coords = getCanvasCoordinates(clientX, clientY);
+      if (!coords) return;
+
+      const { x, y } = coords;
+      const isInsideBounds =
+        x >= 0 &&
+        y >= 0 &&
+        x < CANVAS_DATA.CANVAS_WIDTH &&
+        y < CANVAS_DATA.CANVAS_HEIGHT;
+
+      if (!isInsideBounds) return;
+
+      if (isPaletteOpen) {
+        if (isEraserActive) {
+          const key = `${x}:${y}`;
+          if (unpaintedPixels[key]) {
+            removeUnpaintedPixel(x, y);
+          } else {
+            toast.warn(t("canvas.errors.cannot-erase-unsent"));
+          }
         } else {
-          toast.warn(t("canvas.errors.cannot-erase-unsent"));
+          addUnpaintedPixel(x, y, selectedColor);
         }
-      } else {
-        addUnpaintedPixel(x, y, selectedColor);
+        return;
       }
-      return;
-    }
 
-    if (!isPaletteOpen && onPixelClick) {
-      const key = `${x}:${y}`;
-      const pixel = pixels[key];
-      if (pixel) onPixelClick(pixel);
-    }
-  }, [
-    isPaletteOpen,
-    isEraserActive,
-    addUnpaintedPixel,
-    removeUnpaintedPixel,
-    selectedColor,
-    unpaintedPixels,
-    pixels,
-    onPixelClick,
-    t,
-  ]);
+      if (!isPaletteOpen && onPixelClick) {
+        const key = `${x}:${y}`;
+        const pixel = pixels[key];
+        if (pixel) onPixelClick(pixel);
+      }
+    },
+    [
+      isPaletteOpen,
+      isEraserActive,
+      addUnpaintedPixel,
+      removeUnpaintedPixel,
+      selectedColor,
+      unpaintedPixels,
+      pixels,
+      onPixelClick,
+      getCanvasCoordinates,
+      t,
+    ],
+  );
+
+  const handleMouseUp = useCallback(
+    (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+
+      const state = dragStateRef.current;
+      setIsDragging(false);
+
+      if (state.distance > CANVAS_DATA.DRAG_THRESHOLD || state.hasMoved) return;
+
+      handleClick(e.clientX, e.clientY);
+    },
+    [handleClick],
+  );
 
   const handleTouchEnd = useCallback(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
     if (isPinchingRef.current) {
       isPinchingRef.current = false;
       pinchRef.current = null;
@@ -161,107 +252,112 @@ const useCanvas = (
     setIsDragging(false);
 
     if (state.distance <= CANVAS_DATA.DRAG_THRESHOLD && !state.hasMoved) {
-      handleMouseUp();
+      if (state.clientX !== undefined && state.clientY !== undefined) {
+        handleClick(state.clientX, state.clientY);
+      }
     }
-  }, [handleMouseUp]);
+  }, [handleClick]);
 
-  const handleMouseMove = useCallback(() => {
-    const stage = stageRef.current;
-    if (!stage || !isDraggingRef.current) return;
-
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
-
-    const state = dragStateRef.current;
-    const dx = pointer.x - state.startX;
-    const dy = pointer.y - state.startY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    state.distance = distance;
-
-    if (distance > CANVAS_DATA.DRAG_THRESHOLD) {
-      state.hasMoved = true;
-      const scale = stage.scaleX();
-      const newX = state.stageStartX + dx;
-      const newY = state.stageStartY + dy;
-      const { width: stageWidth, height: stageHeight } = getStageSize();
+  const constrainPosition = useCallback(
+    (newX: number, newY: number, currentScale: number) => {
+      const { width: stageWidth, height: stageHeight } = getContainerSize();
       const scaledWidth =
-        CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * scale;
+        CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * currentScale;
       const scaledHeight =
-        CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * scale;
+        CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * currentScale;
+
       const minX = Math.min(0, stageWidth - scaledWidth);
       const maxX = 0;
       const minY = Math.min(0, stageHeight - scaledHeight);
       const maxY = 0;
 
-      stage.x(Math.max(minX, Math.min(maxX, newX)));
-      stage.y(Math.max(minY, Math.min(maxY, newY)));
-    }
-  }, [getStageSize]);
+      return {
+        x: Math.max(minX, Math.min(maxX, newX)),
+        y: Math.max(minY, Math.min(maxY, newY)),
+      };
+    },
+    [getContainerSize],
+  );
 
-  const handleMouseDown = useCallback((e: KonvaEventObject<MouseEvent>) => {
-    const stage = stageRef.current;
-    if (!stage || (e.evt.button !== 0 && e.evt.button !== 1)) return;
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
 
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
+      const state = dragStateRef.current;
+      const dx = e.clientX - state.startX;
+      const dy = e.clientY - state.startY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      state.distance = distance;
 
-    setIsDragging(true);
-    dragStateRef.current = {
-      startX: pointer.x,
-      startY: pointer.y,
-      stageStartX: stage.x(),
-      stageStartY: stage.y(),
-      distance: 0,
-      hasMoved: false,
-    };
-  }, []);
+      if (distance > CANVAS_DATA.DRAG_THRESHOLD) {
+        state.hasMoved = true;
+        const newX = state.stageStartX + dx;
+        const newY = state.stageStartY + dy;
+        const constrained = constrainPosition(newX, newY, scale);
+        setPosition(constrained);
+      }
+    },
+    [scale, constrainPosition],
+  );
 
-  const handleTouchStart = useCallback((e: KonvaEventObject<TouchEvent>) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    e.evt.preventDefault();
-
-    if (e.evt.touches.length === 2) {
-      setIsDragging(false);
-      isPinchingRef.current = true;
-      const [touch1, touch2] = e.evt.touches;
-      if (!touch1 || !touch2) return;
-
-      const dist = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY,
-      );
-      pinchRef.current = { startDist: dist, startScale: stage.scaleX() };
-      return;
-    }
-
-    if (e.evt.touches.length === 1) {
-      const pointer = stage.getPointerPosition();
-      if (!pointer) return;
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0 && e.button !== 1) return;
 
       setIsDragging(true);
       dragStateRef.current = {
-        startX: pointer.x,
-        startY: pointer.y,
-        stageStartX: stage.x(),
-        stageStartY: stage.y(),
+        startX: e.clientX,
+        startY: e.clientY,
+        stageStartX: position.x,
+        stageStartY: position.y,
         distance: 0,
         hasMoved: false,
       };
-    }
-  }, []);
+    },
+    [position],
+  );
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+
+      if (e.touches.length === 2) {
+        setIsDragging(false);
+        isPinchingRef.current = true;
+        const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
+
+        const dist = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY,
+        );
+        pinchRef.current = { startDist: dist, startScale: scale };
+        return;
+      }
+
+      if (e.touches.length === 1) {
+        const touch = e.touches[0]!;
+        setIsDragging(true);
+        dragStateRef.current = {
+          startX: touch.clientX,
+          startY: touch.clientY,
+          stageStartX: position.x,
+          stageStartY: position.y,
+          distance: 0,
+          hasMoved: false,
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+        };
+      }
+    },
+    [position, scale],
+  );
 
   const handleTouchMove = useCallback(
-    (e: KonvaEventObject<TouchEvent>) => {
-      const stage = stageRef.current;
-      if (!stage) return;
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 2 && pinchRef.current) {
+        e.preventDefault();
+        const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
 
-      if (e.evt.touches.length === 2 && pinchRef.current) {
-        const [touch1, touch2] = e.evt.touches;
-        if (!touch1 || !touch2) return;
-
-        e.evt.preventDefault();
         const dist = Math.hypot(
           touch2.clientX - touch1.clientX,
           touch2.clientY - touch1.clientY,
@@ -280,107 +376,99 @@ const useCanvas = (
         };
 
         const mousePointTo = {
-          x: (pointer.x - stage.x()) / stage.scaleX(),
-          y: (pointer.y - stage.y()) / stage.scaleY(),
+          x: (pointer.x - position.x) / scale,
+          y: (pointer.y - position.y) / scale,
         };
-
-        stage.scale({ x: limitedScale, y: limitedScale });
-
-        const { width: stageWidth, height: stageHeight } = getStageSize();
-        const scaledWidth =
-          CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * limitedScale;
-        const scaledHeight =
-          CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * limitedScale;
-        const minX = Math.min(0, stageWidth - scaledWidth);
-        const maxX = 0;
-        const minY = Math.min(0, stageHeight - scaledHeight);
-        const maxY = 0;
 
         const newX = pointer.x - mousePointTo.x * limitedScale;
         const newY = pointer.y - mousePointTo.y * limitedScale;
 
-        stage.position({
-          x: Math.max(minX, Math.min(maxX, newX)),
-          y: Math.max(minY, Math.min(maxY, newY)),
-        });
-
-        stage.batchDraw();
+        const constrained = constrainPosition(newX, newY, limitedScale);
+        setScale(limitedScale);
+        setPosition(constrained);
         return;
       }
 
-      if (isDraggingRef.current) {
-        e.evt.preventDefault();
-        handleMouseMove();
+      if (isDraggingRef.current && e.touches.length === 1) {
+        e.preventDefault();
+        const touch = e.touches[0]!;
+        const state = dragStateRef.current;
+        const dx = touch.clientX - state.startX;
+        const dy = touch.clientY - state.startY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        state.distance = distance;
+
+        if (distance > CANVAS_DATA.DRAG_THRESHOLD) {
+          state.hasMoved = true;
+          const newX = state.stageStartX + dx;
+          const newY = state.stageStartY + dy;
+          const constrained = constrainPosition(newX, newY, scale);
+          setPosition(constrained);
+        }
+
+        state.clientX = touch.clientX;
+        state.clientY = touch.clientY;
       }
     },
-    [handleMouseMove, getStageSize],
+    [position, scale, constrainPosition],
   );
 
   const handleWheel = useCallback(
-    (e: KonvaEventObject<WheelEvent>) => {
-      const stage = stageRef.current;
-      if (!stage) return;
+    (e: React.WheelEvent) => {
+      e.preventDefault();
 
-      e.evt.preventDefault();
-      const oldScale = stage.scaleX();
-      const pointer = stage.getPointerPosition();
-      if (!pointer) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const pointer = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
 
       const mousePointTo = {
-        x: (pointer.x - stage.x()) / oldScale,
-        y: (pointer.y - stage.y()) / oldScale,
+        x: (pointer.x - position.x) / scale,
+        y: (pointer.y - position.y) / scale,
       };
+
       const scaleBy = 1.1;
-      const newScale =
-        e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
+      const newScale = e.deltaY > 0 ? scale / scaleBy : scale * scaleBy;
       const limitedScale = Math.max(
         CANVAS_DATA.MIN_SCALE,
         Math.min(newScale, CANVAS_DATA.MAX_SCALE),
       );
 
-      stage.scale({ x: limitedScale, y: limitedScale });
+      const newX = pointer.x - mousePointTo.x * limitedScale;
+      const newY = pointer.y - mousePointTo.y * limitedScale;
 
-      const newPos = {
-        x: pointer.x - mousePointTo.x * limitedScale,
-        y: pointer.y - mousePointTo.y * limitedScale,
-      };
-      const { width: stageWidth, height: stageHeight } = getStageSize();
-      const scaledWidth =
-        CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE * limitedScale;
-      const scaledHeight =
-        CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE * limitedScale;
-      const minX = Math.min(0, stageWidth - scaledWidth);
-      const maxX = 0;
-      const minY = Math.min(0, stageHeight - scaledHeight);
-      const maxY = 0;
-
-      stage.position({
-        x: Math.max(minX, Math.min(maxX, newPos.x)),
-        y: Math.max(minY, Math.min(maxY, newPos.y)),
-      });
+      const constrained = constrainPosition(newX, newY, limitedScale);
+      setScale(limitedScale);
+      setPosition(constrained);
     },
-    [getStageSize],
+    [position, scale, constrainPosition],
   );
 
   useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("touchend", handleTouchEnd);
+
     return () => {
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [handleMouseUp, handleTouchEnd]);
+  }, [handleMouseUp, handleMouseMove, handleTouchEnd]);
 
   return {
-    stageRef,
+    canvasRef,
+    containerRef,
+    isDragging,
     pixels,
     unpaintedPixels,
     handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
     handleTouchStart,
     handleTouchMove,
-    handleTouchEnd,
     handleWheel,
     centerCanvas,
   };

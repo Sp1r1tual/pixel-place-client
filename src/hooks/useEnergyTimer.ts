@@ -17,7 +17,6 @@ const useEnergyTimer = (
 ) => {
   const frameRef = useRef<number | undefined>(undefined);
   const setEnergy = useCanvasStore((state) => state.setEnergy);
-  const unpaintedPixels = useCanvasStore((state) => state.unpaintedPixels);
 
   useEffect(() => {
     if (!showTimer || !timerData || !displayRef?.current) return;
@@ -35,9 +34,7 @@ const useEnergyTimer = (
         maxEnergy,
       );
 
-      const availableEnergy =
-        Math.floor(currentEnergy) - Object.keys(unpaintedPixels).length;
-      const displayEnergy = Math.max(availableEnergy, 0);
+      const displayEnergy = Math.floor(currentEnergy);
 
       setEnergy(currentEnergy);
 
@@ -68,14 +65,7 @@ const useEnergyTimer = (
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
-  }, [
-    timerData,
-    displayRef,
-    progressText,
-    showTimer,
-    setEnergy,
-    unpaintedPixels,
-  ]);
+  }, [timerData, displayRef, progressText, showTimer, setEnergy]);
 };
 
 export { useEnergyTimer };
