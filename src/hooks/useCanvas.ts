@@ -8,7 +8,7 @@ import { IPixel } from "@/types";
 
 import { CANVAS_DATA } from "@/data/canvas";
 
-interface DragState {
+interface IDragState {
   startX: number;
   startY: number;
   stageStartX: number;
@@ -43,7 +43,7 @@ const useCanvas = (
     cleanupSocket,
   } = useCanvasStore();
 
-  const dragStateRef = useRef<DragState>({
+  const dragStateRef = useRef<IDragState>({
     startX: 0,
     startY: 0,
     stageStartX: 0,
@@ -320,6 +320,7 @@ const useCanvas = (
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       e.preventDefault();
+      e.stopPropagation();
 
       if (e.touches.length === 2) {
         setIsDragging(false);
@@ -354,8 +355,10 @@ const useCanvas = (
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
       if (e.touches.length === 2 && pinchRef.current) {
-        e.preventDefault();
         const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
 
         const dist = Math.hypot(
@@ -390,7 +393,6 @@ const useCanvas = (
       }
 
       if (isDraggingRef.current && e.touches.length === 1) {
-        e.preventDefault();
         const touch = e.touches[0]!;
         const state = dragStateRef.current;
         const dx = touch.clientX - state.startX;
