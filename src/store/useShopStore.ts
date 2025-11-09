@@ -55,8 +55,9 @@ const useShopStore = create<IShopState>((set, get) => ({
 
     try {
       const response = await ShopService.buyUpgrade(itemType);
-      const { effectValue } = response.data;
+      const { data } = response;
 
+      const { effectValue } = data;
       const canvasStore = useCanvasStore.getState();
 
       if (itemType === "energyLimit") {
@@ -64,7 +65,7 @@ const useShopStore = create<IShopState>((set, get) => ({
         canvasStore.setEnergy(canvasStore.energy + 1);
       }
       if (itemType === "recoverySpeed") {
-        canvasStore.setRecoverySpeed(effectValue);
+        canvasStore.setRecoverySpeed(data.recoverySpeed ?? effectValue);
       }
       if (itemType === "pixelReward") {
         canvasStore.setPixelReward(effectValue);
@@ -72,8 +73,9 @@ const useShopStore = create<IShopState>((set, get) => ({
 
       set((state) => ({
         currency:
+          data.currency ??
           state.currency -
-          (state.items.find((i) => i.type === itemType)?.price || 0),
+            (state.items.find((i) => i.type === itemType)?.price || 0),
         items: state.items.map((i) =>
           i.type === itemType && i.level! < i.maxLevel!
             ? { ...i, level: i.level! + 1 }
