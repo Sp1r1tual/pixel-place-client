@@ -29,7 +29,7 @@ It’s pixel democracy: **each user gets one pixel, but together, they build art
 - **Frontend Framework:** React 19
 - **Language:** TypeScript
 - **Routing:** React Router v7
-- **Canvas Rendering:** Konva + React Konva
+- **Canvas Rendering:** Canvas API
 - **State Management:** Zustand
 - **Networking:** Axios + Socket.IO Client
 - **Bundler:** Vite
