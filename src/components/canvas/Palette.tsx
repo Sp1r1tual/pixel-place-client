@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCanvasStore } from "@/store/useCanvasStore";
 
 import { PALETTE_COLORS } from "@/data/canvas";
 
@@ -9,25 +9,30 @@ interface PaletteProps {
 }
 
 const Palette = ({ onSelectColor }: PaletteProps) => {
-  const [selectedColor, setSelectedColor] = useState<string>(
-    PALETTE_COLORS[0] || "#000000",
-  );
+  const selectedColor = useCanvasStore((state) => state.selectedColor);
 
   const handleSelect = (color: string) => {
-    setSelectedColor(color);
+    useCanvasStore.getState().setSelectedColor(color);
     if (onSelectColor) onSelectColor(color);
   };
 
   return (
-    <div className={styles.palette}>
+    <div className={`${styles.palette} ui-element`}>
       {PALETTE_COLORS.map((color) => (
         <div
           key={color}
-          className={`${styles.colorBox} ${
+          className={`${styles.colorBox} ui-element ${
             color === selectedColor ? styles.selected : ""
           }`}
           style={{ backgroundColor: color }}
           onClick={() => handleSelect(color)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              handleSelect(color);
+            }
+          }}
         />
       ))}
     </div>
