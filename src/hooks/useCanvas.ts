@@ -30,6 +30,7 @@ const useCanvas = (
 
   const isPinchingRef = useRef(false);
   const isDraggingRef = useRef(false);
+  const renderRequestedRef = useRef(false);
 
   const [isDragging, setIsDragging] = useState(false);
   const [scale, setScale] = useState(1);
@@ -92,7 +93,7 @@ const useCanvas = (
     }
 
     const offscreen = offscreenRef.current;
-    const ctx = offscreen.getContext("2d");
+    const ctx = offscreen.getContext("2d", { alpha: false });
 
     if (!ctx) return;
 
@@ -154,12 +155,15 @@ const useCanvas = (
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
     const { width, height } = getContainerSize();
-    canvas.width = width;
-    canvas.height = height;
+
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
 
     drawOffscreen();
     const offscreen = offscreenRef.current;
@@ -183,19 +187,20 @@ const useCanvas = (
       canvasHeight * scale,
     );
     ctx.restore();
+
+    renderRequestedRef.current = false;
   }, [drawOffscreen, position, scale, getContainerSize]);
 
-  useEffect(() => {
-    let animationFrame: number;
-    const render = () => {
-      drawCanvas();
-      animationFrame = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => cancelAnimationFrame(animationFrame);
+  const requestRender = useCallback(() => {
+    if (!renderRequestedRef.current) {
+      renderRequestedRef.current = true;
+      requestAnimationFrame(drawCanvas);
+    }
   }, [drawCanvas]);
+
+  useEffect(() => {
+    requestRender();
+  }, [pixels, unpaintedPixels, position, scale, requestRender]);
 
   const getCanvasCoordinates = useCallback(
     (clientX: number, clientY: number) => {
@@ -343,9 +348,8 @@ const useCanvas = (
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
-      e.preventDefault();
-
       if (e.touches.length === 2) {
+        e.preventDefault();
         isPinchingRef.current = true;
 
         const t0 = e.touches[0];
@@ -446,29 +450,32 @@ const useCanvas = (
     [position, scale, constrainPosition],
   );
 
-  const handleTouchEnd = useCallback(() => {
-    if (isPinchingRef.current) {
-      isPinchingRef.current = false;
-      pinchRef.current = null;
-      setIsDragging(false);
-      isDraggingRef.current = false;
-      return;
-    }
-    const state = dragStateRef.current;
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent) => {
+      if (isPinchingRef.current && e.touches.length < 2) {
+        isPinchingRef.current = false;
+        pinchRef.current = null;
+      }
 
-    setIsDragging(false);
+      if (e.touches.length === 0) {
+        const state = dragStateRef.current;
 
-    isDraggingRef.current = false;
+        setIsDragging(false);
+        isDraggingRef.current = false;
 
-    if (
-      state.distance <= CANVAS_DATA.DRAG_THRESHOLD &&
-      !state.hasMoved &&
-      state.clientX !== undefined &&
-      state.clientY !== undefined
-    ) {
-      handleClick(state.clientX, state.clientY);
-    }
-  }, [handleClick]);
+        if (
+          !isPinchingRef.current &&
+          state.distance <= CANVAS_DATA.DRAG_THRESHOLD &&
+          !state.hasMoved &&
+          state.clientX !== undefined &&
+          state.clientY !== undefined
+        ) {
+          handleClick(state.clientX, state.clientY);
+        }
+      }
+    },
+    [handleClick],
+  );
 
   const handleWheel = useCallback(
     (e: WheelEvent) => {
@@ -508,26 +515,28 @@ const useCanvas = (
 
     canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
     canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
+    canvas.addEventListener("touchcancel", handleTouchEnd, { passive: false });
     canvas.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
       canvas.removeEventListener("touchstart", handleTouchStart);
       canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+      canvas.removeEventListener("touchcancel", handleTouchEnd);
       canvas.removeEventListener("wheel", handleWheel);
     };
-  }, [handleTouchStart, handleTouchMove, handleWheel]);
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel]);
 
   useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [handleMouseUp, handleMouseMove, handleTouchEnd]);
+  }, [handleMouseUp, handleMouseMove]);
 
   return {
     canvasRef,
