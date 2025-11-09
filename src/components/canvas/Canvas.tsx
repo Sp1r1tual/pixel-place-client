@@ -4,6 +4,8 @@ import { useCanvas } from "@/hooks/useCanvas";
 
 import { IPixel } from "@/types";
 
+import styles from "./styles/Canvas.module.css";
+
 interface ICanvasProps {
   isPaletteOpen: boolean;
   isEraserActive: boolean;
@@ -26,22 +28,11 @@ const Canvas = ({
   }, [centerCanvas]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        position: "relative",
-      }}
-    >
+    <div ref={containerRef} className={styles.container}>
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
-        style={{
-          display: "block",
-          touchAction: "none",
-        }}
+        className={styles.canvas}
       />
     </div>
   );
