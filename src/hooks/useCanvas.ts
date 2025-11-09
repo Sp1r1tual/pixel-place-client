@@ -239,24 +239,35 @@ const useCanvas = (
     [handleClick],
   );
 
-  const handleTouchEnd = useCallback(() => {
-    if (isPinchingRef.current) {
-      isPinchingRef.current = false;
-      pinchRef.current = null;
-      setIsDragging(false);
-      return;
-    }
-
-    pinchRef.current = null;
-    const state = dragStateRef.current;
-    setIsDragging(false);
-
-    if (state.distance <= CANVAS_DATA.DRAG_THRESHOLD && !state.hasMoved) {
-      if (state.clientX !== undefined && state.clientY !== undefined) {
-        handleClick(state.clientX, state.clientY);
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest('button, [role="button"], .ui-element')) {
+        isPinchingRef.current = false;
+        pinchRef.current = null;
+        setIsDragging(false);
+        return;
       }
-    }
-  }, [handleClick]);
+
+      if (isPinchingRef.current) {
+        isPinchingRef.current = false;
+        pinchRef.current = null;
+        setIsDragging(false);
+        return;
+      }
+
+      pinchRef.current = null;
+      const state = dragStateRef.current;
+      setIsDragging(false);
+
+      if (state.distance <= CANVAS_DATA.DRAG_THRESHOLD && !state.hasMoved) {
+        if (state.clientX !== undefined && state.clientY !== undefined) {
+          handleClick(state.clientX, state.clientY);
+        }
+      }
+    },
+    [handleClick],
+  );
 
   const constrainPosition = useCallback(
     (newX: number, newY: number, currentScale: number) => {
@@ -319,6 +330,11 @@ const useCanvas = (
 
   const handleTouchStartNative = useCallback(
     (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest('button, [role="button"], .ui-element')) {
+        return;
+      }
+
       e.preventDefault();
 
       if (e.touches.length === 2) {
@@ -472,7 +488,7 @@ const useCanvas = (
   useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("touchend", handleTouchEnd);
+    window.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
       window.removeEventListener("mouseup", handleMouseUp);
