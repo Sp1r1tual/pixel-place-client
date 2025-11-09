@@ -317,8 +317,8 @@ const useCanvas = (
     [position],
   );
 
-  const handleTouchStart = useCallback(
-    (e: React.TouchEvent) => {
+  const handleTouchStartNative = useCallback(
+    (e: TouchEvent) => {
       e.preventDefault();
 
       if (e.touches.length === 2) {
@@ -352,8 +352,8 @@ const useCanvas = (
     [position, scale],
   );
 
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
+  const handleTouchMoveNative = useCallback(
+    (e: TouchEvent) => {
       if (e.touches.length === 2 && pinchRef.current) {
         e.preventDefault();
         const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
@@ -413,8 +413,8 @@ const useCanvas = (
     [position, scale, constrainPosition],
   );
 
-  const handleWheel = useCallback(
-    (e: React.WheelEvent) => {
+  const handleWheelNative = useCallback(
+    (e: WheelEvent) => {
       e.preventDefault();
 
       const canvas = canvasRef.current;
@@ -449,6 +449,27 @@ const useCanvas = (
   );
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    canvas.addEventListener("touchstart", handleTouchStartNative, {
+      passive: false,
+    });
+    canvas.addEventListener("touchmove", handleTouchMoveNative, {
+      passive: false,
+    });
+    canvas.addEventListener("wheel", handleWheelNative, {
+      passive: false,
+    });
+
+    return () => {
+      canvas.removeEventListener("touchstart", handleTouchStartNative);
+      canvas.removeEventListener("touchmove", handleTouchMoveNative);
+      canvas.removeEventListener("wheel", handleWheelNative);
+    };
+  }, [handleTouchStartNative, handleTouchMoveNative, handleWheelNative]);
+
+  useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("touchend", handleTouchEnd);
@@ -467,9 +488,6 @@ const useCanvas = (
     pixels,
     unpaintedPixels,
     handleMouseDown,
-    handleTouchStart,
-    handleTouchMove,
-    handleWheel,
     centerCanvas,
   };
 };

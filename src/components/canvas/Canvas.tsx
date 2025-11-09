@@ -15,15 +15,11 @@ const Canvas = ({
   isEraserActive,
   onPixelClick,
 }: ICanvasProps) => {
-  const {
-    canvasRef,
-    containerRef,
-    handleMouseDown,
-    handleTouchStart,
-    handleTouchMove,
-    handleWheel,
-    centerCanvas,
-  } = useCanvas(isPaletteOpen, isEraserActive, onPixelClick);
+  const { canvasRef, containerRef, handleMouseDown, centerCanvas } = useCanvas(
+    isPaletteOpen,
+    isEraserActive,
+    onPixelClick,
+  );
 
   useEffect(() => {
     centerCanvas();
@@ -42,9 +38,6 @@ const Canvas = ({
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
-        onWheel={handleWheel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
         style={{
           display: "block",
           touchAction: "none",
