@@ -25,6 +25,7 @@ const useCanvas = (
   onPixelClick?: (pixel: IPixel) => void,
 ) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isPinchingRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -90,7 +91,7 @@ const useCanvas = (
 
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !offscreenCanvasRef.current) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -101,19 +102,42 @@ const useCanvas = (
 
     ctx.clearRect(0, 0, width, height);
 
-    ctx.save();
-    ctx.translate(position.x, position.y);
-    ctx.scale(scale, scale);
-
     const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
     const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(
+      offscreenCanvasRef.current,
+      0,
+      0,
+      canvasWidth,
+      canvasHeight,
+      position.x,
+      position.y,
+      canvasWidth * scale,
+      canvasHeight * scale,
+    );
+  }, [position, scale, getContainerSize]);
+
+  useEffect(() => {
+    if (!offscreenCanvasRef.current) {
+      offscreenCanvasRef.current = document.createElement("canvas");
+    }
+    const offscreen = offscreenCanvasRef.current;
+    const offscreenCtx = offscreen.getContext("2d");
+    if (!offscreenCtx) return;
+
+    const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
+    const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
+    offscreen.width = canvasWidth;
+    offscreen.height = canvasHeight;
+
+    offscreenCtx.fillStyle = "#fff";
+    offscreenCtx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     Object.entries(pixels).forEach(([_, pixel]) => {
-      ctx.fillStyle = pixel.color;
-      ctx.fillRect(
+      offscreenCtx.fillStyle = pixel.color;
+      offscreenCtx.fillRect(
         pixel.x * CANVAS_DATA.PIXEL_SIZE,
         pixel.y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
@@ -126,17 +150,17 @@ const useCanvas = (
       const x = Number(xStr);
       const y = Number(yStr);
 
-      ctx.fillStyle = color;
-      ctx.fillRect(
+      offscreenCtx.fillStyle = color;
+      offscreenCtx.fillRect(
         x * CANVAS_DATA.PIXEL_SIZE,
         y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
       );
 
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(
+      offscreenCtx.strokeStyle = "#ffffff";
+      offscreenCtx.lineWidth = 1;
+      offscreenCtx.strokeRect(
         x * CANVAS_DATA.PIXEL_SIZE,
         y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
@@ -144,16 +168,8 @@ const useCanvas = (
       );
     });
 
-    ctx.strokeStyle = "#888888";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
-
-    ctx.shadowColor = "#000000";
-    ctx.shadowBlur = 4;
-    ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
-
-    ctx.restore();
-  }, [pixels, unpaintedPixels, position, scale, getContainerSize]);
+    drawCanvas();
+  }, [pixels, unpaintedPixels, drawCanvas]);
 
   useEffect(() => {
     drawCanvas();
@@ -346,7 +362,10 @@ const useCanvas = (
       if (e.touches.length === 2) {
         setIsDragging(false);
         isPinchingRef.current = true;
-        const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+
+        if (!touch1 || !touch2) return;
 
         const dist = Math.hypot(
           touch2.clientX - touch1.clientX,
@@ -357,7 +376,9 @@ const useCanvas = (
       }
 
       if (e.touches.length === 1) {
-        const touch = e.touches[0]!;
+        const touch = e.touches[0];
+        if (!touch) return;
+
         setIsDragging(true);
         dragStateRef.current = {
           startX: touch.clientX,
@@ -378,7 +399,10 @@ const useCanvas = (
     (e: TouchEvent) => {
       if (e.touches.length === 2 && pinchRef.current) {
         e.preventDefault();
-        const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+
+        if (!touch1 || !touch2) return;
 
         const dist = Math.hypot(
           touch2.clientX - touch1.clientX,
@@ -413,7 +437,9 @@ const useCanvas = (
 
       if (isDraggingRef.current && e.touches.length === 1) {
         e.preventDefault();
-        const touch = e.touches[0]!;
+        const touch = e.touches[0];
+        if (!touch) return;
+
         const state = dragStateRef.current;
         const dx = touch.clientX - state.startX;
         const dy = touch.clientY - state.startY;
