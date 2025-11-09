@@ -68,7 +68,7 @@ const CanvasView = () => {
           {isPaletteOpen && (
             <>
               <div className={styles.topRow}>
-                <div className={styles.uiBtnWrapper}>
+                <div className={`${styles.uiBtnWrapper} ui-element`}>
                   <InterfaceBtn
                     id="hideInterfaceBtn"
                     imgDefault={hideInterfaceSvg}
@@ -89,7 +89,7 @@ const CanvasView = () => {
                   {t("canvas.painted")} {pixelsPainted}
                 </span>
 
-                <div className={styles.uiBtnWrapper}>
+                <div className={`${styles.uiBtnWrapper} ui-element`}>
                   <InterfaceBtn
                     id="undoPixelBtn"
                     imgDefault={undoSvg}
@@ -99,7 +99,7 @@ const CanvasView = () => {
                 </div>
               </div>
 
-              <div className={styles.paletteWrapper}>
+              <div className={`${styles.paletteWrapper} ui-element`}>
                 <Palette onSelectColor={handleColorSelect} />
               </div>
             </>

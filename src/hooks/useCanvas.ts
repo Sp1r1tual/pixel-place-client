@@ -227,6 +227,12 @@ const useCanvas = (
 
   const handleMouseUp = useCallback(
     (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest('button, [role="button"], .ui-element')) {
+        setIsDragging(false);
+        return;
+      }
+
       if (!isDraggingRef.current) return;
 
       const state = dragStateRef.current;
