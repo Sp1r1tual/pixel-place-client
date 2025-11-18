@@ -378,6 +378,9 @@ const useCanvas = (
     (e: TouchEvent) => {
       if (e.touches.length === 2 && pinchRef.current) {
         e.preventDefault();
+
+        dragStateRef.current.hasMoved = true;
+
         const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
 
         const dist = Math.hypot(
