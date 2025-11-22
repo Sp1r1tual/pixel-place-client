@@ -1,4 +1,11 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useEffectEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -26,6 +33,7 @@ const useCanvas = (
 ) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const offscreenRef = useRef<HTMLCanvasElement | null>(null);
   const isPinchingRef = useRef(false);
   const isDraggingRef = useRef(false);
 
@@ -67,6 +75,12 @@ const useCanvas = (
     return () => cleanupSocket();
   }, [initSocket, cleanupSocket]);
 
+  useLayoutEffect(() => {
+    if (!offscreenRef.current) {
+      offscreenRef.current = document.createElement("canvas");
+    }
+  }, []);
+
   const getContainerSize = useCallback(() => {
     if (!containerRef.current) {
       return { width: window.innerWidth, height: window.innerHeight };
@@ -90,38 +104,62 @@ const useCanvas = (
 
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const offscreen = offscreenRef.current;
+
+    if (!canvas || !offscreen) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const { width, height } = getContainerSize();
-
     const dpr = window.devicePixelRatio || 1;
 
     canvas.width = width * dpr;
     canvas.height = height * dpr;
-
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
     ctx.scale(dpr, dpr);
-
     ctx.clearRect(0, 0, width, height);
-
-    ctx.save();
-    ctx.translate(position.x, position.y);
-    ctx.scale(scale, scale);
 
     const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
     const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(
+      offscreen,
+      0,
+      0,
+      canvasWidth,
+      canvasHeight,
+      position.x,
+      position.y,
+      canvasWidth * scale,
+      canvasHeight * scale,
+    );
+  }, [position, scale, getContainerSize]);
+
+  const updateOffscreen = useCallback(() => {
+    const offscreen = offscreenRef.current;
+    if (!offscreen) return;
+
+    const offCtx = offscreen.getContext("2d");
+    if (!offCtx) return;
+
+    const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
+    const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
+
+    offscreen.width = canvasWidth;
+    offscreen.height = canvasHeight;
+
+    offCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    offCtx.fillStyle = "#fff";
+    offCtx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     Object.entries(pixels).forEach(([_, pixel]) => {
-      ctx.fillStyle = pixel.color;
-      ctx.fillRect(
+      offCtx.fillStyle = pixel.color;
+      offCtx.fillRect(
         pixel.x * CANVAS_DATA.PIXEL_SIZE,
         pixel.y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
@@ -134,17 +172,17 @@ const useCanvas = (
       const x = Number(xStr);
       const y = Number(yStr);
 
-      ctx.fillStyle = color;
-      ctx.fillRect(
+      offCtx.fillStyle = color;
+      offCtx.fillRect(
         x * CANVAS_DATA.PIXEL_SIZE,
         y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
       );
 
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(
+      offCtx.strokeStyle = "#fff";
+      offCtx.lineWidth = 1;
+      offCtx.strokeRect(
         x * CANVAS_DATA.PIXEL_SIZE,
         y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
@@ -152,20 +190,27 @@ const useCanvas = (
       );
     });
 
-    ctx.strokeStyle = "#888888";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
+    offCtx.strokeStyle = "#888888";
+    offCtx.lineWidth = 3;
+    offCtx.strokeRect(0, 0, canvasWidth, canvasHeight);
 
-    ctx.shadowColor = "#000000";
-    ctx.shadowBlur = 4;
-    ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
+    offCtx.shadowColor = "#000";
+    offCtx.shadowBlur = 4;
+    offCtx.strokeRect(0, 0, canvasWidth, canvasHeight);
 
-    ctx.restore();
-  }, [pixels, unpaintedPixels, position, scale, getContainerSize]);
-
-  useEffect(() => {
     drawCanvas();
-  }, [drawCanvas]);
+  }, [pixels, unpaintedPixels, drawCanvas]);
+
+  const onUpdateOffscreen = useEffectEvent(updateOffscreen);
+  const onDrawCanvas = useEffectEvent(drawCanvas);
+
+  useLayoutEffect(() => {
+    onUpdateOffscreen();
+  }, [pixels, unpaintedPixels]);
+
+  useLayoutEffect(() => {
+    onDrawCanvas();
+  }, [position, scale]);
 
   const getCanvasCoordinates = useCallback(
     (clientX: number, clientY: number) => {
@@ -191,13 +236,13 @@ const useCanvas = (
       if (!coords) return;
 
       const { x, y } = coords;
-      const isInsideBounds =
+      const isInside =
         x >= 0 &&
         y >= 0 &&
         x < CANVAS_DATA.CANVAS_WIDTH &&
         y < CANVAS_DATA.CANVAS_HEIGHT;
 
-      if (!isInsideBounds) return;
+      if (!isInside) return;
 
       if (isPaletteOpen) {
         if (isEraserActive) {
@@ -318,8 +363,7 @@ const useCanvas = (
         state.hasMoved = true;
         const newX = state.stageStartX + dx;
         const newY = state.stageStartY + dy;
-        const constrained = constrainPosition(newX, newY, scale);
-        setPosition(constrained);
+        setPosition(constrainPosition(newX, newY, scale));
       }
     },
     [scale, constrainPosition],
@@ -354,11 +398,11 @@ const useCanvas = (
       if (e.touches.length === 2) {
         setIsDragging(false);
         isPinchingRef.current = true;
-        const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
+        const [t1, t2] = [e.touches[0]!, e.touches[1]!];
 
         const dist = Math.hypot(
-          touch2.clientX - touch1.clientX,
-          touch2.clientY - touch1.clientY,
+          t2.clientX - t1.clientX,
+          t2.clientY - t1.clientY,
         );
         pinchRef.current = { startDist: dist, startScale: scale };
         return;
@@ -386,39 +430,38 @@ const useCanvas = (
     (e: TouchEvent) => {
       if (e.touches.length === 2 && pinchRef.current) {
         e.preventDefault();
-
         dragStateRef.current.hasMoved = true;
 
-        const [touch1, touch2] = [e.touches[0]!, e.touches[1]!];
+        const [t1, t2] = [e.touches[0]!, e.touches[1]!];
 
         const dist = Math.hypot(
-          touch2.clientX - touch1.clientX,
-          touch2.clientY - touch1.clientY,
+          t2.clientX - t1.clientX,
+          t2.clientY - t1.clientY,
         );
 
         const newScale =
           (dist / pinchRef.current.startDist) * pinchRef.current.startScale;
-        const limitedScale = Math.max(
+
+        const limited = Math.max(
           CANVAS_DATA.MIN_SCALE,
           Math.min(newScale, CANVAS_DATA.MAX_SCALE),
         );
 
-        const pointer = {
-          x: (touch1.clientX + touch2.clientX) / 2,
-          y: (touch1.clientY + touch2.clientY) / 2,
+        const center = {
+          x: (t1.clientX + t2.clientX) / 2,
+          y: (t1.clientY + t2.clientY) / 2,
         };
 
         const mousePointTo = {
-          x: (pointer.x - position.x) / scale,
-          y: (pointer.y - position.y) / scale,
+          x: (center.x - position.x) / scale,
+          y: (center.y - position.y) / scale,
         };
 
-        const newX = pointer.x - mousePointTo.x * limitedScale;
-        const newY = pointer.y - mousePointTo.y * limitedScale;
+        const newX = center.x - mousePointTo.x * limited;
+        const newY = center.y - mousePointTo.y * limited;
 
-        const constrained = constrainPosition(newX, newY, limitedScale);
-        setScale(limitedScale);
-        setPosition(constrained);
+        setScale(limited);
+        setPosition(constrainPosition(newX, newY, limited));
         return;
       }
 
@@ -426,6 +469,7 @@ const useCanvas = (
         e.preventDefault();
         const touch = e.touches[0]!;
         const state = dragStateRef.current;
+
         const dx = touch.clientX - state.startX;
         const dy = touch.clientY - state.startY;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -435,8 +479,7 @@ const useCanvas = (
           state.hasMoved = true;
           const newX = state.stageStartX + dx;
           const newY = state.stageStartY + dy;
-          const constrained = constrainPosition(newX, newY, scale);
-          setPosition(constrained);
+          setPosition(constrainPosition(newX, newY, scale));
         }
 
         state.clientX = touch.clientX;
@@ -466,17 +509,17 @@ const useCanvas = (
 
       const scaleBy = 1.1;
       const newScale = e.deltaY > 0 ? scale / scaleBy : scale * scaleBy;
-      const limitedScale = Math.max(
+
+      const limited = Math.max(
         CANVAS_DATA.MIN_SCALE,
         Math.min(newScale, CANVAS_DATA.MAX_SCALE),
       );
 
-      const newX = pointer.x - mousePointTo.x * limitedScale;
-      const newY = pointer.y - mousePointTo.y * limitedScale;
+      const newX = pointer.x - mousePointTo.x * limited;
+      const newY = pointer.y - mousePointTo.y * limited;
 
-      const constrained = constrainPosition(newX, newY, limitedScale);
-      setScale(limitedScale);
-      setPosition(constrained);
+      setScale(limited);
+      setPosition(constrainPosition(newX, newY, limited));
     },
     [position, scale, constrainPosition],
   );
