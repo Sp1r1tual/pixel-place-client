@@ -75,10 +75,18 @@
     position: static;
     transform: none;
   }
+
+  .shopContainer {
+    margin-bottom: 3rem;
+  }
 }
 
 @media (max-width: 480px) {
   .header h1 {
     margin-bottom: 1rem;
+  }
+
+  .shopContainer {
+    margin-bottom: 3rem;
   }
 }

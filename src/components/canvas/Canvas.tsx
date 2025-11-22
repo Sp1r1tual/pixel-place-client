@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
-import { useCanvas } from "@/hooks/useCanvas";
+import { useCanvasRenderer } from "@/hooks/useCanvasRenderer";
+import { useCanvasControls } from "@/hooks/useCanvasControls";
 
 import { IPixel } from "@/types";
 
@@ -17,11 +18,32 @@ const Canvas = ({
   isEraserActive,
   onPixelClick,
 }: ICanvasProps) => {
-  const { canvasRef, containerRef, handleMouseDown, centerCanvas } = useCanvas(
+  const {
+    canvasRef,
+    containerRef,
+    scale,
+    setScale,
+    position,
+    setPosition,
+    constrainPosition,
+    centerCanvas,
+    pixels,
+    unpaintedPixels,
+  } = useCanvasRenderer();
+
+  const { handleMouseDown } = useCanvasControls({
+    canvasRef,
+    scale,
+    setScale,
+    position,
+    setPosition,
+    constrainPosition,
     isPaletteOpen,
     isEraserActive,
-    onPixelClick,
-  );
+    pixels,
+    unpaintedPixels,
+    ...(onPixelClick !== undefined && { onPixelClick }),
+  });
 
   useEffect(() => {
     centerCanvas();

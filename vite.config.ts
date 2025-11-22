@@ -7,7 +7,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      babel: {
+        plugins: ["babel-plugin-react-compiler"],
+      },
+    }),
+  ],
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
@@ -17,6 +23,7 @@ export default defineConfig({
       "@/types": resolve(__dirname, "src/types"),
     },
   },
+
   build: {
     target: "esnext",
     sourcemap: true,
