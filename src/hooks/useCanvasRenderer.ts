@@ -4,7 +4,6 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useEffectEvent,
 } from "react";
 
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -14,7 +13,6 @@ import { CANVAS_DATA } from "@/data/canvas";
 const useCanvasRenderer = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const offscreenRef = useRef<HTMLCanvasElement | null>(null);
 
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -26,12 +24,6 @@ const useCanvasRenderer = () => {
     initSocket();
     return () => cleanupSocket();
   }, [initSocket, cleanupSocket]);
-
-  useLayoutEffect(() => {
-    if (!offscreenRef.current) {
-      offscreenRef.current = document.createElement("canvas");
-    }
-  }, []);
 
   const getContainerSize = useCallback(() => {
     if (!containerRef.current) {
@@ -56,9 +48,7 @@ const useCanvasRenderer = () => {
 
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
-    const offscreen = offscreenRef.current;
-
-    if (!canvas || !offscreen) return;
+    if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -78,40 +68,17 @@ const useCanvasRenderer = () => {
     const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
 
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(
-      offscreen,
-      0,
-      0,
-      canvasWidth,
-      canvasHeight,
-      position.x,
-      position.y,
-      canvasWidth * scale,
-      canvasHeight * scale,
-    );
-  }, [position, scale, getContainerSize]);
 
-  const updateOffscreen = useCallback(() => {
-    const offscreen = offscreenRef.current;
-    if (!offscreen) return;
+    ctx.save();
+    ctx.translate(position.x, position.y);
+    ctx.scale(scale, scale);
 
-    const offCtx = offscreen.getContext("2d");
-    if (!offCtx) return;
-
-    const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
-    const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
-
-    offscreen.width = canvasWidth;
-    offscreen.height = canvasHeight;
-
-    offCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    offCtx.fillStyle = "#fff";
-    offCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     Object.entries(pixels).forEach(([_, pixel]) => {
-      offCtx.fillStyle = pixel.color;
-      offCtx.fillRect(
+      ctx.fillStyle = pixel.color;
+      ctx.fillRect(
         pixel.x * CANVAS_DATA.PIXEL_SIZE,
         pixel.y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
@@ -124,17 +91,17 @@ const useCanvasRenderer = () => {
       const x = Number(xStr);
       const y = Number(yStr);
 
-      offCtx.fillStyle = color;
-      offCtx.fillRect(
+      ctx.fillStyle = color;
+      ctx.fillRect(
         x * CANVAS_DATA.PIXEL_SIZE,
         y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
       );
 
-      offCtx.strokeStyle = "#fff";
-      offCtx.lineWidth = 1;
-      offCtx.strokeRect(
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(
         x * CANVAS_DATA.PIXEL_SIZE,
         y * CANVAS_DATA.PIXEL_SIZE,
         CANVAS_DATA.PIXEL_SIZE,
@@ -142,27 +109,19 @@ const useCanvasRenderer = () => {
       );
     });
 
-    offCtx.strokeStyle = "#888888";
-    offCtx.lineWidth = 3;
-    offCtx.strokeRect(0, 0, canvasWidth, canvasHeight);
+    ctx.strokeStyle = "#888888";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
 
-    offCtx.shadowColor = "#000";
-    offCtx.shadowBlur = 4;
-    offCtx.strokeRect(0, 0, canvasWidth, canvasHeight);
+    ctx.shadowColor = "#000";
+    ctx.shadowBlur = 4;
+    ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
+    ctx.restore();
+  }, [position, scale, getContainerSize, pixels, unpaintedPixels]);
 
+  useLayoutEffect(() => {
     drawCanvas();
-  }, [pixels, unpaintedPixels, drawCanvas]);
-
-  const onUpdateOffscreen = useEffectEvent(updateOffscreen);
-  const onDrawCanvas = useEffectEvent(drawCanvas);
-
-  useLayoutEffect(() => {
-    onUpdateOffscreen();
-  }, [pixels, unpaintedPixels]);
-
-  useLayoutEffect(() => {
-    onDrawCanvas();
-  }, [position, scale]);
+  }, [drawCanvas]);
 
   const constrainPosition = useCallback(
     (newX: number, newY: number, currentScale: number) => {
