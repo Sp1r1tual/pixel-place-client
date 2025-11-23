@@ -7,6 +7,10 @@ import { IShopItem, IShopResponse } from "@/types";
 
 import { ShopService } from "@/services/shopService";
 
+import { playTapSound } from "@/utils/sfx/playTapSound";
+
+import cashoutMp3 from "@/assets/sounds/metal-coin-rattle.mp3";
+
 interface IShopState {
   items: IShopItem[];
   currency: number;
@@ -15,7 +19,7 @@ interface IShopState {
   upgradingItemType: string | null;
   fetchShop: (force?: boolean, silent?: boolean) => Promise<void>;
   buyUpgrade: (
-    itemType: "energyLimit" | "recoverySpeed" | "pixelReward",
+    itemType: "energy_limit" | "recovery_speed" | "pixel_reward",
   ) => Promise<void>;
 }
 
@@ -60,14 +64,14 @@ const useShopStore = create<IShopState>((set, get) => ({
       const { effectValue } = data;
       const canvasStore = useCanvasStore.getState();
 
-      if (itemType === "energyLimit") {
+      if (itemType === "energy_limit") {
         canvasStore.setMaxEnergy(canvasStore.maxEnergy + 1);
         canvasStore.setEnergy(canvasStore.energy + 1);
       }
-      if (itemType === "recoverySpeed") {
+      if (itemType === "recovery_speed") {
         canvasStore.setRecoverySpeed(data.recoverySpeed ?? effectValue);
       }
-      if (itemType === "pixelReward") {
+      if (itemType === "pixel_reward") {
         canvasStore.setPixelReward(effectValue);
       }
 
@@ -83,6 +87,8 @@ const useShopStore = create<IShopState>((set, get) => ({
         ),
         upgradingItemType: null,
       }));
+
+      playTapSound(cashoutMp3);
 
       const { fetchShop } = get();
       fetchShop(true, true);

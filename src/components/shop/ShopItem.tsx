@@ -9,7 +9,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import styles from "./styles/ShopItem.module.css";
 
 type IShopItemProps = {
-  type?: "energyLimit" | "recoverySpeed" | "pixelReward";
+  type?: "energy_limit" | "recovery_speed" | "pixel_reward";
   name?: string;
   price?: number;
   image_url?: string;

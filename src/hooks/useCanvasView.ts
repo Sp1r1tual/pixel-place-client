@@ -11,6 +11,8 @@ import { useUserInterface } from "@/store/useUserInterface";
 
 import { getSocket } from "@/sockets/canvasSockets";
 
+import { playTapSound } from "@/utils/sfx/playTapSound";
+
 import tapSoundMp3 from "@/assets/sounds/key-hit-sound.mp3";
 
 const useCanvasView = () => {
@@ -42,12 +44,6 @@ const useCanvasView = () => {
 
   const handleEraseToggle = useCallback(() => {
     setIsEraserActive((prev) => !prev);
-  }, []);
-
-  const playTapSound = useCallback(() => {
-    const audio = new Audio(tapSoundMp3);
-    audio.volume = 1;
-    audio.play().catch(() => {});
   }, []);
 
   const handlePaintClick = useCallback(() => {
@@ -87,7 +83,7 @@ const useCanvasView = () => {
         const store = useCanvasStore.getState();
         store.setPixelsBatch(localPixels);
         store.clearUnpaintedPixels();
-        playTapSound();
+        playTapSound(tapSoundMp3);
 
         if (typeof energyLeft === "number") store.setEnergy(energyLeft);
         if (typeof maxEnergy === "number") store.setMaxEnergy(maxEnergy);
@@ -95,7 +91,7 @@ const useCanvasView = () => {
         useShopStore.getState().fetchShop(true);
       },
     );
-  }, [isPaletteOpen, pixelsPainted, unpaintedPixels, playTapSound, t]);
+  }, [isPaletteOpen, pixelsPainted, unpaintedPixels, t]);
 
   const handleClosePixelDetails = useCallback(() => setSelectedPixel(null), []);
 

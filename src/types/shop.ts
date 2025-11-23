@@ -1,7 +1,7 @@
 export interface IShopItem {
   id: string;
   name: string;
-  type: "energyLimit" | "recoverySpeed" | "pixelReward";
+  type: "energy_limit" | "recovery_speed" | "pixel_reward";
   price: number;
   level: number;
   maxLevel: number;
