@@ -11,6 +11,9 @@ import { useUserInterface } from "@/store/useUserInterface";
 
 import { getSocket } from "@/sockets/canvasSockets";
 
+import { playTapSound } from "@/utils/sfx/playTapSound";
+import { formatDateTime } from "@/utils/date/formatDate";
+
 import tapSoundMp3 from "@/assets/sounds/key-hit-sound.mp3";
 
 const useCanvasView = () => {
@@ -44,12 +47,6 @@ const useCanvasView = () => {
     setIsEraserActive((prev) => !prev);
   }, []);
 
-  const playTapSound = useCallback(() => {
-    const audio = new Audio(tapSoundMp3);
-    audio.volume = 1;
-    audio.play().catch(() => {});
-  }, []);
-
   const handlePaintClick = useCallback(() => {
     if (!isPaletteOpen) {
       setIsPaletteOpen(true);
@@ -64,14 +61,18 @@ const useCanvasView = () => {
     setIsLoading(true);
 
     const userId = useAuthStore.getState().user?.id ?? "";
-    const pixelsToSend: Omit<IPixel, "userId">[] = Object.entries(
+    const pixelsToSend: Omit<IPixel, "userId" | "placedAt">[] = Object.entries(
       unpaintedPixels,
     ).map(([key, color]) => {
       const [xStr, yStr] = key.split(":");
       return { x: Number(xStr), y: Number(yStr), color: String(color) };
     });
 
-    const localPixels: IPixel[] = pixelsToSend.map((p) => ({ ...p, userId }));
+    const localPixels: IPixel[] = pixelsToSend.map((p) => ({
+      ...p,
+      userId,
+      placedAt: formatDateTime(new Date().toISOString()),
+    }));
 
     getSocket().emit(
       "sendBatch",
@@ -87,7 +88,7 @@ const useCanvasView = () => {
         const store = useCanvasStore.getState();
         store.setPixelsBatch(localPixels);
         store.clearUnpaintedPixels();
-        playTapSound();
+        playTapSound(tapSoundMp3);
 
         if (typeof energyLeft === "number") store.setEnergy(energyLeft);
         if (typeof maxEnergy === "number") store.setMaxEnergy(maxEnergy);
@@ -95,7 +96,7 @@ const useCanvasView = () => {
         useShopStore.getState().fetchShop(true);
       },
     );
-  }, [isPaletteOpen, pixelsPainted, unpaintedPixels, playTapSound, t]);
+  }, [isPaletteOpen, pixelsPainted, unpaintedPixels, t]);
 
   const handleClosePixelDetails = useCallback(() => setSelectedPixel(null), []);
 

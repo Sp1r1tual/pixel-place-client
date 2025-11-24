@@ -3,12 +3,14 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { useUserInterface } from "@/store/useUserInterface";
+import { useProfileStore } from "@/store/useProfileStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
 import { Dropdown } from "../ui/Dropdown";
 import { DropdownBtn } from "../ui/DropdownBtn";
 
 import pixelPlacePng from "@/assets/pixel-place-logo.png";
+import profileSvg from "@/assets/profile-round-svgrepo-com.svg";
 import settingsSvg from "@/assets/settings-svgrepo-com.svg";
 import logoutSvg from "@/assets/logout-svgrepo-com.svg";
 import userSvg from "@/assets/user-circle-svgrepo-com.svg";
@@ -25,6 +27,7 @@ const Navbar = ({ onLogout }: INavbarProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const { isHidden } = useUserInterface();
+  const { toggleProfile } = useProfileStore();
   const { toggleSettings } = useSettingsStore();
   const { t } = useTranslation();
 
@@ -73,6 +76,12 @@ const Navbar = ({ onLogout }: INavbarProps) => {
           isOpen={dropdownOpen}
           onToggle={handleDropdownToggle}
         >
+          <DropdownBtn
+            text={t("navbar.dropdown.profile")}
+            icon={profileSvg}
+            onClick={toggleProfile}
+            className={styles.dropdownBtn}
+          />
           <DropdownBtn
             text={t("navbar.dropdown.settings")}
             icon={settingsSvg}

@@ -3,4 +3,5 @@ export interface IPixel {
   y: number;
   color: string;
   userId: string;
+  placedAt: string;
 }

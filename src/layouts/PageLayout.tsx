@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useProfileStore } from "@/store/useProfileStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
 import { Navbar } from "@/components/navbar/Navbar";
+import { Profile } from "@/components/profile/Profile";
 import { Settings } from "@/components/settings/Settings";
 import { ConfirmChoiceModal } from "@/components/ui/ConfirmChoiceModal";
 
@@ -15,6 +17,7 @@ interface IPageLayoutProps {
 
 const PageLayout = ({ children }: IPageLayoutProps) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const { isProfileOpen, closeProfile } = useProfileStore();
   const { isSettingsOpen, closeSettings } = useSettingsStore();
 
   const { t } = useTranslation();
@@ -36,7 +39,9 @@ const PageLayout = ({ children }: IPageLayoutProps) => {
       <Navbar onLogout={() => setIsConfirmOpen(true)} />
 
       <main className={styles.main}>
+        <Profile isOpen={isProfileOpen} onClose={closeProfile} />
         <Settings isOpen={isSettingsOpen} onClose={closeSettings} />
+
         {children}
       </main>
     </>

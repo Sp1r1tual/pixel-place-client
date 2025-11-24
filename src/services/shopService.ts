@@ -1,6 +1,6 @@
 import { $api } from "@/api";
 
-type UpgradeType = "energyLimit" | "recoverySpeed" | "pixelReward";
+type UpgradeType = "energy_limit" | "recovery_speed" | "pixel_reward";
 
 class ShopService {
   static async getShop() {

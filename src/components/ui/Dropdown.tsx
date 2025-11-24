@@ -1,5 +1,4 @@
 import {
-  useState,
   ReactNode,
   useRef,
   useEffect,
@@ -30,42 +29,53 @@ const Dropdown: React.FC<IDropdownProps> = ({
   isOpen,
   onToggle,
 }) => {
-  const [open, setOpen] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>(null);
+  const isControlled = typeof isOpen === "boolean";
+
+  const open = isControlled ? isOpen : false;
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        if (onToggle) {
+          onToggle();
+        }
+      }
+    },
+    [onToggle],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (onToggle) {
+          onToggle();
+        }
+      }
+    },
+    [onToggle],
+  );
 
   useEffect(() => {
-    if (typeof isOpen === "boolean") {
-      Promise.resolve().then(() => setOpen(isOpen));
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside, {
+        passive: true,
+      });
+      document.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("touchstart", handleClickOutside);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
     }
-  }, [isOpen]);
-
-  const handleClickOutside = useCallback((event: MouseEvent | TouchEvent) => {
-    if (ref.current && !ref.current.contains(event.target as Node)) {
-      setOpen(false);
-    }
-  }, []);
-
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === "Escape") setOpen(false);
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside, {
-      passive: true,
-    });
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleClickOutside, handleKeyDown]);
+  }, [open, handleClickOutside, handleKeyDown]);
 
   const toggleOpen = () => {
-    if (onToggle) onToggle();
-    else setOpen((prev) => !prev);
+    if (onToggle) {
+      onToggle();
+    }
   };
 
   return (
@@ -88,7 +98,9 @@ const Dropdown: React.FC<IDropdownProps> = ({
           return cloneElement(typedChild, {
             onClick: (e: React.MouseEvent<HTMLElement>) => {
               typedChild.props.onClick?.(e);
-              setOpen(false);
+              if (onToggle) {
+                onToggle();
+              }
             },
           });
         })}

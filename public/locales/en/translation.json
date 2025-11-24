@@ -82,6 +82,7 @@
     "main": "Main",
     "shop": "Shop",
     "dropdown": {
+      "profile": "Profile",
       "settings": "Settings",
       "logout": "Logout",
       "confirm-logout-message": "Confirm Logout",
@@ -98,7 +99,7 @@
     "pixel-details": {
       "coordinates": "Coordinates",
       "color": "Color",
-      "user-id": "User ID"
+      "placed": "Placed:"
     },
     "errors": {
       "cannot-erase-unsent": "You can erase only unsent pixels",
@@ -125,6 +126,32 @@
     "item-max-level": "Upgrade already at max level",
     "not-enough-currency": "Not enough currency to purchase",
     "shop-item-not-found": "Shop item not found"
+  },
+
+  "profile": {
+    "title": "Profile",
+    "no-username": "Name not set",
+    "level": "Level:",
+    "bio": "Description:",
+    "repaints": "Painted:",
+    "joined": "Joined:",
+    "no-bio": "No bio",
+    "edit-profile": "Edit profile",
+    "username-too-long": "Username is too long. Enter fewer than 21 characters",
+    "bio-too-long": "Profile bio is too long",
+    "image-too-large": "Upload a photo no larger than 2 mb",
+    "change-avatar": "Change avatar",
+    "username": "Username",
+    "username-placeholder": "Enter your username",
+    "bio-placeholder": "Tell something about yourself",
+    "characters": "characters",
+    "save": "Save",
+    "cancel": "Cancel",
+    "not-found": "Profile not found",
+    "failed-to-update-profile": "Failed to update profile",
+    "updated-successfully": "Updated successfully",
+    "profile-not-loaded": "Profile not loaded",
+    "failed-to-load-profile": "Error loading profile"
   },
 
   "socket": {
