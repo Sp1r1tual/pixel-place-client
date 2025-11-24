@@ -1,3 +1,4 @@
-export * from "./auth";
-export * from "./shop";
-export * from "./canvas";
+export * from "./auth.js";
+export * from "./shop.js";
+export * from "./canvas.js";
+export * from "./profile.js";

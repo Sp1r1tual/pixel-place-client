@@ -82,6 +82,7 @@
     "main": "ホーム",
     "shop": "ショップ",
     "dropdown": {
+      "profile": "アカウント",
       "settings": "設定",
       "logout": "ログアウト",
       "confirm-logout-message": "ログアウトを確認してください",
@@ -98,7 +99,7 @@
     "pixel-details": {
       "coordinates": "座標",
       "color": "色",
-      "user-id": "ユーザーID"
+      "placed": "配置:"
     },
     "errors": {
       "cannot-erase-unsent": "未承認のピクセルのみ削除可能です",
@@ -125,6 +126,31 @@
     "item-max-level": "アップグレードは最大レベルです",
     "not-enough-currency": "購入に必要な通貨が不足しています",
     "shop-item-not-found": "ショップアイテムが見つかりません"
+  },
+
+  "profile": {
+    "title": "アカウント",
+    "no-username": "名前が設定されていません",
+    "level": "レベル:",
+    "bio": "説明:",
+    "repaints": "描かれた:",
+    "joined": "参加:",
+    "no-bio": "自己紹介はありません",
+    "edit-profile": "プロフィールを編集",
+    "username-too-long": "名前が長すぎます。21文字未満で入力してください",
+    "bio-too-long": "プロフィールの説明が長すぎます",
+    "change-avatar": "アバターを変更",
+    "username": "名前",
+    "username-placeholder": "名前を入力してください",
+    "bio-placeholder": "自己紹介を書いてください",
+    "characters": "文字",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "not-found": "プロフィールが見つかりません",
+    "failed-to-update-profile": "プロフィールを更新できませんでした",
+    "updated-successfully": "正常に更新されました",
+    "profile-not-loaded": "プロフィールが読み込まれていません",
+    "failed-to-load-profile": "プロフィールの読み込み中にエラーが発生しました"
   },
 
   "socket": {

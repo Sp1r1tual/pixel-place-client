@@ -18,6 +18,7 @@ interface IPrimaryBtnProps {
     lastEnergyUpdate: number;
     recoverySpeed: number;
   };
+  type?: "button" | "submit" | "reset";
 }
 
 const PrimaryBtn = ({
@@ -29,6 +30,7 @@ const PrimaryBtn = ({
   progressText,
   showTimer = false,
   timerData,
+  type = "submit",
 }: IPrimaryBtnProps) => {
   const displayRef = useRef<HTMLSpanElement | null>(null);
 
@@ -36,6 +38,7 @@ const PrimaryBtn = ({
 
   return (
     <button
+      type={type}
       className={`${styles.primaryBtn} ${isLoading ? styles.loading : ""}`}
       disabled={isLoading || disabled}
       onClick={onClick}

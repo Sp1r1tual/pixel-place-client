@@ -1,10 +1,21 @@
+.pixelDetailsOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
 .details {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  width: 80%;
-  max-width: 20rem;
+  top: -4.5dvh;
+  max-width: 30rem;
   min-width: 15rem;
+  min-height: 10.5rem;
   background-color: rgba(255, 255, 255, 0.95);
   border-radius: 0.5rem;
   display: flex;
@@ -16,15 +27,16 @@
   font-family: Arial, sans-serif;
   font-size: 16px;
   color: #333;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.details.visible {
   opacity: 1;
-  transition:
-    opacity 0.3s ease-in-out,
-    transform 0.3s ease-in-out;
 }
 
 .details.closing {
   opacity: 0;
-  transform: translateX(-50%) translateY(-20px);
   pointer-events: none;
 }
 
@@ -44,6 +56,51 @@
 .details p:not(.header) {
   margin: 4px 0;
   word-break: break-word;
+}
+
+.userHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.placedDate {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0.25rem 0;
+}
+
+.username {
+  margin: 0;
+  font-weight: 600;
+}
+
+.userHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.userHeader:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.2),
+    0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
