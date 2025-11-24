@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { IPixel } from "@/types/canvas";
 
 import { useProfileStore } from "@/store/useProfileStore";
+import { useAvatar } from "@/hooks/useAvatar";
 
 import { CloseBtn } from "../ui/CloseBtn";
 import { Spinner } from "../ui/Spinner";
@@ -29,6 +30,12 @@ const PixelDetails = ({ pixel, onClose }: IPixelDetailsProps) => {
     openProfile,
     setViewedProfile,
   } = useProfileStore();
+
+  const { avatarSrc, handleError } = useAvatar(
+    pixelProfile?.avatarSrc || "",
+    defaultAvatarSvg,
+    pixelProfile?.userId,
+  );
 
   useEffect(() => {
     if (pixel.userId) {
@@ -78,9 +85,11 @@ const PixelDetails = ({ pixel, onClose }: IPixelDetailsProps) => {
           <>
             <div className={styles.userHeader} onClick={handleUserClick}>
               <img
-                src={pixelProfile.avatarSrc || defaultAvatarSvg}
+                src={avatarSrc}
                 alt={pixelProfile.username || "User avatar"}
                 className={styles.avatar}
+                key={pixelProfile.userId}
+                onError={handleError}
               />
 
               <div className={styles.userDetails}>

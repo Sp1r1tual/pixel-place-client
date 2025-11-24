@@ -139,6 +139,7 @@
     "edit-profile": "Змінити профіль",
     "username-too-long": "Завелике ім'я. Введіть менше 21 символа",
     "bio-too-long": "Завеликий опис профілю",
+    "image-too-large": "Завантажте фото не більше за 2 мб",
     "change-avatar": "Змінити аватар",
     "username": "Ім'я",
     "username-placeholder": "Введіть своє ім'я",

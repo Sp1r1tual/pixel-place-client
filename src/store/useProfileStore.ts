@@ -4,6 +4,7 @@ import i18n from "@/i18n";
 
 import { ProfileService } from "@/services/profileService";
 import { IProfileData, IUpdateProfilePayload } from "@/types/profile";
+import { getAvatarUrl } from "@/utils/profile/getAvatarUrl";
 
 interface IProfileState {
   isProfileOpen: boolean;
@@ -46,7 +47,10 @@ const useProfileStore = create<IProfileState>((set, get) => ({
     try {
       const { data } = await ProfileService.getProfile();
       set({
-        currentProfile: data,
+        currentProfile: {
+          ...data,
+          avatarSrc: getAvatarUrl(data.avatarSrc),
+        },
         isLoadingCurrent: false,
         error: null,
       });
@@ -68,7 +72,10 @@ const useProfileStore = create<IProfileState>((set, get) => ({
     try {
       const { data } = await ProfileService.getPublicProfile(userId);
       set({
-        viewedProfile: data,
+        viewedProfile: {
+          ...data,
+          avatarSrc: getAvatarUrl(data.avatarSrc),
+        },
         isLoadingViewed: false,
         error: null,
       });
@@ -90,7 +97,10 @@ const useProfileStore = create<IProfileState>((set, get) => ({
     try {
       const { data } = await ProfileService.getPublicProfile(userId);
       set({
-        pixelProfile: data,
+        pixelProfile: {
+          ...data,
+          avatarSrc: getAvatarUrl(data.avatarSrc),
+        },
         isLoadingPixel: false,
         error: null,
       });
@@ -118,7 +128,10 @@ const useProfileStore = create<IProfileState>((set, get) => ({
     try {
       const { data: updated } = await ProfileService.changeProfileInfo(data);
       set({
-        currentProfile: updated,
+        currentProfile: {
+          ...updated,
+          avatarSrc: getAvatarUrl(updated.avatarSrc),
+        },
         isLoadingCurrent: false,
         error: null,
       });
@@ -135,7 +148,13 @@ const useProfileStore = create<IProfileState>((set, get) => ({
     }
   },
 
-  setViewedProfile: (profile: IProfileData) => set({ viewedProfile: profile }),
+  setViewedProfile: (profile: IProfileData) =>
+    set({
+      viewedProfile: {
+        ...profile,
+        avatarSrc: getAvatarUrl(profile.avatarSrc),
+      },
+    }),
   clearViewedProfile: () => set({ viewedProfile: null }),
   clearPixelProfile: () => set({ pixelProfile: null }),
 }));

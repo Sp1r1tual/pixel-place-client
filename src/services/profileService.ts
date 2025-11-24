@@ -12,7 +12,13 @@ class ProfileService {
   }
 
   static changeProfileInfo(data: IUpdateProfilePayload) {
-    return $api.patch<IProfileData>("/profile", data);
+    const formData = new FormData();
+
+    if (data.username !== undefined) formData.append("username", data.username);
+    if (data.bio !== undefined) formData.append("bio", data.bio);
+    if (data.avatar) formData.append("avatar", data.avatar);
+
+    return $api.patch<IProfileData>("/profile", formData);
   }
 }
 

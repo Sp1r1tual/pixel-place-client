@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAvatar } from "@/hooks/useAvatar";
 import { useProfileStore } from "@/store/useProfileStore";
 
 import { CloseBtn } from "../ui/CloseBtn";
@@ -34,6 +35,12 @@ const Profile = ({ isOpen, onClose }: IProfileProps) => {
   const isLoading =
     isLoadingViewed || (viewedProfile === null && isLoadingCurrent);
   const isOwnProfile = !viewedProfile && currentProfile;
+
+  const { avatarSrc, handleError } = useAvatar(
+    profile?.avatarSrc || "",
+    defaultAvatarSvg,
+    profile?.userId,
+  );
 
   const [isEditing, setIsEditing] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -126,9 +133,11 @@ const Profile = ({ isOpen, onClose }: IProfileProps) => {
                 className={`${styles.contentWrapper} ${isTransitioning ? styles.fadeOut : styles.fadeIn}`}
               >
                 <img
-                  src={profile.avatarSrc || defaultAvatarSvg}
+                  src={avatarSrc}
                   alt={profile.username || "User avatar"}
                   className={styles.avatar}
+                  key={profile.userId}
+                  onError={handleError}
                 />
 
                 <span className={styles.username}>

@@ -139,6 +139,7 @@
     "edit-profile": "Edit profile",
     "username-too-long": "Username is too long. Enter fewer than 21 characters",
     "bio-too-long": "Profile bio is too long",
+    "image-too-large": "Upload a photo no larger than 2 mb",
     "change-avatar": "Change avatar",
     "username": "Username",
     "username-placeholder": "Enter your username",

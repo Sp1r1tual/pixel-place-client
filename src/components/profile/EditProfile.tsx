@@ -1,6 +1,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAvatar } from "@/hooks/useAvatar";
 import { useProfileStore } from "@/store/useProfileStore";
 import { IUpdateProfilePayload } from "@/types/profile";
 import { PrimaryBtn } from "../ui/PrimaryBtn";
@@ -17,15 +18,19 @@ const EditProfile = ({ onClose }: IEditProfileFormProps) => {
   const { t } = useTranslation();
   const { currentProfile, updateProfile, isLoadingCurrent } = useProfileStore();
 
+  const { avatarSrc: currentAvatarSrc } = useAvatar(
+    currentProfile?.avatarSrc || "",
+    defaultAvatarSvg,
+  );
+
   const [username, setUsername] = useState(currentProfile?.username || "");
   const [bio, setBio] = useState(currentProfile?.bio || "");
-  const [avatarSrc, setAvatarSrc] = useState(currentProfile?.avatarSrc || "");
-  const [avatarPreview, setAvatarPreview] = useState(
-    currentProfile?.avatarSrc || defaultAvatarSvg,
-  );
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState(currentAvatarSrc);
 
   const [usernameError, setUsernameError] = useState("");
   const [bioError, setBioError] = useState("");
+  const [avatarError, setAvatarError] = useState("");
 
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -54,26 +59,34 @@ const EditProfile = ({ onClose }: IEditProfileFormProps) => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
+      setAvatarError(t("profile.invalid-image-format"));
       return;
     }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError(t("profile.image-too-large"));
+      return;
+    }
+
+    setAvatarError("");
+    setAvatarFile(file);
 
     const reader = new FileReader();
     reader.onloadend = () => {
       const result = reader.result as string;
       setAvatarPreview(result);
-      setAvatarSrc(result);
     };
     reader.readAsDataURL(file);
   };
 
   const handleAvatarError = () => {
-    setAvatarPreview("/default-avatar.png");
+    setAvatarPreview(defaultAvatarSvg);
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (usernameError || bioError) {
+    if (usernameError || bioError || avatarError) {
       return;
     }
 
@@ -85,8 +98,8 @@ const EditProfile = ({ onClose }: IEditProfileFormProps) => {
     if (bio !== currentProfile?.bio) {
       payload.bio = bio;
     }
-    if (avatarSrc !== currentProfile?.avatarSrc) {
-      payload.avatarSrc = avatarSrc;
+    if (avatarFile) {
+      payload.avatar = avatarFile;
     }
 
     if (Object.keys(payload).length === 0) {
@@ -107,6 +120,7 @@ const EditProfile = ({ onClose }: IEditProfileFormProps) => {
       <div className={styles.avatarSection}>
         <img
           src={avatarPreview}
+          alt={username || "User avatar"}
           className={styles.avatar}
           loading="lazy"
           onError={handleAvatarError}
@@ -128,6 +142,7 @@ const EditProfile = ({ onClose }: IEditProfileFormProps) => {
           className={styles.avatarInput}
           aria-label={t("profile.change-avatar")}
         />
+        {avatarError && <p className={styles.error}>{avatarError}</p>}
       </div>
 
       <div className={styles.fieldGroup}>
@@ -171,7 +186,7 @@ const EditProfile = ({ onClose }: IEditProfileFormProps) => {
         <PrimaryBtn
           text={t("profile.save")}
           isLoading={isLoadingCurrent}
-          disabled={!!usernameError || !!bioError}
+          disabled={!!usernameError || !!bioError || !!avatarError}
         />
 
         <PrimaryBtn

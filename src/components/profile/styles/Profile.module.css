@@ -108,29 +108,37 @@
   display: flex;
   gap: 0.5rem;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .avatar {
-  width: 10rem;
-  height: 10rem;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(
+    145deg,
+    rgba(31, 41, 55, 0.9) 0%,
+    rgba(31, 41, 55, 0.7) 100%
+  );
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top: 2px solid rgba(255, 255, 255, 0.25);
 }
 
 .bioWrapper {
   width: 100%;
   max-width: 90%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 6rem;
-  padding: 0 0.5rem 0 0.5rem;
+  height: 8rem;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
+  padding: 0.2rem 1rem;
   overflow-y: scroll;
   text-align: center;
   line-height: 1.4;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #111827;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
 .username {
@@ -163,7 +171,8 @@
 .stats {
   width: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
   gap: 1rem;
   flex: 1;
@@ -219,9 +228,9 @@
 
   .bioWrapper {
     font-size: 1rem;
-    border: 1px solid #2d3845;
     border-radius: 0.5rem;
-    padding: 0.25rem;
+    padding: 0.2rem 0.9rem;
+    height: 7rem;
   }
 
   .avatar {

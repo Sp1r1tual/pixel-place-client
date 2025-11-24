@@ -12,6 +12,7 @@ import { useUserInterface } from "@/store/useUserInterface";
 import { getSocket } from "@/sockets/canvasSockets";
 
 import { playTapSound } from "@/utils/sfx/playTapSound";
+import { formatDateTime } from "@/utils/date/formatDate";
 
 import tapSoundMp3 from "@/assets/sounds/key-hit-sound.mp3";
 
@@ -60,14 +61,18 @@ const useCanvasView = () => {
     setIsLoading(true);
 
     const userId = useAuthStore.getState().user?.id ?? "";
-    const pixelsToSend: Omit<IPixel, "userId">[] = Object.entries(
+    const pixelsToSend: Omit<IPixel, "userId" | "placedAt">[] = Object.entries(
       unpaintedPixels,
     ).map(([key, color]) => {
       const [xStr, yStr] = key.split(":");
       return { x: Number(xStr), y: Number(yStr), color: String(color) };
     });
 
-    const localPixels: IPixel[] = pixelsToSend.map((p) => ({ ...p, userId }));
+    const localPixels: IPixel[] = pixelsToSend.map((p) => ({
+      ...p,
+      userId,
+      placedAt: formatDateTime(new Date().toISOString()),
+    }));
 
     getSocket().emit(
       "sendBatch",

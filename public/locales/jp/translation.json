@@ -139,6 +139,7 @@
     "edit-profile": "プロフィールを編集",
     "username-too-long": "名前が長すぎます。21文字未満で入力してください",
     "bio-too-long": "プロフィールの説明が長すぎます",
+    "image-too-large": "2 メガバイト以下の写真をアップロードしてください。",
     "change-avatar": "アバターを変更",
     "username": "名前",
     "username-placeholder": "名前を入力してください",

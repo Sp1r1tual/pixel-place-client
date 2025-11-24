@@ -11,5 +11,5 @@ export interface IProfileData {
 export interface IUpdateProfilePayload {
   username?: string;
   bio?: string;
-  avatarSrc?: string;
+  avatar?: File;
 }
