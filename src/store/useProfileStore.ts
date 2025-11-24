@@ -139,7 +139,7 @@ const useProfileStore = create<IProfileState>((set, get) => ({
     } catch (error) {
       const errorMessage =
         (error as { response?: { data?: { message?: string } } }).response?.data
-          ?.message || i18n.t("errors.failed-to-update-profile");
+          ?.message || i18n.t("profile.failed-to-update-profile");
       set({
         isLoadingCurrent: false,
         error: errorMessage,

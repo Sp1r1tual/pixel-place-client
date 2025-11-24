@@ -118,8 +118,6 @@ const Profile = ({ isOpen, onClose }: IProfileProps) => {
           <div className={styles.loadingWrapper}>
             <Spinner size="large" />
           </div>
-        ) : error ? (
-          <div className={styles.error}>{error}</div>
         ) : profile ? (
           <>
             {isEditing ? (
