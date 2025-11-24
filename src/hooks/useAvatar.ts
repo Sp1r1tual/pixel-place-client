@@ -1,31 +1,20 @@
 import { useState } from "react";
-
 import { getAvatarUrl } from "@/utils/profile/getAvatarUrl";
 
-const useAvatar = (
-  avatar: string,
-  defaultAvatar: string,
-  resetKey?: string,
-) => {
-  const [errorState, setErrorState] = useState<{
-    key: string;
-    hasError: boolean;
-  }>({
-    key: resetKey || "",
-    hasError: false,
-  });
+const useAvatar = (avatar: string, defaultAvatarSvg: string, key?: string) => {
+  const avatarKey = `${avatar}-${key}`;
 
-  const hasError = errorState.key === resetKey ? errorState.hasError : false;
+  const [errorKey, setErrorKey] = useState<string>("");
+
+  const hasError = errorKey === avatarKey;
 
   const avatarSrc = hasError
-    ? defaultAvatar
+    ? defaultAvatarSvg
     : avatar
       ? getAvatarUrl(avatar)
-      : defaultAvatar;
+      : defaultAvatarSvg;
 
-  const handleError = () => {
-    setErrorState({ key: resetKey || "", hasError: true });
-  };
+  const handleError = () => setErrorKey(avatarKey);
 
   return { avatarSrc, handleError };
 };
