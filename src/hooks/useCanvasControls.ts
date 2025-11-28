@@ -20,9 +20,9 @@ interface IDragState {
 
 interface IUseCanvasControlsProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  scale: number;
+  scaleRef: React.MutableRefObject<number>;
+  positionRef: React.MutableRefObject<{ x: number; y: number }>;
   setScale: (scale: number) => void;
-  position: { x: number; y: number };
   setPosition: (position: { x: number; y: number }) => void;
   constrainPosition: (
     newX: number,
@@ -38,9 +38,9 @@ interface IUseCanvasControlsProps {
 
 const useCanvasControls = ({
   canvasRef,
-  scale,
+  scaleRef,
+  positionRef,
   setScale,
-  position,
   setPosition,
   constrainPosition,
   isPaletteOpen,
@@ -81,6 +81,9 @@ const useCanvasControls = ({
       if (!canvas) return null;
 
       const rect = canvas.getBoundingClientRect();
+      const position = positionRef.current;
+      const scale = scaleRef.current;
+
       const x = Math.floor(
         (clientX - rect.left - position.x) / (CANVAS_DATA.PIXEL_SIZE * scale),
       );
@@ -90,7 +93,7 @@ const useCanvasControls = ({
 
       return { x, y };
     },
-    [canvasRef, position, scale],
+    [canvasRef, positionRef, scaleRef],
   );
 
   const handleClick = useCallback(
@@ -205,10 +208,11 @@ const useCanvasControls = ({
         state.hasMoved = true;
         const newX = state.stageStartX + dx;
         const newY = state.stageStartY + dy;
+        const scale = scaleRef.current;
         setPosition(constrainPosition(newX, newY, scale));
       }
     },
-    [scale, constrainPosition, setPosition],
+    [scaleRef, constrainPosition, setPosition],
   );
 
   const handleMouseDown = useCallback(
@@ -216,6 +220,7 @@ const useCanvasControls = ({
       if (e.button !== 0 && e.button !== 1) return;
 
       setIsDragging(true);
+      const position = positionRef.current;
       dragStateRef.current = {
         startX: e.clientX,
         startY: e.clientY,
@@ -225,7 +230,7 @@ const useCanvasControls = ({
         hasMoved: false,
       };
     },
-    [position],
+    [positionRef],
   );
 
   const handleTouchStartNative = useCallback(
@@ -246,6 +251,7 @@ const useCanvasControls = ({
           t2.clientX - t1.clientX,
           t2.clientY - t1.clientY,
         );
+        const scale = scaleRef.current;
         pinchRef.current = { startDist: dist, startScale: scale };
         return;
       }
@@ -253,6 +259,7 @@ const useCanvasControls = ({
       if (e.touches.length === 1) {
         const touch = e.touches[0]!;
         setIsDragging(true);
+        const position = positionRef.current;
         dragStateRef.current = {
           startX: touch.clientX,
           startY: touch.clientY,
@@ -265,7 +272,7 @@ const useCanvasControls = ({
         };
       }
     },
-    [position, scale],
+    [positionRef, scaleRef],
   );
 
   const handleTouchMoveNative = useCallback(
@@ -294,6 +301,9 @@ const useCanvasControls = ({
           y: (t1.clientY + t2.clientY) / 2,
         };
 
+        const position = positionRef.current;
+        const scale = scaleRef.current;
+
         const mousePointTo = {
           x: (center.x - position.x) / scale,
           y: (center.y - position.y) / scale,
@@ -321,6 +331,7 @@ const useCanvasControls = ({
           state.hasMoved = true;
           const newX = state.stageStartX + dx;
           const newY = state.stageStartY + dy;
+          const scale = scaleRef.current;
           setPosition(constrainPosition(newX, newY, scale));
         }
 
@@ -328,7 +339,7 @@ const useCanvasControls = ({
         state.clientY = touch.clientY;
       }
     },
-    [position, scale, constrainPosition, setScale, setPosition],
+    [positionRef, scaleRef, constrainPosition, setScale, setPosition],
   );
 
   const handleWheelNative = useCallback(
@@ -343,6 +354,9 @@ const useCanvasControls = ({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
       };
+
+      const position = positionRef.current;
+      const scale = scaleRef.current;
 
       const mousePointTo = {
         x: (pointer.x - position.x) / scale,
@@ -363,7 +377,14 @@ const useCanvasControls = ({
       setScale(limited);
       setPosition(constrainPosition(newX, newY, limited));
     },
-    [position, scale, constrainPosition, setScale, setPosition, canvasRef],
+    [
+      positionRef,
+      scaleRef,
+      constrainPosition,
+      setScale,
+      setPosition,
+      canvasRef,
+    ],
   );
 
   useEffect(() => {

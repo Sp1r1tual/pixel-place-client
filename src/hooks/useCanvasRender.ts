@@ -1,10 +1,4 @@
-import {
-  useRef,
-  useState,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-} from "react";
+import { useRef, useCallback, useEffect, useLayoutEffect } from "react";
 
 import { useCanvasStore } from "@/store/useCanvasStore";
 
@@ -14,15 +8,21 @@ const useCanvasRenderer = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const scaleRef = useRef(1);
+  const positionRef = useRef({ x: 0, y: 0 });
+  const rafIdRef = useRef<number | null>(null);
 
   const { pixels, unpaintedPixels, initSocket, cleanupSocket } =
     useCanvasStore();
 
   useEffect(() => {
     initSocket();
-    return () => cleanupSocket();
+    return () => {
+      cleanupSocket();
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
   }, [initSocket, cleanupSocket]);
 
   const getContainerSize = useCallback(() => {
@@ -34,17 +34,6 @@ const useCanvasRenderer = () => {
       height: containerRef.current.offsetHeight,
     };
   }, []);
-
-  const centerCanvas = useCallback(() => {
-    const { width: stageWidth, height: stageHeight } = getContainerSize();
-    const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
-    const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
-
-    const x = (stageWidth - canvasWidth) / 2;
-    const y = (stageHeight - canvasHeight) / 2;
-
-    setPosition({ x, y });
-  }, [getContainerSize]);
 
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -70,8 +59,8 @@ const useCanvasRenderer = () => {
     ctx.imageSmoothingEnabled = false;
 
     ctx.save();
-    ctx.translate(position.x, position.y);
-    ctx.scale(scale, scale);
+    ctx.translate(positionRef.current.x, positionRef.current.y);
+    ctx.scale(scaleRef.current, scaleRef.current);
 
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -117,7 +106,19 @@ const useCanvasRenderer = () => {
     ctx.shadowBlur = 4;
     ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
     ctx.restore();
-  }, [position, scale, getContainerSize, pixels, unpaintedPixels]);
+  }, [getContainerSize, pixels, unpaintedPixels]);
+
+  const centerCanvas = useCallback(() => {
+    const { width: stageWidth, height: stageHeight } = getContainerSize();
+    const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
+    const canvasHeight = CANVAS_DATA.CANVAS_HEIGHT * CANVAS_DATA.PIXEL_SIZE;
+
+    const x = (stageWidth - canvasWidth) / 2;
+    const y = (stageHeight - canvasHeight) / 2;
+
+    positionRef.current = { x, y };
+    drawCanvas();
+  }, [getContainerSize, drawCanvas]);
 
   useLayoutEffect(() => {
     drawCanvas();
@@ -144,12 +145,44 @@ const useCanvasRenderer = () => {
     [getContainerSize],
   );
 
+  const setScale = useCallback(
+    (newScale: number) => {
+      scaleRef.current = newScale;
+
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      rafIdRef.current = requestAnimationFrame(() => {
+        drawCanvas();
+        rafIdRef.current = null;
+      });
+    },
+    [drawCanvas],
+  );
+
+  const setPosition = useCallback(
+    (newPosition: { x: number; y: number }) => {
+      positionRef.current = newPosition;
+
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      rafIdRef.current = requestAnimationFrame(() => {
+        drawCanvas();
+        rafIdRef.current = null;
+      });
+    },
+    [drawCanvas],
+  );
+
   return {
     canvasRef,
     containerRef,
-    scale,
+    scaleRef,
+    positionRef,
     setScale,
-    position,
     setPosition,
     centerCanvas,
     constrainPosition,

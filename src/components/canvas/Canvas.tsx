@@ -21,9 +21,9 @@ const Canvas = ({
   const {
     canvasRef,
     containerRef,
-    scale,
     setScale,
-    position,
+    scaleRef,
+    positionRef,
     setPosition,
     constrainPosition,
     centerCanvas,
@@ -33,9 +33,9 @@ const Canvas = ({
 
   const { handleMouseDown } = useCanvasControls({
     canvasRef,
-    scale,
+    scaleRef,
+    positionRef,
     setScale,
-    position,
     setPosition,
     constrainPosition,
     isPaletteOpen,
