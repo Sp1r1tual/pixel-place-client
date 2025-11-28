@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { useCanvasRenderer } from "@/hooks/useCanvasRenderer";
+import { useCanvasRenderer } from "@/hooks/useCanvasRender";
 import { useCanvasControls } from "@/hooks/useCanvasControls";
 
 import { IPixel } from "@/types";

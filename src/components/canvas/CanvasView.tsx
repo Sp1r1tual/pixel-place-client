@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { useCanvasView } from "@/hooks/useCanvasView";
+import { useCanvasStore } from "@/store/useCanvasStore";
 
 import { Canvas } from "./Canvas";
 import { PixelDetails } from "./PixelDetails";
@@ -8,6 +9,7 @@ import { PrimaryBtn } from "../ui/PrimaryBtn";
 import { Palette } from "./Palette";
 import { InterfaceBtn } from "../ui/InterfaceBtn";
 import { CloseBtn } from "../ui/CloseBtn";
+import { Spinner } from "../ui/Spinner";
 
 import brushSvg from "@/assets/brush-3-svgrepo-com.svg";
 import hideInterfaceSvg from "@/assets/eye-slash-visibility-visible-hide-hidden-show-watch-svgrepo-com.svg";
@@ -41,9 +43,16 @@ const CanvasView = () => {
   } = useCanvasView();
 
   const { t } = useTranslation();
+  const isCanvasLoaded = useCanvasStore((state) => state.isCanvasLoaded);
 
   return (
     <div className={styles.canvasView}>
+      {!isCanvasLoaded && (
+        <div className={styles.loaderOverlay}>
+          <Spinner size="large" />
+        </div>
+      )}
+
       <Canvas
         isPaletteOpen={isPaletteOpen}
         isEraserActive={isEraserActive}

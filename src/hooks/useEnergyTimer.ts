@@ -36,7 +36,11 @@ const useEnergyTimer = (
         maxEnergy,
       );
 
-      setEnergy(currentEnergy);
+      const prev = useCanvasStore.getState().energy;
+      const next = Math.floor(currentEnergy);
+      if (Math.floor(prev) !== next) {
+        setEnergy(currentEnergy);
+      }
 
       const displayEnergy = Math.floor(currentEnergy);
       let timeText = "";

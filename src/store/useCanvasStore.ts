@@ -8,6 +8,8 @@ import { useAuthStore } from "./useAuthStore";
 
 import { getSocket, connectSocket } from "@/sockets/canvasSockets";
 
+import { formatDateTime } from "@/utils/date/formatDate";
+
 interface ICanvasState {
   pixels: Record<string, IPixel>;
   unpaintedPixels: Record<string, string>;
@@ -19,6 +21,7 @@ interface ICanvasState {
   lastEnergyUpdate: number;
   isConnected: boolean;
   connectionError: string | null;
+  isCanvasLoaded: boolean;
   setPixel: (pixel: IPixel) => void;
   addUnpaintedPixel: (x: number, y: number, color: string) => void;
   removeUnpaintedPixel: (x: number, y: number) => void;
@@ -47,6 +50,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   lastEnergyUpdate: Date.now(),
   isConnected: false,
   connectionError: null,
+  isCanvasLoaded: false,
 
   setPixel: (pixel: IPixel) => {
     const userId = useAuthStore.getState().user?.id;
@@ -57,7 +61,11 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     set((state) => ({
       pixels: {
         ...state.pixels,
-        [`${pixel.x}:${pixel.y}`]: { ...pixel, userId },
+        [`${pixel.x}:${pixel.y}`]: {
+          ...pixel,
+          userId,
+          placedAt: formatDateTime(pixel.placedAt),
+        },
       },
     }));
   },
@@ -99,7 +107,11 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
       const userId = useAuthStore.getState().user?.id ?? null;
       const updated = { ...state.pixels };
       for (const p of batch) {
-        updated[`${p.x}:${p.y}`] = { ...p, userId: p.userId ?? userId };
+        updated[`${p.x}:${p.y}`] = {
+          ...p,
+          userId: p.userId ?? userId,
+          placedAt: formatDateTime(p.placedAt),
+        };
       }
       return { pixels: updated };
     }),
@@ -145,6 +157,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
       console.log("[Socket] Disconnected");
       set({
         isConnected: false,
+        isCanvasLoaded: false,
         connectionError: i18n.t("socket.disconnected"),
       });
     });
@@ -163,9 +176,15 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     socket.on("canvasState", (pixelsArray: IPixel[]) => {
       const pixelsMap: Record<string, IPixel> = {};
       for (const pixel of pixelsArray) {
-        pixelsMap[`${pixel.x}:${pixel.y}`] = pixel;
+        pixelsMap[`${pixel.x}:${pixel.y}`] = {
+          ...pixel,
+          placedAt: formatDateTime(pixel.placedAt),
+        };
       }
-      set({ pixels: pixelsMap });
+      set({
+        pixels: pixelsMap,
+        isCanvasLoaded: true,
+      });
     });
 
     socket.on("updatePixels", (batch: IPixel[]) => get().setPixelsBatch(batch));
