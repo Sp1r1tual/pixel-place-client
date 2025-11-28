@@ -35,7 +35,7 @@ const useCanvasRenderer = () => {
     };
   }, []);
 
-  const drawCanvas = useCallback(() => {
+  const drawCanvasInternal = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -65,7 +65,9 @@ const useCanvasRenderer = () => {
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    Object.entries(pixels).forEach(([_, pixel]) => {
+    const state = useCanvasStore.getState();
+
+    Object.entries(state.pixels).forEach(([_, pixel]) => {
       ctx.fillStyle = pixel.color;
       ctx.fillRect(
         pixel.x * CANVAS_DATA.PIXEL_SIZE,
@@ -75,7 +77,7 @@ const useCanvasRenderer = () => {
       );
     });
 
-    Object.entries(unpaintedPixels).forEach(([key, color]) => {
+    Object.entries(state.unpaintedPixels).forEach(([key, color]) => {
       const [xStr, yStr] = key.split(":");
       const x = Number(xStr);
       const y = Number(yStr);
@@ -106,7 +108,18 @@ const useCanvasRenderer = () => {
     ctx.shadowBlur = 4;
     ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
     ctx.restore();
-  }, [getContainerSize, pixels, unpaintedPixels]);
+  }, [getContainerSize]);
+
+  const scheduleRedraw = useCallback(() => {
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+    }
+
+    rafIdRef.current = requestAnimationFrame(() => {
+      drawCanvasInternal();
+      rafIdRef.current = null;
+    });
+  }, [drawCanvasInternal]);
 
   const centerCanvas = useCallback(() => {
     const { width: stageWidth, height: stageHeight } = getContainerSize();
@@ -117,12 +130,16 @@ const useCanvasRenderer = () => {
     const y = (stageHeight - canvasHeight) / 2;
 
     positionRef.current = { x, y };
-    drawCanvas();
-  }, [getContainerSize, drawCanvas]);
+    drawCanvasInternal();
+  }, [getContainerSize, drawCanvasInternal]);
 
   useLayoutEffect(() => {
-    drawCanvas();
-  }, [drawCanvas]);
+    drawCanvasInternal();
+  }, [drawCanvasInternal]);
+
+  useEffect(() => {
+    scheduleRedraw();
+  }, [pixels, unpaintedPixels, scheduleRedraw]);
 
   const constrainPosition = useCallback(
     (newX: number, newY: number, currentScale: number) => {
@@ -148,33 +165,17 @@ const useCanvasRenderer = () => {
   const setScale = useCallback(
     (newScale: number) => {
       scaleRef.current = newScale;
-
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-
-      rafIdRef.current = requestAnimationFrame(() => {
-        drawCanvas();
-        rafIdRef.current = null;
-      });
+      scheduleRedraw();
     },
-    [drawCanvas],
+    [scheduleRedraw],
   );
 
   const setPosition = useCallback(
     (newPosition: { x: number; y: number }) => {
       positionRef.current = newPosition;
-
-      if (rafIdRef.current !== null) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-
-      rafIdRef.current = requestAnimationFrame(() => {
-        drawCanvas();
-        rafIdRef.current = null;
-      });
+      scheduleRedraw();
     },
-    [drawCanvas],
+    [scheduleRedraw],
   );
 
   return {
