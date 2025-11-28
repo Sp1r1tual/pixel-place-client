@@ -1,14 +1,14 @@
-import { $api } from "@/api";
+import { $apiMain } from "@/api";
 
 import { IProfileData, IUpdateProfilePayload } from "@/types";
 
 class ProfileService {
   static getProfile() {
-    return $api.get<IProfileData>("/profile");
+    return $apiMain.get<IProfileData>("/profile");
   }
 
   static getPublicProfile(userId: string) {
-    return $api.get<IProfileData>(`/profile/${userId}`);
+    return $apiMain.get<IProfileData>(`/profile/${userId}`);
   }
 
   static changeProfileInfo(data: IUpdateProfilePayload) {
@@ -18,7 +18,7 @@ class ProfileService {
     if (data.bio !== undefined) formData.append("bio", data.bio);
     if (data.avatar) formData.append("avatar", data.avatar);
 
-    return $api.patch<IProfileData>("/profile", formData);
+    return $apiMain.patch<IProfileData>("/profile", formData);
   }
 }
 

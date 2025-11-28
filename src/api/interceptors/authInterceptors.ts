@@ -6,26 +6,38 @@ import axios, {
 } from "axios";
 
 import { IUserPublic } from "@/types";
-import { useAuthStore } from "@/store/useAuthStore";
 
-const API_URL = import.meta.env.VITE_API_URL as string;
+import { useAuthStore } from "@/store/useAuthStore";
 
 let refreshPromise: Promise<string> | null = null;
 
 const refreshToken = async (): Promise<string> => {
   if (!refreshPromise) {
     refreshPromise = axios
-      .get<{ accessToken: string; user: IUserPublic }>(`${API_URL}/refresh`, {
-        withCredentials: true,
-      })
+      .get<{ accessToken: string; user: IUserPublic }>(
+        `${import.meta.env.VITE_AUTH_URL}/refresh`,
+        {
+          withCredentials: true,
+        },
+      )
       .then((response) => {
         const { accessToken, user } = response.data;
+
         localStorage.setItem("token", accessToken);
 
         const { setUser } = useAuthStore.getState();
         if (user) setUser(user);
 
         return accessToken;
+      })
+      .catch((error) => {
+        console.error("[Auth] Token refresh failed:", error);
+        localStorage.removeItem("token");
+
+        const { setUser } = useAuthStore.getState();
+
+        setUser(null);
+        throw error;
       })
       .finally(() => {
         refreshPromise = null;
@@ -58,7 +70,12 @@ const authInterceptors = (axiosInstance: AxiosInstance) => {
     ) => {
       const originalRequest = error.config;
 
-      const publicPaths = ["/login", "/registration"];
+      const publicPaths = [
+        "/login",
+        "/registration",
+        "/refresh",
+        "/forgot-password",
+      ];
 
       if (
         originalRequest &&
@@ -82,7 +99,7 @@ const authInterceptors = (axiosInstance: AxiosInstance) => {
 
           return axiosInstance(originalRequest);
         } catch (err) {
-          localStorage.removeItem("token");
+          window.location.href = "/login";
           return Promise.reject(err);
         }
       }

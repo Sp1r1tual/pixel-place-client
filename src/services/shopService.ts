@@ -1,14 +1,14 @@
-import { $api } from "@/api";
+import { $apiMain } from "@/api";
 
 type UpgradeType = "energy_limit" | "recovery_speed" | "pixel_reward";
 
 class ShopService {
   static async getShop() {
-    return $api.get("/shop");
+    return $apiMain.get("/shop");
   }
 
   static async buyUpgrade(upgradeType: UpgradeType) {
-    return $api.post("/shop/upgrade", { statId: upgradeType });
+    return $apiMain.post("/shop/upgrade", { statId: upgradeType });
   }
 }
 
