@@ -2,20 +2,3 @@ body {
   padding: 0;
   margin: 0;
 }
-
-input[type="password"]::-ms-reveal {
-  display: none;
-}
-
-input[type="password"]::-ms-clear {
-  display: none;
-}
-
-input[type="password"]::-webkit-textfield-decoration-container {
-  display: none;
-}
-
-input[type="password"] {
-  -webkit-appearance: none;
-  appearance: none;
-}
