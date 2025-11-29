@@ -15,7 +15,9 @@ const createSocket = (): Socket => {
     path: "/canvas/socket.io",
     auth: { authorization: token ? `Bearer ${token}` : "" },
     withCredentials: true,
-    autoConnect: false,
+    autoConnect: true,
+    reconnection: true,
+    timeout: 60000,
   });
 
   setupListeners(sock);
@@ -28,30 +30,39 @@ const setupListeners = (sock: Socket) => {
   sock.on("server_error", (err: { message: string; errors?: string[] }) => {
     console.error("[Socket Server Error]", err);
     toast.error(i18n.t(err.message));
-  });
 
-  sock.on("connect_error", (err) => {
-    toast.error(i18n.t("socket.connection-error", { message: err.message }));
-  });
-
-  sock.on("token_expired", async () => {
-    if (isRefreshing) return;
-    isRefreshing = true;
-
-    try {
-      await refreshToken();
-      const newToken = localStorage.getItem("token");
-      if (!newToken) throw new Error("No new token");
-
-      sock.auth = { authorization: `Bearer ${newToken}` };
-      if (!sock.connected) sock.connect();
-    } catch {
-      toast.error(i18n.t("errors.session-expired"));
+    if (err.message.includes("Invalid token after refresh")) {
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       window.dispatchEvent(new CustomEvent("socket:refresh_failed"));
-    } finally {
-      isRefreshing = false;
+    }
+  });
+
+  sock.on("connect_error", async (err) => {
+    console.warn("[Socket] Connect error:", err.message);
+
+    if (err.message.includes("Unauthorized") && !isRefreshing) {
+      isRefreshing = true;
+
+      try {
+        await refreshToken();
+        const newToken = localStorage.getItem("token");
+        if (!newToken) throw new Error("No new token");
+
+        sock.emit("token_refresh", newToken);
+
+        sock.once("token_refreshed", () => {
+          console.log("[Socket] Token successfully refreshed");
+        });
+      } catch {
+        toast.error(i18n.t("errors.session-expired"));
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        sock.disconnect();
+        window.dispatchEvent(new CustomEvent("socket:refresh_failed"));
+      } finally {
+        isRefreshing = false;
+      }
     }
   });
 
@@ -64,11 +75,6 @@ const setupListeners = (sock: Socket) => {
 };
 
 const getSocket = (): Socket => socket ?? createSocket();
-
-export const connectSocket = () => {
-  const sock = getSocket();
-  if (!sock.connected) sock.connect();
-};
 
 const disconnectSocket = () => {
   if (socket) {

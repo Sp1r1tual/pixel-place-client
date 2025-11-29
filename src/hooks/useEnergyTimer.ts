@@ -29,6 +29,11 @@ const useEnergyTimer = (
     } = timerData;
 
     const updateTimer = () => {
+      if (!displayRef.current) {
+        if (frameRef.current) cancelAnimationFrame(frameRef.current);
+        return;
+      }
+
       const now = Date.now();
       const secondsPassed = (now - serverUpdate) / 1000;
       const currentEnergy = Math.min(
@@ -53,9 +58,13 @@ const useEnergyTimer = (
         timeText = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
       }
 
-      displayRef.current!.textContent = progressText
+      const displayText = progressText
         ? `${progressText} ${displayEnergy} / ${maxEnergy}${timeText && displayEnergy < maxEnergy ? ` (${timeText})` : ""}`
         : `${displayEnergy} / ${maxEnergy}${timeText && displayEnergy < maxEnergy ? ` (${timeText})` : ""}`;
+
+      if (displayRef.current) {
+        displayRef.current.textContent = displayText;
+      }
 
       frameRef.current = requestAnimationFrame(updateTimer);
     };

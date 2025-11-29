@@ -6,7 +6,7 @@ import { IPixel } from "@/types";
 
 import { useAuthStore } from "./useAuthStore";
 
-import { getSocket, connectSocket } from "@/sockets/canvasSockets";
+import { getSocket } from "@/sockets/canvasSockets";
 
 import { formatDateTime } from "@/utils/date/formatDate";
 
@@ -188,8 +188,6 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
     });
 
     socket.on("updatePixels", (batch: IPixel[]) => get().setPixelsBatch(batch));
-
-    connectSocket();
   },
 
   cleanupSocket: () => {
