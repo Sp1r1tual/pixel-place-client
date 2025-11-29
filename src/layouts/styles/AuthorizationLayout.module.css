@@ -69,4 +69,8 @@
   .content {
     margin-top: 2rem;
   }
+
+  .formSection {
+    padding: 1.2rem;
+  }
 }

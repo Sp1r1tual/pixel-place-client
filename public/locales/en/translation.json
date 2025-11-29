@@ -1,7 +1,10 @@
 {
   "shared": {
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "return-to-home": "Return to the main page",
+    "goBack": "Back",
+    "tryAgain": "Try Again"
   },
 
   "preloader": { "loading": "Loading, please wait..." },
@@ -72,7 +75,7 @@
 
       "fill-all-fields": "Fill all fields",
       "invalid-email": "Invalid email format",
-      "invalid-password": "Password must be 8-32 characters, include an uppercase letter, and contain only allowed symbols",
+      "invalid-password": "The password must be 8-32 characters long, include one uppercase letter and English letters",
       "passwords-not-match": "Passwords do not match"
     }
   },

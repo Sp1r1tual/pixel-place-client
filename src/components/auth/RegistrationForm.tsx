@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useFormValidation } from "@/hooks/useFormValidation";
+import { usePasswordToggle } from "@/hooks/usePasswordToggle";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
 import { PasswordToggleBtn } from "../ui/PasswordToggleBtn";
@@ -12,7 +13,6 @@ import { Header } from "../ui/Header";
 import styles from "./styles/RegistrationForm.module.css";
 
 const RegistrationForm = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { registration, isLoading, error } = useAuthStore();
@@ -23,6 +23,13 @@ const RegistrationForm = () => {
     fieldErrors,
     clearError,
   } = useFormValidation();
+  const {
+    passwords,
+    handlePasswordChange,
+    toggleShowPassword,
+    shouldShowToggle,
+    getShowPassword,
+  } = usePasswordToggle(["", ""]);
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -79,15 +86,17 @@ const RegistrationForm = () => {
           <input
             id="password"
             name="password"
-            type={showPassword ? "text" : "password"}
-            onChange={handleInputChange}
+            type={getShowPassword(0) ? "text" : "password"}
+            value={passwords[0]}
+            onChange={handlePasswordChange(0)}
             className={fieldErrors.password ? styles.errorInput : ""}
           />
-
-          <PasswordToggleBtn
-            passwordVisible={showPassword}
-            setPasswordVisible={setShowPassword}
-          />
+          {shouldShowToggle(0) && (
+            <PasswordToggleBtn
+              passwordVisible={getShowPassword(0)}
+              setPasswordVisible={() => toggleShowPassword(0)}
+            />
+          )}
         </div>
       </div>
 
@@ -99,15 +108,17 @@ const RegistrationForm = () => {
           <input
             id="passwordConfirm"
             name="passwordConfirm"
-            type={showPassword ? "text" : "password"}
-            onChange={handleInputChange}
+            type={getShowPassword(1) ? "text" : "password"}
+            value={passwords[1]}
+            onChange={handlePasswordChange(1)}
             className={fieldErrors.passwordConfirm ? styles.errorInput : ""}
           />
-
-          <PasswordToggleBtn
-            passwordVisible={showPassword}
-            setPasswordVisible={setShowPassword}
-          />
+          {shouldShowToggle(1) && (
+            <PasswordToggleBtn
+              passwordVisible={getShowPassword(1)}
+              setPasswordVisible={() => toggleShowPassword(1)}
+            />
+          )}
         </div>
       </div>
 

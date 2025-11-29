@@ -84,6 +84,12 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.55) 100%
+  );
+  color: #1f2937;
   transition:
     background 0.2s ease,
     transform 0.15s ease,
@@ -96,15 +102,6 @@
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-.button {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 255, 255, 0.55) 100%
-  );
-  color: #1f2937;
 }
 
 .button:hover {

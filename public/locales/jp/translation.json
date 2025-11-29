@@ -1,7 +1,10 @@
 {
   "shared": {
     "yes": "はい",
-    "no": "いいえ"
+    "no": "いいえ",
+    "return-to-home": "メインページに戻る",
+    "goBack": "戻る",
+    "tryAgain": "もう一度やり直してください"
   },
 
   "preloader": { "loading": "読み込み中です。しばらくお待ちください…" },
@@ -72,7 +75,7 @@
 
       "fill-all-fields": "すべての項目を入力してください",
       "invalid-email": "メールアドレスの形式が正しくありません",
-      "invalid-password": "パスワードは8〜32文字で、大文字1文字を含む必要があります",
+      "invalid-password": "パスワードは8～32文字で、大文字と英語の文字を1つ含める必要があります。",
       "passwords-not-match": "パスワードが一致しません"
     }
   },

@@ -1,0 +1,168 @@
+.errorWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9fafb;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.backgroundCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.errorAlert {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+  width: 90%;
+  border: 1px solid #d4d4d4;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.errorText {
+  color: #2c2c2c;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.errorMessage {
+  color: #d63031;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: "Courier New", monospace;
+  margin: 0 0 24px 0;
+  border: 1px solid #ffebee;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 60vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.retryButton {
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.6rem;
+  width: fit-content;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.retryButton:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.backButton {
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.6rem;
+  width: fit-content;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(
+    145deg,
+    rgba(31, 41, 55, 0.9) 0%,
+    rgba(31, 41, 55, 0.7) 100%
+  );
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.backButton:hover {
+  background: linear-gradient(
+    145deg,
+    rgba(31, 41, 55, 1) 0%,
+    rgba(31, 41, 55, 0.85) 100%
+  );
+  transform: translateY(-2px) scale(1.03);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 600px) {
+  .errorAlert {
+    padding: 20px;
+    width: 95%;
+    border-radius: 8px;
+  }
+
+  .errorText {
+    font-size: 16px;
+  }
+
+  .errorMessage {
+    font-size: 13px;
+    padding: 12px;
+    max-height: 50vh;
+  }
+
+  .retryButton {
+    font-size: 15px;
+    padding: 10px 24px;
+    width: 100%;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .retryButton,
+  .backButton {
+    width: 100%;
+  }
+}

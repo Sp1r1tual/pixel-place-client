@@ -1,5 +1,15 @@
 .footer {
-  background-color: #1f2937;
+  background: linear-gradient(
+    145deg,
+    rgba(31, 41, 55, 0.9) 0%,
+    rgba(31, 41, 55, 0.7) 100%
+  );
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-top: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   color: #ffffff;
   padding: 1rem 0;
   width: 100%;
@@ -52,17 +62,24 @@
   .container {
     padding: 0 0.5rem;
     gap: 0.5rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
   }
 
   .copyright,
   .link {
     font-size: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .linkGroup {
-    gap: 0.75rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
   }
 }
 

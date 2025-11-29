@@ -1,6 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import App from "./App";
+import { RouteErrorFallback } from "./components/errors/RouteErrorFallback";
+
 import { LoginPage } from "./pages/LoginPage";
 import { RegistrationPage } from "./pages/RegistrationPage";
 import { AuthorizationLayout } from "./layouts/AuthorizationLayout";
@@ -15,6 +17,7 @@ const Router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    errorElement: <RouteErrorFallback />,
     children: [
       {
         element: <AuthorizationLayout />,

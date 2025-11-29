@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useFormValidation } from "@/hooks/useFormValidation";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
 import { Header } from "../ui/Header";

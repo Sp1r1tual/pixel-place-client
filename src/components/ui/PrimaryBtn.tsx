@@ -8,7 +8,7 @@ interface IPrimaryBtnProps {
   image?: string;
   text?: string;
   onClick?: () => void;
-  isLoading: boolean;
+  isLoading?: boolean;
   disabled?: boolean;
   progressText?: string;
   showTimer?: boolean;

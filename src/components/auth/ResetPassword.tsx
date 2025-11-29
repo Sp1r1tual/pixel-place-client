@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import { useFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useFormValidation } from "@/hooks/useFormValidation";
+import { usePasswordToggle } from "@/hooks/usePasswordToggle";
 
 import { SubmitBtn } from "../ui/SubmitBtn";
 import { PasswordToggleBtn } from "../ui/PasswordToggleBtn";
@@ -12,13 +13,19 @@ import { Header } from "../ui/Header";
 import styles from "./styles/ResetPassword.module.css";
 
 const ResetPassword = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   const { resetPassword, isLoading, error, setError } = useAuthStore();
   const { validatePassword, validateConfirmPassword, clearError, fieldErrors } =
     useFormValidation();
+  const {
+    passwords,
+    handlePasswordChange,
+    toggleShowPassword,
+    shouldShowToggle,
+    getShowPassword,
+  } = usePasswordToggle(["", ""]);
 
   const { token } = useParams<{ token: string }>();
   const { t } = useTranslation();
@@ -53,7 +60,9 @@ const ResetPassword = () => {
     }
   };
 
-  const handleInputChange = () => clearError();
+  const handleInputChange = () => {
+    clearError();
+  };
 
   return (
     <form
@@ -70,15 +79,20 @@ const ResetPassword = () => {
           <input
             id="password"
             name="password"
-            type={showPassword ? "text" : "password"}
-            onChange={handleInputChange}
+            type={getShowPassword(0) ? "text" : "password"}
+            value={passwords[0]}
+            onChange={(e) => {
+              handlePasswordChange(0)(e);
+              handleInputChange();
+            }}
             className={fieldErrors.password ? styles.errorInput : ""}
           />
-
-          <PasswordToggleBtn
-            passwordVisible={showPassword}
-            setPasswordVisible={setShowPassword}
-          />
+          {shouldShowToggle(0) && (
+            <PasswordToggleBtn
+              passwordVisible={getShowPassword(0)}
+              setPasswordVisible={() => toggleShowPassword(0)}
+            />
+          )}
         </div>
       </div>
 
@@ -88,17 +102,22 @@ const ResetPassword = () => {
         </label>
         <div className={styles.passwordWrapper}>
           <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type={showPassword ? "text" : "password"}
-            onChange={handleInputChange}
+            id="passwordConfirm"
+            name="passwordConfirm"
+            type={getShowPassword(1) ? "text" : "password"}
+            value={passwords[1]}
+            onChange={(e) => {
+              handlePasswordChange(1)(e);
+              handleInputChange();
+            }}
             className={fieldErrors.passwordConfirm ? styles.errorInput : ""}
           />
-
-          <PasswordToggleBtn
-            passwordVisible={showPassword}
-            setPasswordVisible={setShowPassword}
-          />
+          {shouldShowToggle(1) && (
+            <PasswordToggleBtn
+              passwordVisible={getShowPassword(1)}
+              setPasswordVisible={() => toggleShowPassword(1)}
+            />
+          )}
         </div>
       </div>
 
