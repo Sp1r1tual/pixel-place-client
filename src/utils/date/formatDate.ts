@@ -1,21 +1,9 @@
-const formatDate = (date: string) => {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}.${month}.${year}`;
-};
-
-const formatDateTime = (dateString: string) => {
-  if (/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}:\d{2}$/.test(dateString)) {
-    return dateString;
-  }
-
-  const date = new Date(dateString);
+const formatDateTime = (isoDate: string): string => {
+  const date = new Date(isoDate);
 
   if (isNaN(date.getTime())) {
-    console.error("Invalid date string:", dateString);
-    return dateString;
+    console.error("Invalid date:", isoDate);
+    return isoDate;
   }
 
   const day = String(date.getDate()).padStart(2, "0");
@@ -29,8 +17,4 @@ const formatDateTime = (dateString: string) => {
   return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
 };
 
-const getCurrentISOString = () => {
-  return new Date().toISOString();
-};
-
-export { formatDate, formatDateTime, getCurrentISOString };
+export { formatDateTime };

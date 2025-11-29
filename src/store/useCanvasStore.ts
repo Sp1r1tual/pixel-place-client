@@ -64,7 +64,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
         [`${pixel.x}:${pixel.y}`]: {
           ...pixel,
           userId,
-          placedAt: formatDateTime(pixel.placedAt),
+          placedAt: pixel.placedAt,
         },
       },
     }));
@@ -110,7 +110,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
         updated[`${p.x}:${p.y}`] = {
           ...p,
           userId: p.userId ?? userId,
-          placedAt: formatDateTime(p.placedAt),
+          placedAt: p.placedAt,
         };
       }
       return { pixels: updated };
