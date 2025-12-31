@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import { refreshToken } from "@/api/interceptors/authInterceptors";
+import { SystemService } from "@/services/systemService";
 
 import { PreLoader } from "../ui/Preloader";
 
@@ -21,6 +22,8 @@ const AuthInitializer = ({ children }: AuthInitializerProps) => {
   useEffect(() => {
     const verifyToken = async () => {
       const token = localStorage.getItem("token");
+
+      await SystemService.wakeUp();
 
       if (token) {
         try {
