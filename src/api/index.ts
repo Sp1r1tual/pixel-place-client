@@ -8,12 +8,7 @@ const $apiMain = axios.create({
   withCredentials: true,
 });
 
-const $apiAuth = axios.create({
-  baseURL: import.meta.env.VITE_AUTH_URL,
-  withCredentials: true,
-});
-
 authInterceptors($apiMain);
 notificationInterceptor($apiMain);
 
-export { $apiMain, $apiAuth };
+export { $apiMain };

@@ -15,7 +15,7 @@ const refreshToken = async (): Promise<string> => {
   if (!refreshPromise) {
     refreshPromise = axios
       .get<{ accessToken: string; user: IUserPublic }>(
-        `${import.meta.env.VITE_AUTH_URL}/refresh`,
+        `${import.meta.env.VITE_API_URL}/refresh`,
         {
           withCredentials: true,
         },
@@ -75,6 +75,7 @@ const authInterceptors = (axiosInstance: AxiosInstance) => {
         "/registration",
         "/refresh",
         "/forgot-password",
+        "/system/ping",
       ];
 
       if (

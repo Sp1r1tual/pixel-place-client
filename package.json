@@ -1,7 +1,7 @@
 {
   "name": "pixel-place-client",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.4.1",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -44,6 +44,7 @@
     "@types/socket.io-client": "^3.0.0",
     "@vitejs/plugin-react": "^5.0.4",
     "babel-plugin-react-compiler": "^1.0.0",
+    "baseline-browser-mapping": "^2.9.17",
     "compare-versions": "^6.1.1",
     "eslint": "^9.37.0",
     "eslint-plugin-prettier": "^5.5.4",

@@ -36,17 +36,16 @@ This is the author’s second full-fledged project, and the MVP was built in jus
 - React
 - TypeScript
 - React Router
-- Canvas API
+- Canvas
 - Zustand
 - Axios
-- Vite
 - Socket.IO Client
 - i18next
 - React Toastify
 - React Loading Skeleton
 - React Error Boundary
 
-**Architecture**: Client ↔ (Main API - Auth API - Mail API) ↔ Database
+**Architecture**: Client ↔ (Main API - Mail API) ↔ Database
 
 ---
 

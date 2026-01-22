@@ -1,30 +1,30 @@
-import { $apiAuth } from "@/api";
+import { $apiMain } from "@/api";
 
 import { IAuthPayloadWithoutId } from "@/types";
 
 class AuthService {
   static async login(payload: IAuthPayloadWithoutId) {
-    return $apiAuth.post("/login", payload);
+    return $apiMain.post("/login", payload);
   }
 
   static async registration(payload: IAuthPayloadWithoutId) {
-    return $apiAuth.post("/registration", payload);
+    return $apiMain.post("/registration", payload);
   }
 
   static async logout() {
-    return $apiAuth.post("/logout");
+    return $apiMain.post("/logout");
   }
 
   static async refresh() {
-    return $apiAuth.get("/refresh");
+    return $apiMain.get("/refresh");
   }
 
   static async requestPasswordReset(email: string) {
-    return $apiAuth.post("/forgot-password", { email });
+    return $apiMain.post("/forgot-password", { email });
   }
 
   static async resetPassword(token: string, password: string) {
-    return $apiAuth.post(`/reset-password/${token}`, { password });
+    return $apiMain.post(`/reset-password/${token}`, { password });
   }
 }
 
