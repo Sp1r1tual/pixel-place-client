@@ -12,6 +12,12 @@ It’s pixel democracy: **each user gets one pixel, but together, they build art
 
 ---
 
+## Screenshot
+
+![Pixel Place](https://res.cloudinary.com/dynnapuco/image/upload/v1767999836/54f27db0-66c9-40ee-9101-40b59f422749.png)
+
+---
+
 ## About the Project
 
 This is the author’s second full-fledged project, and the MVP was built in just 10 days. The project allowed the author to practice WebSockets, real-time collaboration, and state synchronization. Ever since starting programming, the author dreamed of creating a project like this – a digital canvas shaped by lot of users simultaneously.
@@ -70,3 +76,5 @@ Currently, this project does not include a formal license. All rights are reserv
 If you plan to use, modify, or distribute this project, please contact the author for permission.
 
 Built with ❤️ by the Pixel Place community
+
+
