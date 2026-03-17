@@ -69,6 +69,38 @@ This is the author’s second full-fledged project, and the MVP was built in jus
 
 ---
 
+## Local Development Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Sp1r1tual/pixel-place-client.git
+```
+
+### 2. Install dependencies
+
+```bash
+yarn install
+```
+
+### 3. Configure environment variables
+
+Copy `.env.example` to `.env` and fill in the values:
+
+```dotenv
+VITE_API_URL=http://localhost:5000
+```
+
+### 4. Start the client
+
+```bash
+yarn dev
+```
+
+The client will be available at `http://localhost:5173`.
+
+---
+
 ## License
 
 Currently, this project does not include a formal license. All rights are reserved by the author.
@@ -76,5 +108,3 @@ Currently, this project does not include a formal license. All rights are reserv
 If you plan to use, modify, or distribute this project, please contact the author for permission.
 
 Built with ❤️ by the Pixel Place community
-
-
