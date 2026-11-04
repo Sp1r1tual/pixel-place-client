@@ -31,8 +31,6 @@ interface IUseCanvasControlsProps {
   ) => { x: number; y: number };
   isPaletteOpen: boolean;
   isEraserActive: boolean;
-  pixels: Record<string, IPixel>;
-  unpaintedPixels: Record<string, string>;
   onPixelClick?: (pixel: IPixel) => void;
 }
 
@@ -45,16 +43,11 @@ const useCanvasControls = ({
   constrainPosition,
   isPaletteOpen,
   isEraserActive,
-  pixels,
-  unpaintedPixels,
   onPixelClick,
 }: IUseCanvasControlsProps) => {
   const isPinchingRef = useRef(false);
   const isDraggingRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
-
-  const { addUnpaintedPixel, removeUnpaintedPixel, selectedColor } =
-    useCanvasStore();
 
   const dragStateRef = useRef<IDragState>({
     startX: 0,
@@ -110,38 +103,29 @@ const useCanvasControls = ({
 
       if (!isInside) return;
 
+      const store = useCanvasStore.getState();
+
       if (isPaletteOpen) {
         if (isEraserActive) {
           const key = `${x}:${y}`;
-          if (unpaintedPixels[key]) {
-            removeUnpaintedPixel(x, y);
+          if (store.unpaintedPixels[key]) {
+            store.removeUnpaintedPixel(x, y);
           } else {
             toast.warn(t("canvas.errors.cannot-erase-unsent"));
           }
         } else {
-          addUnpaintedPixel(x, y, selectedColor);
+          store.addUnpaintedPixel(x, y, store.selectedColor);
         }
         return;
       }
 
       if (!isPaletteOpen && onPixelClick) {
         const key = `${x}:${y}`;
-        const pixel = pixels[key];
+        const pixel = store.pixels[key];
         if (pixel) onPixelClick(pixel);
       }
     },
-    [
-      isPaletteOpen,
-      isEraserActive,
-      addUnpaintedPixel,
-      removeUnpaintedPixel,
-      selectedColor,
-      unpaintedPixels,
-      pixels,
-      onPixelClick,
-      getCanvasCoordinates,
-      t,
-    ],
+    [isPaletteOpen, isEraserActive, onPixelClick, getCanvasCoordinates, t],
   );
 
   const handleMouseUp = useCallback(
@@ -182,6 +166,11 @@ const useCanvasControls = ({
       }
 
       pinchRef.current = null;
+
+      // This listener is on window: a tap outside the canvas must not repeat the
+      // previous tap, whose coordinates are still in dragStateRef.
+      if (!isDraggingRef.current) return;
+
       const state = dragStateRef.current;
       setIsDragging(false);
 

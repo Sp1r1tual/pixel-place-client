@@ -1,17 +1,18 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
+import { Socket } from "socket.io-client";
 import i18n from "@/i18n";
 
 import { IPixel } from "@/types";
 
-import { useAuthStore } from "./useAuthStore";
-
 import { getSocket } from "@/sockets/canvasSockets";
 
-import { formatDateTime } from "@/utils/date/formatDate";
+import { clearPixelLayer, paintPixels } from "@/utils/canvas/pixelLayer";
 
 interface ICanvasState {
+  /** Mutated in place for speed: subscribe to pixelsVersion to react to changes. */
   pixels: Record<string, IPixel>;
+  pixelsVersion: number;
   unpaintedPixels: Record<string, string>;
   selectedColor: string;
   energy: number;
@@ -19,10 +20,7 @@ interface ICanvasState {
   pixelReward: number;
   recoverySpeed: number;
   lastEnergyUpdate: number;
-  isConnected: boolean;
-  connectionError: string | null;
   isCanvasLoaded: boolean;
-  setPixel: (pixel: IPixel) => void;
   addUnpaintedPixel: (x: number, y: number, color: string) => void;
   removeUnpaintedPixel: (x: number, y: number) => void;
   undoLastPixel: () => void;
@@ -34,13 +32,17 @@ interface ICanvasState {
   setRecoverySpeed: (value: number) => void;
   setMaxEnergy: (value: number) => void;
   initSocket: () => void;
-  cleanupSocket: () => void;
 }
 
-let socketInitialized = false;
+const pixelKey = (x: number, y: number) => `${x}:${y}`;
+
+// The socket outlives this store's consumers (pages come and go), so listeners are
+// bound once per socket instance. A new instance appears after a session expires.
+let boundSocket: Socket | null = null;
 
 const useCanvasStore = create<ICanvasState>((set, get) => ({
   pixels: {},
+  pixelsVersion: 0,
   unpaintedPixels: {},
   selectedColor: "#000000",
   energy: 0,
@@ -48,27 +50,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   pixelReward: 0,
   recoverySpeed: 60,
   lastEnergyUpdate: Date.now(),
-  isConnected: false,
-  connectionError: null,
   isCanvasLoaded: false,
-
-  setPixel: (pixel: IPixel) => {
-    const userId = useAuthStore.getState().user?.id;
-    if (!userId) {
-      toast.warn(i18n.t("errors.must-login-to-paint"));
-      return;
-    }
-    set((state) => ({
-      pixels: {
-        ...state.pixels,
-        [`${pixel.x}:${pixel.y}`]: {
-          ...pixel,
-          userId,
-          placedAt: pixel.placedAt,
-        },
-      },
-    }));
-  },
 
   undoLastPixel: () =>
     set((state) => {
@@ -82,7 +64,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
   addUnpaintedPixel: (x, y, color) => {
     const state = get();
-    const key = `${x}:${y}`;
+    const key = pixelKey(x, y);
     if (state.unpaintedPixels[key]) return;
     if (Object.keys(state.unpaintedPixels).length >= Math.floor(state.energy)) {
       toast.warn(i18n.t("errors.not-enough-energy"));
@@ -93,7 +75,7 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
   removeUnpaintedPixel: (x, y) =>
     set((state) => {
-      const key = `${x}:${y}`;
+      const key = pixelKey(x, y);
       if (!(key in state.unpaintedPixels)) return state;
       const updated = { ...state.unpaintedPixels };
       delete updated[key];
@@ -102,19 +84,17 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
 
   clearUnpaintedPixels: () => set({ unpaintedPixels: {} }),
   setSelectedColor: (color) => set({ selectedColor: color }),
-  setPixelsBatch: (batch: IPixel[]) =>
-    set((state) => {
-      const userId = useAuthStore.getState().user?.id ?? null;
-      const updated = { ...state.pixels };
-      for (const p of batch) {
-        updated[`${p.x}:${p.y}`] = {
-          ...p,
-          userId: p.userId ?? userId,
-          placedAt: p.placedAt,
-        };
-      }
-      return { pixels: updated };
-    }),
+
+  setPixelsBatch: (batch) => {
+    const { pixels } = get();
+
+    for (const pixel of batch) {
+      pixels[pixelKey(pixel.x, pixel.y)] = pixel;
+    }
+
+    paintPixels(batch);
+    set((state) => ({ pixelsVersion: state.pixelsVersion + 1 }));
+  },
 
   setEnergy: (value) => set({ energy: value, lastEnergyUpdate: Date.now() }),
   setMaxEnergy: (value) => set({ maxEnergy: value }),
@@ -122,76 +102,38 @@ const useCanvasStore = create<ICanvasState>((set, get) => ({
   setRecoverySpeed: (value) => set({ recoverySpeed: value }),
 
   initSocket: () => {
-    if (socketInitialized) return;
-    socketInitialized = true;
-
     const socket = getSocket();
 
-    socket.on("connect", () => {
-      console.log("[Socket] Connected");
-
-      socket.emit(
-        "getEnergy",
-        null,
-        (
-          energy: number,
-          maxEnergy: number,
-          recoverySpeed: number,
-          updatedAt?: string,
-        ) => {
-          set({
-            isConnected: true,
-            connectionError: null,
-            energy,
-            maxEnergy,
-            recoverySpeed,
-            lastEnergyUpdate: updatedAt
-              ? new Date(updatedAt).getTime()
-              : Date.now(),
-          });
-        },
-      );
-    });
-
-    socket.on("disconnect", () => {
-      console.log("[Socket] Disconnected");
-      set({
-        isConnected: false,
-        isCanvasLoaded: false,
-        connectionError: i18n.t("socket.disconnected"),
-      });
-    });
+    if (boundSocket === socket) return;
+    boundSocket = socket;
 
     socket.on("energyUpdate", (energy, maxEnergy, recoverySpeed, updatedAt) => {
       set({
         energy,
-        lastEnergyUpdate: updatedAt
-          ? new Date(updatedAt).getTime()
-          : Date.now(),
-        ...(typeof maxEnergy === "number" ? { maxEnergy } : {}),
-        ...(typeof recoverySpeed === "number" ? { recoverySpeed } : {}),
+        maxEnergy,
+        recoverySpeed,
+        lastEnergyUpdate: new Date(updatedAt).getTime(),
       });
     });
 
     socket.on("canvasState", (pixelsArray: IPixel[]) => {
-      const pixelsMap: Record<string, IPixel> = {};
+      const pixels: Record<string, IPixel> = {};
+
       for (const pixel of pixelsArray) {
-        pixelsMap[`${pixel.x}:${pixel.y}`] = {
-          ...pixel,
-          placedAt: formatDateTime(pixel.placedAt),
-        };
+        pixels[pixelKey(pixel.x, pixel.y)] = pixel;
       }
-      set({
-        pixels: pixelsMap,
+
+      clearPixelLayer();
+      paintPixels(pixelsArray);
+
+      set((state) => ({
+        pixels,
+        pixelsVersion: state.pixelsVersion + 1,
         isCanvasLoaded: true,
-      });
+      }));
     });
 
     socket.on("updatePixels", (batch: IPixel[]) => get().setPixelsBatch(batch));
-  },
-
-  cleanupSocket: () => {
-    socketInitialized = false;
   },
 }));
 

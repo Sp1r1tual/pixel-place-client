@@ -72,6 +72,7 @@
       "invalid-activation-link": "無効または期限切れのアクティベーションリンクです",
       "token-and-password-required": "リセットトークンと新しいパスワードが必要です",
       "incorrect-password": "パスワードが間違っています",
+      "invalid-credentials": "メールアドレスまたはパスワードが正しくありません",
 
       "fill-all-fields": "すべての項目を入力してください",
       "invalid-email": "メールアドレスの形式が正しくありません",
@@ -167,6 +168,7 @@
 
   "errors": {
     "something-went-wrong": "何かがうまくいきませんでした",
+    "too-many-requests": "試行回数が多すぎます。しばらくしてからもう一度お試しください",
     "session-expired": "セッションが期限切れです。再度ログインしてください",
     "must-login-to-paint": "ピクセルを描くにはログインが必要です",
     "not-enough-energy": "ピクセルを描くのに十分なエネルギーがありません"

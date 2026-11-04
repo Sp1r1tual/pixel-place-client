@@ -27,8 +27,6 @@ const Canvas = ({
     setPosition,
     constrainPosition,
     centerCanvas,
-    pixels,
-    unpaintedPixels,
   } = useCanvasRenderer();
 
   const { handleMouseDown } = useCanvasControls({
@@ -40,8 +38,6 @@ const Canvas = ({
     constrainPosition,
     isPaletteOpen,
     isEraserActive,
-    pixels,
-    unpaintedPixels,
     ...(onPixelClick !== undefined && { onPixelClick }),
   });
 

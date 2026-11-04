@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAuthStore } from "@/store/useAuthStore";
 import { useProfileStore } from "@/store/useProfileStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
@@ -19,6 +20,7 @@ const PageLayout = ({ children }: IPageLayoutProps) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const { isProfileOpen, closeProfile } = useProfileStore();
   const { isSettingsOpen, closeSettings } = useSettingsStore();
+  const logout = useAuthStore((state) => state.logout);
 
   const { t } = useTranslation();
 
@@ -29,8 +31,8 @@ const PageLayout = ({ children }: IPageLayoutProps) => {
         title={t("navbar.dropdown.confirm-logout-title")}
         message={t("navbar.dropdown.confirm-logout-message")}
         highlightConfirm={false}
-        onConfirm={() => {
-          localStorage.removeItem("token");
+        onConfirm={async () => {
+          await logout();
           window.location.href = "/login";
         }}
         onClose={() => setIsConfirmOpen(false)}

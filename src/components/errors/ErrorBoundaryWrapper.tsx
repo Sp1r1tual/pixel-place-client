@@ -36,7 +36,9 @@ const ErrorFallback = ({
       <canvas ref={canvasRef} className={styles.backgroundCanvas} />
       <div role="alert" className={styles.errorAlert}>
         <p className={styles.errorText}>{errorText}:</p>
-        <pre className={styles.errorMessage}>{error?.message}</pre>
+        <pre className={styles.errorMessage}>
+          {error instanceof Error ? error.message : String(error)}
+        </pre>
 
         <div className={styles.buttonGroup}>
           <button

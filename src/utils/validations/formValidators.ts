@@ -3,7 +3,7 @@ const validateEmail = (value: string): boolean =>
 
 const validatePassword = (value: string): boolean =>
   value.length >= 8 &&
-  value.length <= 16 &&
+  value.length <= 32 &&
   /[A-Z]/.test(value) &&
   /^[A-Za-z0-9!@#$%^&*()_+\-=]+$/.test(value);
 
