@@ -16,7 +16,7 @@ interface IAuthState {
   error: string | null;
   setUser: (user: IUserPublic | null) => void;
   login: (payload: IAuthPayloadWithoutId) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   registration: (payload: IAuthPayloadWithoutId) => Promise<boolean>;
   requestPasswordReset: (email: string) => Promise<boolean>;
   resetPassword: (token: string, newPassword: string) => Promise<boolean>;
@@ -53,11 +53,8 @@ const useAuthStore = create<IAuthState>((set) => ({
   registration: async (payload) => {
     set({ isLoading: true, error: null });
     try {
-      const { data } = await AuthService.registration(payload);
-      const { accessToken, user } = data as ILoginResponse;
-
-      localStorage.setItem("token", accessToken);
-      set({ user });
+      // No session yet: the user logs in after activating the account by email.
+      await AuthService.registration(payload);
 
       return true;
     } catch (err) {
@@ -72,8 +69,13 @@ const useAuthStore = create<IAuthState>((set) => ({
     }
   },
 
-  logout: () => {
-    AuthService.logout();
+  logout: async () => {
+    try {
+      await AuthService.logout();
+    } catch (err) {
+      console.error("[Auth] Server logout failed:", err);
+    }
+
     localStorage.removeItem("token");
     set({ user: null });
   },

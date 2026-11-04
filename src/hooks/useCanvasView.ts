@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import { IPixel } from "@/types/canvas";
 
-import { useAuthStore } from "@/store/useAuthStore";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { useShopStore } from "@/store/useShopStore";
 import { useUserInterface } from "@/store/useUserInterface";
@@ -12,9 +11,10 @@ import { useUserInterface } from "@/store/useUserInterface";
 import { getSocket } from "@/sockets/canvasSockets";
 
 import { playTapSound } from "@/utils/sfx/playTapSound";
-import { formatDateTime } from "@/utils/date/formatDate";
 
 import tapSoundMp3 from "@/assets/sounds/key-hit-sound.mp3";
+
+const SEND_BATCH_TIMEOUT_MS = 15000;
 
 const useCanvasView = () => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -58,44 +58,44 @@ const useCanvasView = () => {
       return;
     }
 
+    const socket = getSocket();
+
+    if (!socket.connected) {
+      toast.warn(t("socket.connection-lost"));
+      return;
+    }
+
     setIsLoading(true);
 
-    const userId = useAuthStore.getState().user?.id ?? "";
-    const pixelsToSend: Omit<IPixel, "userId" | "placedAt">[] = Object.entries(
-      unpaintedPixels,
-    ).map(([key, color]) => {
+    const pixelsToSend = Object.entries(unpaintedPixels).map(([key, color]) => {
       const [xStr, yStr] = key.split(":");
-      return { x: Number(xStr), y: Number(yStr), color: String(color) };
+      return { x: Number(xStr), y: Number(yStr), color };
     });
 
-    const localPixels: IPixel[] = pixelsToSend.map((p) => ({
-      ...p,
-      userId,
-      placedAt: formatDateTime(new Date().toISOString()),
-    }));
+    socket
+      .timeout(SEND_BATCH_TIMEOUT_MS)
+      .emit(
+        "sendBatch",
+        pixelsToSend,
+        (timeoutError: Error | null, err?: string) => {
+          setIsLoading(false);
 
-    getSocket().emit(
-      "sendBatch",
-      pixelsToSend,
-      (err?: string, energyLeft?: number, maxEnergy?: number) => {
-        setIsLoading(false);
+          if (timeoutError) {
+            toast.error(t("socket.connection-lost"));
+            return;
+          }
 
-        if (err) {
-          toast.error(t(err));
-          return;
-        }
+          if (err) {
+            toast.error(t(err));
+            return;
+          }
 
-        const store = useCanvasStore.getState();
-        store.setPixelsBatch(localPixels);
-        store.clearUnpaintedPixels();
-        playTapSound(tapSoundMp3);
-
-        if (typeof energyLeft === "number") store.setEnergy(energyLeft);
-        if (typeof maxEnergy === "number") store.setMaxEnergy(maxEnergy);
-
-        useShopStore.getState().fetchShop(true);
-      },
-    );
+          // The pixels and new energy arrive through updatePixels and energyUpdate.
+          useCanvasStore.getState().clearUnpaintedPixels();
+          playTapSound(tapSoundMp3);
+          useShopStore.getState().fetchShop(true, true);
+        },
+      );
   }, [isPaletteOpen, pixelsPainted, unpaintedPixels, t]);
 
   const handleClosePixelDetails = useCallback(() => setSelectedPixel(null), []);

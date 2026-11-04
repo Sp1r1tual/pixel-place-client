@@ -72,6 +72,7 @@
       "invalid-activation-link": "Invalid or expired activation link",
       "token-and-password-required": "Reset token and new password are required",
       "incorrect-password": "Incorrect password",
+      "invalid-credentials": "Incorrect email or password",
 
       "fill-all-fields": "Fill all fields",
       "invalid-email": "Invalid email format",
@@ -167,6 +168,7 @@
 
   "errors": {
     "something-went-wrong": "Something went wrong",
+    "too-many-requests": "Too many attempts. Please try again later",
     "session-expired": "Session expired. Please login again",
     "must-login-to-paint": "You must be logged in to place pixels",
     "not-enough-energy": "Not enough energy to add more pixels"

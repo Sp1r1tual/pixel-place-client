@@ -39,7 +39,7 @@ const ResetPassword = () => {
 
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password")?.toString() || "";
-    const passwordConfirm = formData.get("confirmPassword")?.toString() || "";
+    const passwordConfirm = formData.get("passwordConfirm")?.toString() || "";
 
     if (
       !validatePassword(password) ||
@@ -97,7 +97,7 @@ const ResetPassword = () => {
       </div>
 
       <div className={styles.formRow}>
-        <label htmlFor="confirmPassword">
+        <label htmlFor="passwordConfirm">
           {t("auth.reset-password.confirm-password")}
         </label>
         <div className={styles.passwordWrapper}>

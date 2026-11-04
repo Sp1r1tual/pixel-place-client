@@ -11,6 +11,12 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 let refreshPromise: Promise<string> | null = null;
 
+/** True when the server refused the session, as opposed to being unreachable. */
+const isAuthFailure = (error: unknown): boolean => {
+  const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+  return status === 401 || status === 403;
+};
+
 const refreshToken = async (): Promise<string> => {
   if (!refreshPromise) {
     refreshPromise = axios
@@ -32,11 +38,12 @@ const refreshToken = async (): Promise<string> => {
       })
       .catch((error) => {
         console.error("[Auth] Token refresh failed:", error);
-        localStorage.removeItem("token");
 
-        const { setUser } = useAuthStore.getState();
+        if (isAuthFailure(error)) {
+          localStorage.removeItem("token");
+          useAuthStore.getState().setUser(null);
+        }
 
-        setUser(null);
         throw error;
       })
       .finally(() => {
@@ -74,7 +81,9 @@ const authInterceptors = (axiosInstance: AxiosInstance) => {
         "/login",
         "/registration",
         "/refresh",
+        "/logout",
         "/forgot-password",
+        "/reset-password",
         "/system/ping",
       ];
 
@@ -100,7 +109,7 @@ const authInterceptors = (axiosInstance: AxiosInstance) => {
 
           return axiosInstance(originalRequest);
         } catch (err) {
-          window.location.href = "/login";
+          if (isAuthFailure(err)) window.location.href = "/login";
           return Promise.reject(err);
         }
       }
@@ -110,4 +119,4 @@ const authInterceptors = (axiosInstance: AxiosInstance) => {
   );
 };
 
-export { authInterceptors, refreshToken };
+export { authInterceptors, refreshToken, isAuthFailure };

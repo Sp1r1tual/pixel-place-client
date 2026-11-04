@@ -23,6 +23,10 @@ interface IShopState {
   ) => Promise<void>;
 }
 
+const getErrorMessage = (err: unknown): string =>
+  (err as { response?: { data?: { message?: string } } }).response?.data
+    ?.message ?? "shop.cannot-fetch";
+
 const useShopStore = create<IShopState>((set, get) => ({
   items: [],
   currency: 0,
@@ -48,9 +52,7 @@ const useShopStore = create<IShopState>((set, get) => ({
         loading: false,
       });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : i18n.t("shop.cannot-fetch");
-      set({ error: message, loading: false });
+      set({ error: i18n.t(getErrorMessage(err)), loading: false });
     }
   },
 
@@ -93,9 +95,7 @@ const useShopStore = create<IShopState>((set, get) => ({
       const { fetchShop } = get();
       fetchShop(true, true);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : i18n.t("shop.cannot-fetch");
-      set({ error: message, upgradingItemType: null });
+      set({ error: i18n.t(getErrorMessage(err)), upgradingItemType: null });
     }
   },
 }));

@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useEffect, useRef, useState } from "react";
 
 import { useAuthStore } from "@/store/useAuthStore";
 
-import { refreshToken } from "@/api/interceptors/authInterceptors";
+import {
+  isAuthFailure,
+  refreshToken,
+} from "@/api/interceptors/authInterceptors";
 import { SystemService } from "@/services/systemService";
 
 import { PreLoader } from "../ui/Preloader";
@@ -13,25 +15,28 @@ interface AuthInitializerProps {
 }
 
 const AuthInitializer = ({ children }: AuthInitializerProps) => {
-  const { setError, logout } = useAuthStore();
+  const setError = useAuthStore((state) => state.setError);
   const [ready, setReady] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
-
-  const { t } = useTranslation();
+  const hasStarted = useRef(false);
 
   useEffect(() => {
+    // One startup check per page load, also under StrictMode double effects.
+    if (hasStarted.current) return;
+    hasStarted.current = true;
+
     const verifyToken = async () => {
-      const token = localStorage.getItem("token");
+      // Only wakes a sleeping host; the app must still open if this fails.
+      await SystemService.wakeUp().catch((err) =>
+        console.warn("[Auth] Wake-up ping failed:", err),
+      );
 
-      await SystemService.wakeUp();
-
-      if (token) {
+      if (localStorage.getItem("token")) {
         try {
-          const newToken = await refreshToken();
-          localStorage.setItem("token", newToken);
-        } catch {
-          setError(t("errors.session-expired"));
-          logout();
+          await refreshToken();
+        } catch (err) {
+          // An unreachable API says nothing about the session, so it is kept.
+          if (isAuthFailure(err)) setError("errors.session-expired");
         }
       }
 
@@ -39,8 +44,8 @@ const AuthInitializer = ({ children }: AuthInitializerProps) => {
       setTimeout(() => setReady(true), 500);
     };
 
-    verifyToken();
-  }, [logout, setError, t]);
+    void verifyToken();
+  }, [setError]);
 
   if (!ready) return <PreLoader fadeOut={fadeOut} />;
 

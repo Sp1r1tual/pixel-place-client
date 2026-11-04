@@ -4,6 +4,8 @@ import { useCanvasStore } from "@/store/useCanvasStore";
 
 import { CANVAS_DATA } from "@/data/canvas";
 
+import { pixelLayer } from "@/utils/canvas/pixelLayer";
+
 const useCanvasRenderer = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -12,18 +14,19 @@ const useCanvasRenderer = () => {
   const positionRef = useRef({ x: 0, y: 0 });
   const rafIdRef = useRef<number | null>(null);
 
-  const { pixels, unpaintedPixels, initSocket, cleanupSocket } =
-    useCanvasStore();
+  const pixelsVersion = useCanvasStore((state) => state.pixelsVersion);
+  const unpaintedPixels = useCanvasStore((state) => state.unpaintedPixels);
 
   useEffect(() => {
-    initSocket();
+    useCanvasStore.getState().initSocket();
+
     return () => {
-      cleanupSocket();
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
       }
     };
-  }, [initSocket, cleanupSocket]);
+  }, []);
 
   const getContainerSize = useCallback(() => {
     if (!containerRef.current) {
@@ -44,13 +47,18 @@ const useCanvasRenderer = () => {
 
     const { width, height } = getContainerSize();
     const dpr = window.devicePixelRatio || 1;
+    const bufferWidth = Math.round(width * dpr);
+    const bufferHeight = Math.round(height * dpr);
 
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    // Assigning canvas.width reallocates the buffer, so only do it on a real resize.
+    if (canvas.width !== bufferWidth || canvas.height !== bufferHeight) {
+      canvas.width = bufferWidth;
+      canvas.height = bufferHeight;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    }
 
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
 
     const canvasWidth = CANVAS_DATA.CANVAS_WIDTH * CANVAS_DATA.PIXEL_SIZE;
@@ -64,18 +72,9 @@ const useCanvasRenderer = () => {
 
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.drawImage(pixelLayer, 0, 0, canvasWidth, canvasHeight);
 
     const state = useCanvasStore.getState();
-
-    Object.entries(state.pixels).forEach(([_, pixel]) => {
-      ctx.fillStyle = pixel.color;
-      ctx.fillRect(
-        pixel.x * CANVAS_DATA.PIXEL_SIZE,
-        pixel.y * CANVAS_DATA.PIXEL_SIZE,
-        CANVAS_DATA.PIXEL_SIZE,
-        CANVAS_DATA.PIXEL_SIZE,
-      );
-    });
 
     Object.entries(state.unpaintedPixels).forEach(([key, color]) => {
       const [xStr, yStr] = key.split(":");
@@ -139,7 +138,17 @@ const useCanvasRenderer = () => {
 
   useEffect(() => {
     scheduleRedraw();
-  }, [pixels, unpaintedPixels, scheduleRedraw]);
+  }, [pixelsVersion, unpaintedPixels, scheduleRedraw]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(scheduleRedraw);
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, [scheduleRedraw]);
 
   const constrainPosition = useCallback(
     (newX: number, newY: number, currentScale: number) => {
@@ -187,8 +196,6 @@ const useCanvasRenderer = () => {
     setPosition,
     centerCanvas,
     constrainPosition,
-    pixels,
-    unpaintedPixels,
   };
 };
 

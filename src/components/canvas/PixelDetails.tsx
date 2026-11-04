@@ -6,6 +6,8 @@ import { IPixel } from "@/types/canvas";
 import { useProfileStore } from "@/store/useProfileStore";
 import { useAvatar } from "@/hooks/useAvatar";
 
+import { formatDateTime } from "@/utils/date/formatDate";
+
 import { CloseBtn } from "../ui/CloseBtn";
 import { Spinner } from "../ui/Spinner";
 
@@ -74,7 +76,7 @@ const PixelDetails = ({ pixel, onClose }: IPixelDetailsProps) => {
 
       {pixel.placedAt && (
         <p className={styles.placedDate}>
-          {t("canvas.pixel-details.placed")} {pixel.placedAt}
+          {t("canvas.pixel-details.placed")} {formatDateTime(pixel.placedAt)}
         </p>
       )}
 

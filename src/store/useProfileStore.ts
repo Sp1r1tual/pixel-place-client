@@ -62,7 +62,7 @@ const useProfileStore = create<IProfileState>((set, get) => ({
         isLoadingCurrent: false,
         error: errorMessage,
       });
-      toast.error(errorMessage);
+      toast.error(i18n.t(errorMessage));
     }
   },
 
@@ -87,7 +87,7 @@ const useProfileStore = create<IProfileState>((set, get) => ({
         isLoadingViewed: false,
         error: errorMessage,
       });
-      toast.error(errorMessage);
+      toast.error(i18n.t(errorMessage));
     }
   },
 
@@ -112,7 +112,7 @@ const useProfileStore = create<IProfileState>((set, get) => ({
         isLoadingPixel: false,
         error: errorMessage,
       });
-      toast.error(errorMessage);
+      toast.error(i18n.t(errorMessage));
     }
   },
 
@@ -144,7 +144,7 @@ const useProfileStore = create<IProfileState>((set, get) => ({
         isLoadingCurrent: false,
         error: errorMessage,
       });
-      toast.error(errorMessage);
+      toast.error(i18n.t(errorMessage));
     }
   },
 
